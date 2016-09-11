@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "target": "es5",
+        "noImplicitAny": true,
+        "sourceMap": false,
+        "outFile": "build/webcrypto-liner.js"
+    },
+    "files": [
+        "typings/webcrypto-core/webcrypto-core.d.ts",
+        "src/declare.d.ts",
+        "src/helper.ts",
+        "src/key.ts",
+        "src/rsa/crypto.ts",
+        "src/ec/crypto.ts",
+        "src/subtle.ts",
+        "src/crypto.ts",
+        "src/main.ts"
+    ]
+}
