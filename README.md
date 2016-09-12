@@ -8,18 +8,20 @@ Though WebCrypto is well [supported accross browsers](http://caniuse.com/cryptog
 
 Intentionally `webcrypto-liner` does not implement any cryptography though it does consume libraries that does. We strongly recomend you read "[What’s wrong with in-browser cryptography?](https://tonyarcieri.com/whats-wrong-with-webcrypto)" before using this library.
 
-The libraries `webcrypto-liner` relies on for cryptographic implementations include:
+The libraries `webcrypto-liner` relies on for include:
 
 | Package                                                    | Description                                                                            | Size   |
 |------------------------------------------------------------|----------------------------------------------------------------------------------------|--------|
 | [asmcrypto.js](https://github.com/vibornoff/asmcrypto.js/) | JavaScript implementation of popular cryptographic utilities with performance in mind. | 131 KB |
 | [elliptic](https://github.com/indutny/elliptic)            | Fast Elliptic Curve Cryptography in plain javascript                                   | 130 KB |
+| [webcryptocore](https://github.com/PeculiarVentures/webcrypto-core)            | A input validation layer for WebCrypto polyfills                 | 31 KB |
+
 
 `webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
 
 We have done no security review or take a position on the security of these third-party libraries. **YOU HAVE BEEN WARNED**.
 
-To keep `webcrypto-liner` as small as possible it was designed to be modular, if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
+To keep `webcrypto-liner` as small as possible (right now it is ~11kb without dependencies). Additionally it was designed to be modular, so if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
 
 If you do not load any of the dependencies that provide cryptographic implementations `webcrypto-liner` will work as an interopanility layer, very similar to [webcrypto-shim](https://github.com/vibornoff/webcrypto-shim).
 
