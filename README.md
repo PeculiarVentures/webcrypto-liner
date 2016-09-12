@@ -17,7 +17,7 @@ The libraries `webcrypto-liner` relies on for cryptographic implementations incl
 
 `webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
 
-At this time our goal is to enable interopability. We have done no security review or take a position on the security of these third-party libraries. **YOU HAVE BEEN WARNED**.
+We have done no security review or take a position on the security of these third-party libraries. **YOU HAVE BEEN WARNED**.
 
 To keep `webcrypto-liner` as small as possible it was designed to be modular, if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
 
