@@ -14,7 +14,7 @@ The libraries `webcrypto-liner` relies on for cryptographic implementations incl
 |-------------------------------------------------|-----------------------------------------------------------------------------|
 | [jsSHA](https://github.com/Caligatio/jsSHA)     | A JavaScript implementation of the complete Secure Hash Standard family     |
 | [elliptic](https://github.com/indutny/elliptic) | Fast Elliptic Curve Cryptography in plain javascript                        |
-| [jrsasign](https://kjur.github.io/jsrsasign/)   | A pure Javascript library implementing RSAES-PKCS1-v1_5, RSA-PSS & RSA-OAEP |
+| [jrsasign](https://kjur.github.io/jsrsasign/)   | A pure Javascript library implementing RSASSA-PKCS1-v1_5, RSA-PSS & RSA-OAEP |
 |                                                 |                                                                             |
 
 `webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
