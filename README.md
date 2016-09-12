@@ -36,9 +36,9 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | Hash                      | SHA-1, SHA-224, SHA-256, and SHA-384          |
 | Derive Key/Bits           | ECDH                                          |
 | Keywrap                   | AES-GCM                                       |
-| Supported ECC Curves      | P-256, P-384, and  P-512                      |
-| Supported RSA Key Lengths | 1024, 2048, 3072, and 4096                    |
-| Supported AES Key Lengths | 128, 192 and 256                              |
+| ECC Curves                | P-256, P-384, and  P-512                      |
+| RSA Key Lengths           | 1024, 2048, 3072, and 4096                    |
+| AES Key Lengths           | 128, 192 and 256                              |
 
 
 ## Important
