@@ -29,12 +29,12 @@ If you do not load any of the dependencies that provide cryptographic implementa
 
 | Capability                | Details                                       |
 |---------------------------|-----------------------------------------------|
-| Encryption/Decryption:    | RSA-OAEP, RSA-PKCSv1_15, AES-CBC, and AES-GCM |
+| Encryption/Decryption     | RSA-OAEP, RSA-PKCSv1_15, AES-CBC, and AES-GCM |
 | Sign/Verify               | RSA-PSS, RSA-PKCSv1.15, and ECDSA             |
 | Hash                      | SHA-1, SHA-224, SHA-256, and SHA-384          |
 | Derive Key/Bits           | ECDH                                          |
 | Keywrap                   | AES-GCM                                       |
-| Supported ECC curves      | P-256, P-384, and  P-512                      |
+| Supported ECC Curves      | P-256, P-384, and  P-512                      |
 | Supported RSA Key Lengths | 1024, 2048, 3072, and 4096                    |
 | Supported AES Key Lengths | 128, 192 and 256                              |
 
