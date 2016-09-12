@@ -10,16 +10,14 @@ Intentionally `webcrypto-liner` does not implement any cryptography though it do
 
 The libraries `webcrypto-liner` relies on for cryptographic implementations include:
 
-| Package                                         | Description                                                                 |
-|-------------------------------------------------|-----------------------------------------------------------------------------|
-| [jsSHA](https://github.com/Caligatio/jsSHA)     | A JavaScript implementation of the complete Secure Hash Standard family     |
-| [elliptic](https://github.com/indutny/elliptic) | Fast Elliptic Curve Cryptography in plain javascript                        |
-| [jrsasign](https://kjur.github.io/jsrsasign/)   | A pure Javascript library implementing RSASSA-PKCS1-v1_5, RSA-PSS & RSA-OAEP |
-|                                                 |                                                                             |
+| Package                                                    | Description                                                                            | Size   |
+|------------------------------------------------------------|----------------------------------------------------------------------------------------|--------|
+| [asmcrypto.js](https://github.com/vibornoff/asmcrypto.js/) | JavaScript implementation of popular cryptographic utilities with performance in mind. | 131 KB |
+| [elliptic](https://github.com/indutny/elliptic)            | Fast Elliptic Curve Cryptography in plain javascript                                   | 130 KB |
 
 `webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
 
-At this time our goal is to enable interopability, at a later date we will revisit the implementation of these third-party libraries and determine our level of confidence in them. **YOU HAVE BEEN WARNED**.
+At this time our goal is to enable interopability. We have done no security review or take a position on the security of these third-party libraries. **YOU HAVE BEEN WARNED**.
 
 To keep `webcrypto-liner` as small as possible it was designed to be modular, if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
 
