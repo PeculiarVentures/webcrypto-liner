@@ -35,10 +35,42 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | Sign/Verify               | RSA-PSS, RSA-PKCSv1.15, and ECDSA             |
 | Hash                      | SHA-1, SHA-224, SHA-256, and SHA-384          |
 | Derive Key/Bits           | ECDH                                          |
-| Keywrap                   | AES-GCM                                       |
+| Keywrap                   | AES-GCM, AES-CBC                              |
 | ECC Curves                | P-256, P-384, and  P-512                      |
 | RSA Key Lengths           | 1024, 2048, 3072, and 4096                    |
 | AES Key Lengths           | 128, 192 and 256                              |
+
+
+## Using
+
+```html
+<head>
+    <!-- ... -->
+    <script src="https://www.promisejs.org/polyfills/promise-7.0.4.min.js"></script>
+    <script src="src/asmcrypto.js"></script>
+    <script src="src/elliptic.js"></script>
+    <script src="src/webcrypto-core.js"></script>
+    <script src="src/webcrypto-liner.js"></script>
+</head>
+<body>
+    <script> 
+        crypto.subtle.generateKey({name: "AES-GCM", length: 192}, true, ["encrypt", "decrypt"])
+            .then(function(key){
+                return crypto.subtle.encrypt({
+                        name: "AES-GCM", 
+                        iv: new Uint8Array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]),
+                        tagLength: 128
+                    }, key, new Uint8Array([1,2,3,4,5]))
+            })
+            .then(function(enc){
+                console.log(new Uint8Array(enc));
+            })
+            .catch(function(err){
+                console.log(err.message); // Chrome throws: 192-bit AES keys are not supported
+            })
+    </script>
+</body>
+```
 
 
 ## Important
