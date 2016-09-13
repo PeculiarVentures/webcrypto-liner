@@ -38,4 +38,17 @@ namespace webcrypto.liner {
         return res;
     }
 
+    export function string2buffer(binaryString: string) {
+        let res = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++)
+            res[i] = binaryString.charCodeAt(i);
+        return res;
+    }
+
+    export function buffer2string(buffer: Uint8Array) {
+        let res = "";
+        for (let i = 0; i < buffer.length; i++)
+            res += String.fromCharCode(buffer[i]);
+        return res;
+    }
 }

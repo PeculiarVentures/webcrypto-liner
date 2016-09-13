@@ -13,13 +13,21 @@ namespace webcrypto.liner {
 
     if (_w.msCrypto) {
         if (!_w.Promise)
-            throw new ShimError(ShimError.MODULE_NOT_FOUND, "Promise", "https://www.promisejs.org");
+            throw new LinerError(LinerError.MODULE_NOT_FOUND, "Promise", "https://www.promisejs.org");
         function WrapFunction(subtle: any, name: string) {
             const fn = subtle[name];
             subtle[name] = function () {
                 const _args = arguments;
-                return new Promise(resolve => {
-                    resolve(fn.apply(subtle, _args));
+                return new Promise((resolve, reject) => {
+                    let op: any = fn.apply(subtle, _args);
+                    op.oncomplete = (e: any) => {
+                        console.log("Complited");
+                        resolve(e.target.result);
+                    }
+                    op.onerror = (e: any) => {
+                        console.log("Error");
+                        reject(`Error on running '${name}' function`);
+                    }
                 });
             };
         }

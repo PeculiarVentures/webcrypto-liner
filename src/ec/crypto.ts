@@ -25,7 +25,7 @@ namespace webcrypto.liner.ec {
     export class EcCrypto extends BaseCrypto {
         protected static checkModule() {
             if (typeof elliptic === "undefined")
-                throw new ShimError(ShimError.MODULE_NOT_FOUND, "elliptic", "https://github.com/indutny/elliptic");
+                throw new LinerError(LinerError.MODULE_NOT_FOUND, "elliptic", "https://github.com/indutny/elliptic");
         }
 
         static generateKey(alg: Algorithm, extractable: boolean, keyUsage: string[]) {
@@ -78,7 +78,7 @@ namespace webcrypto.liner.ec {
             });
         }
 
-        static deriveKey(algorithm: webcrypto.ec.EcdhKeyDeriveParams, baseKey: CryptoKey, derivedKeyType: aes.AesKeyGenParams, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        static deriveKey(algorithm: webcrypto.ec.EcdhKeyDeriveParams, baseKey: CryptoKey, derivedKeyType: webcrypto.aes.AesKeyGenParams, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             return new Promise((resolve, reject) => {
                 this.deriveBits(algorithm, baseKey, derivedKeyType.length)
                     .then(bits => {

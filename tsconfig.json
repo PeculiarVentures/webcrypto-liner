@@ -8,10 +8,12 @@
     },
     "files": [
         "typings/webcrypto-core/webcrypto-core.d.ts",
+        "src/typings/asmcrypto.d.ts",
         "src/declare.d.ts",
         "src/helper.ts",
         "src/key.ts",
-        "src/rsa/crypto.ts",
+        "src/sha/crypto.ts",
+        "src/aes/crypto.ts",
         "src/ec/crypto.ts",
         "src/subtle.ts",
         "src/crypto.ts",
