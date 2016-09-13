@@ -65,9 +65,8 @@ namespace webcrypto.liner.aes {
 
         static wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: Algorithm): PromiseLike<ArrayBuffer> {
             return new Promise((resolve, reject) => {
-                const _w: any = window;
-                (_w.Crypto as Crypto).subtle.exportKey(format, key)
-                    .then(data => {
+                window.crypto.subtle.exportKey(format, key)
+                    .then((data: any) => {
                         let raw: Uint8Array;
                         if (!(data instanceof ArrayBuffer)) {
                             // JWK
@@ -77,7 +76,7 @@ namespace webcrypto.liner.aes {
                             // ArrayBuffer
                             raw = new Uint8Array(data);
                         }
-                        return (_w.Crypto as Crypto).subtle.encrypt(wrapAlgorithm, wrappingKey, raw);
+                        return window.crypto.subtle.encrypt(wrapAlgorithm, wrappingKey, raw);
                     })
                     .then(resolve, reject);
             });
@@ -85,13 +84,12 @@ namespace webcrypto.liner.aes {
 
         static unwrapKey(format: string, wrappedKey: Uint8Array, unwrappingKey: CryptoKey, unwrapAlgorithm: Algorithm, unwrappedKeyAlgorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             return new Promise((resolve, reject) => {
-                const _w: any = window;
-                (_w.Crypto as Crypto).subtle.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey)
-                    .then(data => {
-                        let _data: JWK | Uint8Array = data;
+                window.crypto.subtle.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey)
+                    .then((data: any) => {
+                        let _data: any;
                         if (format.toLowerCase() === "jwk")
                             _data = JSON.parse(buffer2string(new Uint8Array(data)));
-                        return (_w.Crypto as Crypto).subtle.importKey(format, _data, unwrappedKeyAlgorithm, extractable, keyUsages);
+                        return window.crypto.subtle.importKey(format, _data, unwrappedKeyAlgorithm, extractable, keyUsages);
                     })
                     .then(resolve, reject);
             });

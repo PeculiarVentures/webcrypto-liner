@@ -45,6 +45,7 @@ namespace webcrypto.liner {
         WrapFunction(nativeSubtle, "deriveBits");
     }
 
-    _w.Crypto = new Crypto();
+    delete window.crypto;
+    _w.crypto = new Crypto();
 
 }
