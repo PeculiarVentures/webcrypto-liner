@@ -14,7 +14,7 @@ The libraries `webcrypto-liner` relies on include:
 
 | Package                                                    | Description                                                                            | Size   | Optional    |
 |------------------------------------------------------------|----------------------------------------------------------------------------------------|--------|-------------|
-| [asmcrypto.js](https://github.com/vibornoff/asmcrypto.js/) | JavaScript implementation of popular cryptographic utilities with performance in mind. | 131 KB | Yes |
+| [asmcrypto.js](https://github.com/vibornoff/asmcrypto.js/) | A [performant](https://medium.com/@encryb/comparing-performance-of-javascript-cryptography-libraries-42fb138116f3) JavaScript implementation of popular cryptographic utilities with performance in mind. | 131 KB | Yes |
 | [elliptic](https://github.com/indutny/elliptic)            | Fast Elliptic Curve Cryptography in plain javascript                                   | 130 KB | Yes  |
 | [webcrypto-core](https://github.com/PeculiarVentures/webcrypto-core)            | A input validation layer for WebCrypto polyfills                 | 25 KB | No  |
 
