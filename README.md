@@ -2,13 +2,13 @@
 
 A polyfill for WebCrypto that "smooths out" the rough-edges in existing User Agent implementations.
 
-Though WebCrypto is well [supported accross browsers](http://caniuse.com/cryptography), several browsers still have prefixed and buggy implementations. Additionally they do not always support the same algorithms, for example Edge does not support SHA1 or ECC while both Firefox and Chrome do. 
+Though WebCrypto is well [supported across browsers](http://caniuse.com/cryptography), several browsers still have prefixed and buggy implementations. Additionally, they do not always support the same algorithms, for example, Edge does not support SHA1 or ECC while both Firefox and Chrome do. 
 
-**NOTE**: If your not familiar with how to use the various capabilities of WebCrypto see [this great example  page](https://github.com/diafygi/webcrypto-examples).
+**NOTE**: If you are not familiar with how to use the various capabilities of WebCrypto see [this great example  page](https://github.com/diafygi/webcrypto-examples).
 
 `webcrypto-liner` is a wrapper for WebCrypto designed to address these issues, at the same time it was designed to be modular so that it can also be used for testing the addition of new algorithms to WebCrypto in the future.
 
-Intentionally `webcrypto-liner` does not implement any cryptography though it does consume libraries that does. We strongly recomend you read "[What’s wrong with in-browser cryptography?](https://tonyarcieri.com/whats-wrong-with-webcrypto)" before using this library.
+Intentionally `webcrypto-liner` does not implement any cryptography though it does consume libraries that do. We strongly recommend you read "[What’s wrong with in-browser cryptography?](https://tonyarcieri.com/whats-wrong-with-webcrypto)" before using this library.
 
 The libraries `webcrypto-liner` relies on include:
 
@@ -19,13 +19,13 @@ The libraries `webcrypto-liner` relies on include:
 | [webcrypto-core](https://github.com/PeculiarVentures/webcrypto-core)            | A input validation layer for WebCrypto polyfills                 | 25 KB | No  |
 
 
-`webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
+`webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example, it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
 
 We have done no security review or take a position on the security of these third-party libraries. **YOU HAVE BEEN WARNED**.
 
-To keep `webcrypto-liner` as small as possible (right now it is ~11kb without dependencies). Additionally it was designed to be modular, so if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
+To keep `webcrypto-liner` as small as possible (right now it is ~11kb without dependencies). Additionally, it was designed to be modular, so if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
 
-If you do not load any of the dependencies that provide cryptographic implementations `webcrypto-liner` will work as an interopanility layer, very similar to [webcrypto-shim](https://github.com/vibornoff/webcrypto-shim).
+If you do not load any of the dependencies that provide cryptographic implementations `webcrypto-liner` will work as an interoperability layer, very similar to [webcrypto-shim](https://github.com/vibornoff/webcrypto-shim).
 
 `webcrypto-liner` supports the following algorithms and key lengths:
 
