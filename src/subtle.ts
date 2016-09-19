@@ -71,7 +71,7 @@ namespace webcrypto.liner {
                     _alg = PrepareAlgorithm(algorithm);
                     _data = PrepareData(data, "data");
 
-                    return nativeSubtle.digest.apply(nativeSubtle, args)
+                    return nativeSubtle.sign.apply(nativeSubtle, args)
                         .catch((e: Error) => {
                             console.warn(`WebCrypto: native sign for ${_alg.name} doesn't work.`, e.message || "");
                         });
