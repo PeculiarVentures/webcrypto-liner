@@ -52,13 +52,14 @@ namespace webcrypto.liner {
         return res;
     }
 
-    export function concat(buf1: Uint8Array, buf2: Uint8Array) {
-        const res = new Uint8Array(buf1.length + buf2.length);
-        for (let i = 0; i < buf1.length; i++)
-            res[i] = buf1[i];
-        const offset = buf1.length;
-        for (let i = 0; i < buf2.length; i++)
-            res[offset + i] = buf2[i];
+    export function concat(...buf: Uint8Array[]) {
+        const res = new Uint8Array(buf.map(item => item.length).reduce((prev, cur) => prev + cur));
+        let offset = 0;
+        buf.forEach((item, index) => {
+            for (let i = 0; i < item.length; i++)
+                res[offset + i] = item[i];
+            offset += item.length;
+        });
         return res;
     }
 }
