@@ -51,4 +51,14 @@ namespace webcrypto.liner {
             res += String.fromCharCode(buffer[i]);
         return res;
     }
+
+    export function concat(buf1: Uint8Array, buf2: Uint8Array) {
+        const res = new Uint8Array(buf1.length + buf2.length);
+        for (let i = 0; i < buf1.length; i++)
+            res[i] = buf1[i];
+        const offset = buf1.length;
+        for (let i = 0; i < buf2.length; i++)
+            res[offset + i] = buf2[i];
+        return res;
+    }
 }

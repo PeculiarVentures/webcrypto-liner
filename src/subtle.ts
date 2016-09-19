@@ -132,10 +132,15 @@ namespace webcrypto.liner {
                     _alg = PrepareAlgorithm(algorithm);
                     _algDerivedKey = PrepareAlgorithm(derivedKeyType);
 
-                    return nativeSubtle.deriveKey.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native deriveKey for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.deriveKey.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native deriveKey for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    } catch (e) {
+                        // Edge doesn't go to catch of Promise
+                        console.warn(`WebCrypto: native deriveKey for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((key: CryptoKey) => {
                     if (key) return new Promise(resolve => resolve(key));

@@ -3,15 +3,22 @@ namespace webcrypto.liner.ec {
     declare class Elliptic {
         constructor(namedCurve: string);
         genKeyPair(): EllipticKeyPair;
+        keyFromPrivate(hexString: string | number[] | ArrayBuffer): EllipticKeyPair;
+        keyFromPublic(hexString: string | number[] | ArrayBuffer, enc?: string): EllipticKeyPair;
     }
 
     declare class EllipticKeyPair {
-
+        getPrivate(enc: string): any;
+        getPublic(enc: string): any;
     }
 
     declare let elliptic: {
         ec: typeof Elliptic;
     };
+
+    interface EcCryptoKey extends CryptoKey {
+        key: EllipticKeyPair;
+    }
 
     // Helper
     function b2a(buffer: ArrayBuffer | ArrayBufferView) {
@@ -19,6 +26,22 @@ namespace webcrypto.liner.ec {
         let res: number[] = [];
         for (let i = 0; i < buf.length; i++)
             res.push(buf[i]);
+        return res;
+    }
+
+    function hex2buffer(hexString: string) {
+        let res = new Uint8Array(hexString.length / 2);
+        for (let i = 0; i < hexString.length; i++)
+            res[i / 2] = parseInt(hexString.slice(i, ++i), 16);
+        return res;
+    }
+
+    function buffer2hex(buffer: Uint8Array): string {
+        let res = "";
+        for (let i = 0; i < buffer.length; i++) {
+            const char = buffer[i].toString(16);
+            res += char.length % 2 ? char : "0" + char;
+        }
         return res;
     }
 
@@ -61,12 +84,11 @@ namespace webcrypto.liner.ec {
                 const _alg: webcrypto.ec.EcdsaParams = algorithm as any;
 
                 // get digest
-                (window as any).Crypto.subtle.digest(_alg.hash, data)
+                crypto.subtle.digest(_alg.hash, data)
                     .then((hash: ArrayBuffer) => {
                         const array = b2a(data);
                         const signature = key.key.sign(array);
-                        console.log(signature.toDER());
-                        resolve(new ArrayBuffer(0));
+                        resolve(new Uint8Array(signature.toDER()).buffer);
                     })
                     .catch(reject);
             });
@@ -83,8 +105,11 @@ namespace webcrypto.liner.ec {
                 this.deriveBits(algorithm, baseKey, derivedKeyType.length)
                     .then(bits => {
                         // import bits to AES CryptoKey
-                        throw new Error("Not finished yet");
-                    });
+                        console.log("DeriveKey:Bits:", bits);
+                        console.log("DeriveKey:BitsLength:", bits.byteLength);
+                        return crypto.subtle.importKey("raw", new Uint8Array(bits), derivedKeyType, extractable, keyUsages)
+                    })
+                    .then(resolve, reject);
             });
         }
 
@@ -93,6 +118,75 @@ namespace webcrypto.liner.ec {
                 const shared = baseKey.key.derive((algorithm.public as CryptoKey).key.getPublic());
                 const buf = new Uint8Array(shared.toArray().slice(0, length / 8)).buffer;
                 resolve(buf);
+            });
+        }
+
+        static exportKey(format: string, key: EcCryptoKey): PromiseLike<webcrypto.aes.AesJWK | ArrayBuffer> {
+            return new Promise((resolve, reject) => {
+                const ecKey = key.key;
+                if (format.toLowerCase() === "jwk") {
+                    let hexPub = ecKey.getPublic("hex").slice(2); // ignore first '04'
+                    const hexX = hexPub.slice(0, hexPub.length / 2);
+                    const hexY = hexPub.slice(hexPub.length / 2, hexPub.length);
+                    if (key.type === "public") {
+                        // public
+
+                        let jwk: webcrypto.ec.EcJWKPublicKey = {
+                            crv: (key.algorithm as webcrypto.ec.EcKeyAlgorithm).namedCurve,
+                            ext: key.extractable,
+                            x: Base64Url.encode(hex2buffer(hexX)),
+                            y: Base64Url.encode(hex2buffer(hexY)),
+                            key_ops: key.usages,
+                            kty: "EC"
+                        };
+                        resolve(jwk);
+                    }
+                    else {
+                        // private
+                        let jwk: webcrypto.ec.EcJWKPrivateKey = {
+                            crv: (key.algorithm as webcrypto.ec.EcKeyAlgorithm).namedCurve,
+                            ext: key.extractable,
+                            d: Base64Url.encode(hex2buffer(ecKey.getPrivate("hex"))),
+                            x: Base64Url.encode(hex2buffer(hexX)),
+                            y: Base64Url.encode(hex2buffer(hexY)),
+                            key_ops: key.usages,
+                            kty: "EC"
+                        };
+                        resolve(jwk);
+                    }
+                }
+                else {
+                    throw new LinerError(`Format '${format}' is not implemented`);
+                }
+            });
+        }
+
+        static importKey(format: string, keyData: webcrypto.ec.EcJWKPrivateKey | webcrypto.ec.EcJWKPublicKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+            return new Promise((resolve, reject) => {
+                const key = new CryptoKey();
+                key.algorithm = algorithm;
+                if (format.toLowerCase() === "jwk") {
+                    const key: EcCryptoKey = new CryptoKey();
+                    const ecKey = new elliptic.ec((keyData as webcrypto.ec.EcJWKPrivateKey).crv.replace("-", "").toLowerCase());
+                    if ((keyData as webcrypto.ec.EcJWKPrivateKey).d) {
+                        // Private key
+                        key.key = ecKey.keyFromPrivate(Base64Url.decode((keyData as webcrypto.ec.EcJWKPrivateKey).d));
+                        key.type = "private";
+                    }
+                    else {
+                        // Public key
+                        key.key = ecKey.keyFromPublic(
+                            concat(
+                                Base64Url.decode((keyData as webcrypto.ec.EcJWKPrivateKey).x),
+                                Base64Url.decode((keyData as webcrypto.ec.EcJWKPrivateKey).y)
+                            ));
+                        key.type = "public";
+                    }
+                }
+                else
+                    throw new LinerError(`Format '${format}' is not implemented`);
+                key.usages = keyUsages;
+                resolve(key);
             });
         }
     }
