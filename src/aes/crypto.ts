@@ -89,6 +89,8 @@ namespace webcrypto.liner.aes {
                         let _data: any;
                         if (format.toLowerCase() === "jwk")
                             _data = JSON.parse(buffer2string(new Uint8Array(data)));
+                        else
+                            _data = new Uint8Array(data);
                         return window.crypto.subtle.importKey(format, _data, unwrappedKeyAlgorithm, extractable, keyUsages);
                     })
                     .then(resolve, reject);

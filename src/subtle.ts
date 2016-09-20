@@ -10,10 +10,16 @@ namespace webcrypto.liner {
             return super.generateKey.apply(this, args)
                 .then((d: Uint8Array) => {
                     _alg = PrepareAlgorithm(algorithm);
-                    return nativeSubtle.generateKey.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native generateKey for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+
+                    try {
+                        return nativeSubtle.generateKey.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native generateKey for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native generateKey for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((keys: CryptoKey | CryptoKeyPair) => {
 
@@ -51,10 +57,15 @@ namespace webcrypto.liner {
                     _alg = PrepareAlgorithm(algorithm);
                     _data = PrepareData(data, "data");
 
-                    return nativeSubtle.digest.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native digest for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.digest.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native digest for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native digest for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((digest: ArrayBuffer) => {
                     if (digest) return new Promise(resolve => resolve(digest));
@@ -71,10 +82,15 @@ namespace webcrypto.liner {
                     _alg = PrepareAlgorithm(algorithm);
                     _data = PrepareData(data, "data");
 
-                    return nativeSubtle.sign.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native sign for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.sign.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native sign for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native sign for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((signature: ArrayBuffer) => {
                     if (signature) return new Promise(resolve => resolve(signature));
@@ -165,10 +181,15 @@ namespace webcrypto.liner {
                     _alg = PrepareAlgorithm(algorithm);
                     _data = PrepareData(data, "data");
 
-                    return nativeSubtle.encrypt.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'encrypt' for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.encrypt.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native 'encrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native 'encrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((msg: ArrayBuffer) => {
                     if (msg) return new Promise(resolve => resolve(msg));
@@ -193,10 +214,15 @@ namespace webcrypto.liner {
                     _alg = PrepareAlgorithm(algorithm);
                     _data = PrepareData(data, "data");
 
-                    return nativeSubtle.decrypt.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'decrypt' for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.decrypt.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native 'decrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native 'decrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((msg: ArrayBuffer) => {
                     if (msg) return new Promise(resolve => resolve(msg));
@@ -220,10 +246,15 @@ namespace webcrypto.liner {
                 .then((bits: ArrayBuffer) => {
                     _alg = PrepareAlgorithm(wrapAlgorithm);
 
-                    return nativeSubtle.wrapKey.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'wrapKey' for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.wrapKey.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native 'wrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native 'wrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((msg: ArrayBuffer) => {
                     if (msg) return new Promise(resolve => resolve(msg));
@@ -251,10 +282,15 @@ namespace webcrypto.liner {
                     _algKey = PrepareAlgorithm(unwrappedKeyAlgorithm);
                     _data = PrepareData(wrappedKey, "wrappedKey");
 
-                    return nativeSubtle.unwrapKey.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'unwrapKey' for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.unwrapKey.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native 'unwrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native 'unwrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((msg: ArrayBuffer) => {
                     if (msg) return new Promise(resolve => resolve(msg));
@@ -276,10 +312,15 @@ namespace webcrypto.liner {
             return super.exportKey.apply(this, args)
                 .then(() => {
 
-                    return nativeSubtle.exportKey.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.exportKey.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((msg: ArrayBuffer) => {
                     if (msg) return new Promise(resolve => resolve(msg));
@@ -312,10 +353,15 @@ namespace webcrypto.liner {
                         _data = PrepareData(keyData, "keyData");
                     }
 
-                    return nativeSubtle.importKey.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'importKey' for ${_alg.name} doesn't work.`, e.message || "");
-                        });
+                    try {
+                        return nativeSubtle.importKey.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native 'importKey' for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native 'importKey' for ${_alg.name} doesn't work.`, e.message || "");
+                    }
                 })
                 .then((msg: ArrayBuffer) => {
                     if (msg) return new Promise(resolve => resolve(msg));
