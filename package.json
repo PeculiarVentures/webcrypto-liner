@@ -14,10 +14,13 @@
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
   "dependencies": {
-    "uglify": "*",
     "asmcrypto.js": "*",
     "elliptic": "*",
     "webcrypto-core": "git+https://github.com/PeculiarVentures/webcrypto-core"
+  },
+  "devDependencies": {
+    "uglify-js": "*",
+    "typescript": "*"
   },
   "author": "PeculiarVentures",
   "license": "MIT"
