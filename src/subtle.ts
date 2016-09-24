@@ -41,6 +41,10 @@ namespace webcrypto.liner {
                         case AlgorithmNames.EcDH.toLowerCase():
                             Class = ec.EcCrypto;
                             break;
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                        case AlgorithmNames.RsaPSS.toLowerCase():
+                            Class = rsa.RsaCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "generateKey");
                     }
@@ -99,10 +103,51 @@ namespace webcrypto.liner {
                         case AlgorithmNames.EcDSA.toLowerCase():
                             Class = ec.EcCrypto;
                             break;
+                        case AlgorithmNames.RsaPSS.toLowerCase():
+                            Class = rsa.RsaCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "sign");
                     }
                     return Class.sign(_alg, key, _data);
+                });
+        }
+
+        verify(algorithm: AlgorithmIdentifier, key: CryptoKey, signature: CryptoBuffer, data: CryptoBuffer): PromiseLike<boolean> {
+            const args = arguments;
+            let _alg: Algorithm;
+            let _signature: Uint8Array;
+            let _data: Uint8Array;
+            return super.verify.apply(this, args)
+                .then((d: boolean) => {
+                    _alg = PrepareAlgorithm(algorithm);
+                    _signature = PrepareData(signature, "data");
+                    _data = PrepareData(data, "data");
+
+                    try {
+                        return nativeSubtle.verify.apply(nativeSubtle, args)
+                            .catch((e: Error) => {
+                                console.warn(`WebCrypto: native verify for ${_alg.name} doesn't work.`, e.message || "");
+                            });
+                    }
+                    catch (e) {
+                        console.warn(`WebCrypto: native verify for ${_alg.name} doesn't work.`, e.message || "");
+                    }
+                })
+                .then((result: boolean) => {
+                    if (typeof result === "boolean") return new Promise(resolve => resolve(signature));
+                    let Class: typeof BaseCrypto;
+                    switch (_alg.name.toLowerCase()) {
+                        case AlgorithmNames.EcDSA.toLowerCase():
+                            Class = ec.EcCrypto;
+                            break;
+                        case AlgorithmNames.RsaPSS.toLowerCase():
+                            Class = rsa.RsaCrypto;
+                            break;
+                        default:
+                            throw new LinerError(LinerError.NOT_SUPPORTED, "sign");
+                    }
+                    return Class.verify(_alg, key, _signature, _data);
                 });
         }
 
@@ -199,6 +244,9 @@ namespace webcrypto.liner {
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = aes.AesCrypto;
                             break;
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = rsa.RsaCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
                     }
@@ -231,6 +279,9 @@ namespace webcrypto.liner {
                         case AlgorithmNames.AesCBC.toLowerCase():
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = aes.AesCrypto;
+                            break;
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = rsa.RsaCrypto;
                             break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
