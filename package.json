@@ -4,18 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && npm run minify",
+    "build": "tsc && npm run minify && node scripts/install",
     "minify": "uglifyjs build/webcrypto-liner.js -o build/webcrypto-liner.min.js -m -c",
     "test": "mocha test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PeculiarVentures/pv-webcrypto-tests.git"
+    "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
-  "devDependencies": {
-    "mocha": "*",
-    "uglifyjs": "*",
-    "typescript": "*"
+  "dependencies": {
+    "asmcrypto.js": "*",
+    "elliptic": "*",
+    "webcrypto-core": "git+https://github.com/PeculiarVentures/webcrypto-core"
   },
   "author": "PeculiarVentures",
   "license": "MIT"
