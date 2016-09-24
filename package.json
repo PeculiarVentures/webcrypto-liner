@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && npm run minify && node scripts/install",
+    "build": "node scripts/copy && tsc && npm run minify && node scripts/install",
     "minify": "uglifyjs build/webcrypto-liner.js -o build/webcrypto-liner.min.js -m -c",
     "test": "mocha test",
     "install": "npm run build"
