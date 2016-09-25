@@ -25,7 +25,7 @@ The libraries `webcrypto-liner` relies on include:
 
 We have done no security review or take a position on the security of these third-party libraries. **YOU HAVE BEEN WARNED**.
 
-To keep `webcrypto-liner` as small as possible (right now it is ~11kb without dependencies). Additionally, it was designed to be modular, so if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
+To keep `webcrypto-liner` as small as possible (right now it is ~11kb without dependencies) it was designed to be modular, so if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
 
 If you do not load any of the dependencies that provide cryptographic implementations `webcrypto-liner` will work as an interoperability layer, very similar to [webcrypto-shim](https://github.com/vibornoff/webcrypto-shim).
 
