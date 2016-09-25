@@ -101,3 +101,8 @@ npm run build
 - **Do I need to include asmcrypto.js?** No, not unless you want to use the algorithms it exposes.
 - **Do I need to include elliptic.js?** No, not unless you want to use the algorithms it exposes.
 - **How big is the total package?** Right now, if you include all optional dependencies (minfied) the package is ~300 KB, if you include only ECC or only RSA support that is lowered to about 180 KB. Additionally you will see GZIP compression provide about 30% savings above and beyond that. If you use `webcrypto-liner` as just an interopability shim and do not use any of the third-party libraries it will be under 40 KB in size.
+
+## Related
+ - [node-webcrypto-p11](https://github.com/PeculiarVentures/node-webcrypto-p11)
+ - [node-webcrypto-ossl](https://github.com/PeculiarVentures/node-webcrypto-ossl)
+ - [WebCrypto Examples](https://github.com/diafygi/webcrypto-examples)
