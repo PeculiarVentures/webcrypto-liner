@@ -8,7 +8,7 @@ namespace webcrypto.liner {
 
     export class Crypto {
 
-        subtle = new CryptoSubtle();
+        subtle = new SubtleCrypto();
         getRandomValues = nativeCrypto.getRandomValues;
 
     }
