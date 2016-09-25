@@ -88,14 +88,12 @@ typescript
 npm install typescript --global
 ```
 
-## Compilation 
-Compile the source code using the following command:
+## Installation
+Install dependencies and compile the project using the following commands:
+
 ```
-tsc
-```
-Compile the source code with declaration using the next command:
-```
-tsc --declaration
+npm install
+npm run build
 ```
 
 ## FAQ
