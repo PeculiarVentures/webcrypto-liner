@@ -1,6 +1,6 @@
 {
   "name": "webcrypto-liner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -12,8 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "webcrypto-core": "latest",
     "asmcrypto.js": "*",
