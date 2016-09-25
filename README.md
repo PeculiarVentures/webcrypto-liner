@@ -100,7 +100,7 @@ npm run build
 - **Do I need to use a promise library?** - No, not if your browser supports promises.
 - **Do I need to include asmcrypto.js?** No, not unless you want to use the algorithms it exposes.
 - **Do I need to include elliptic.js?** No, not unless you want to use the algorithms it exposes.
-- **How big is the total package?** Right now, if you include all optional dependencies (minfied) the package is ~300 KB, if you include only ECC or only RSA support that is lowered to about 180 KB. Additionally you will see GZIP compression provide about 30% savings above and beyond that. If you use `webcrypto-liner` as just an interopability shim and do not use any of the third-party libraries it will be under 44 KB in size.
+- **How big is the total package?** Right now, if you include all optional dependencies (minfied) the package is ~300 KB, if you include only ECC or only RSA support that is lowered to about 180 KB. Additionally you will see GZIP compression provide about 30% savings above and beyond that. If you use `webcrypto-liner` as just an interopability shim and do not use any of the optional third-party libraries it will be under 44 KB in size.
 - **Will it work in Node?** No. It is compiles to pure Javascript but uses the `window` object so it wont work in Node at this time. With some minor changes it should also be able to work in Node also but you really should be using [node-webcrypto-ossl](https://github.com/PeculiarVentures/node-webcrypto-ossl) on Node instead.
 
 ## Related
