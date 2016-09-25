@@ -6,19 +6,18 @@
   "scripts": {
     "build": "node scripts/copy && tsc && npm run minify && node scripts/install",
     "minify": "uglifyjs build/webcrypto-liner.js -o build/webcrypto-liner.min.js -m -c",
-    "test": "mocha test",
-    "install": "npm run build"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
   "dependencies": {
-    "asmcrypto.js": "*",
-    "elliptic": "*",
-    "webcrypto-core": "git+https://github.com/PeculiarVentures/webcrypto-core"
   },
   "devDependencies": {
+    "webcrypto-core": "latest",
+    "asmcrypto.js": "*",
+    "elliptic": "*",
     "uglify-js": "*",
     "typescript": "*"
   },

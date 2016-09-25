@@ -2,7 +2,7 @@ namespace webcrypto.liner {
 
     declare type IE = any;
 
-    export class CryptoSubtle extends Subtle {
+    export class SubtleCrypto extends webcrypto.SubtleCrypto {
 
         generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey | CryptoKeyPair> {
             const args = arguments;
@@ -31,7 +31,7 @@ namespace webcrypto.liner {
                         }
                         return new Promise(resolve => resolve(keys));
                     }
-                    let Class: typeof BaseCrypto = null;
+                    let Class: typeof BaseCrypto;
                     switch (_alg.name.toLowerCase()) {
                         case AlgorithmNames.AesCBC.toLowerCase():
                         case AlgorithmNames.AesGCM.toLowerCase():
@@ -48,7 +48,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        digest(algorithm: AlgorithmIdentifier, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        digest(algorithm: AlgorithmIdentifier, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
@@ -73,13 +73,13 @@ namespace webcrypto.liner {
                 });
         }
 
-        sign(algorithm: AlgorithmIdentifier, key: CryptoKey, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        sign(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
             return super.sign.apply(this, args)
                 .then((d: Uint8Array) => {
-                    _alg = PrepareAlgorithm(algorithm);
+                    _alg = PrepareAlgorithm(algorithm as string);
                     _data = PrepareData(data, "data");
 
                     try {
@@ -172,7 +172,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        encrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        encrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
@@ -205,7 +205,7 @@ namespace webcrypto.liner {
                     return Class.encrypt(_alg, key, _data);
                 });
         }
-        decrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        decrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
@@ -271,7 +271,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        unwrapKey(format: string, wrappedKey: CryptoBuffer, unwrappingKey: CryptoKey, unwrapAlgorithm: AlgorithmIdentifier, unwrappedKeyAlgorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        unwrapKey(format: string, wrappedKey: BufferSource, unwrappingKey: CryptoKey, unwrapAlgorithm: AlgorithmIdentifier, unwrappedKeyAlgorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             const args = arguments;
             let _alg: Algorithm;
             let _algKey: Algorithm;
@@ -307,7 +307,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        exportKey(format: string, key: CryptoKey): PromiseLike<JWK | ArrayBuffer> {
+        exportKey(format: string, key: CryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
             const args = arguments;
             return super.exportKey.apply(this, args)
                 .then(() => {
@@ -325,7 +325,7 @@ namespace webcrypto.liner {
                 .then((msg: ArrayBuffer) => {
                     if (msg) return new Promise(resolve => resolve(msg));
                     let Class: typeof BaseCrypto;
-                    switch (key.algorithm.name.toLowerCase()) {
+                    switch (key.algorithm.name!.toLowerCase()) {
                         case AlgorithmNames.AesCBC.toLowerCase():
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = aes.AesCrypto;
@@ -341,7 +341,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        importKey(format: string, keyData: JWK | CryptoBuffer, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: any;

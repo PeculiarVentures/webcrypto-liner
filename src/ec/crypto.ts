@@ -54,7 +54,7 @@ namespace webcrypto.liner.ec {
         static generateKey(alg: Algorithm, extractable: boolean, keyUsage: string[]) {
             return new Promise<CryptoKeyPair>(resolve => {
                 this.checkModule();
-                const _alg: webcrypto.ec.EcKeyGenParams = alg as any;
+                const _alg: EcKeyGenParams = alg as any;
                 const key = new elliptic.ec(_alg.namedCurve.replace("-", "").toLowerCase()); // converts name to 'p192', ...
 
                 // set key params
@@ -81,14 +81,15 @@ namespace webcrypto.liner.ec {
 
         static sign(algorithm: Algorithm, key: CryptoKey, data: Uint8Array): PromiseLike<ArrayBuffer> {
             return new Promise((resolve, reject) => {
-                const _alg: webcrypto.ec.EcdsaParams = algorithm as any;
+                const _alg: EcdsaParams = algorithm as any;
 
                 // get digest
-                crypto.subtle.digest(_alg.hash, data)
-                    .then((hash: ArrayBuffer) => {
+                (crypto.subtle.digest(_alg.hash, data) as Promise<ArrayBuffer>)
+                    .then(hash => {
                         const array = b2a(data);
                         const signature = key.key.sign(array);
                         resolve(new Uint8Array(signature.toDER()).buffer);
+                        return Promise.resolve(undefined);
                     })
                     .catch(reject);
             });
@@ -100,7 +101,7 @@ namespace webcrypto.liner.ec {
             });
         }
 
-        static deriveKey(algorithm: webcrypto.ec.EcdhKeyDeriveParams, baseKey: CryptoKey, derivedKeyType: webcrypto.aes.AesKeyGenParams, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        static deriveKey(algorithm: EcdhKeyDeriveParams, baseKey: CryptoKey, derivedKeyType: AesKeyGenParams, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             return new Promise((resolve, reject) => {
                 let promise = (Promise as any).resolve(null);
                 if (!baseKey.key) {
@@ -116,7 +117,7 @@ namespace webcrypto.liner.ec {
                             crypto.subtle.exportKey("jwk", baseKey)
                         )
                             .then((jwk: any) =>
-                                this.importKey("jwk", jwk, baseKey.algorithm, true, baseKey.usages)
+                                this.importKey("jwk", jwk, baseKey.algorithm as EcdhKeyDeriveParams, true, baseKey.usages)
                             );
                     }
                 }
@@ -134,7 +135,7 @@ namespace webcrypto.liner.ec {
             });
         }
 
-        static deriveBits(algorithm: webcrypto.ec.EcdhKeyDeriveParams, baseKey: CryptoKey, length: number): PromiseLike<ArrayBuffer> {
+        static deriveBits(algorithm: EcdhKeyDeriveParams, baseKey: CryptoKey, length: number): PromiseLike<ArrayBuffer> {
             return new Promise((resolve, reject) => {
                 let promise = (Promise as any).resolve(null);
                 if (!(algorithm.public as EcCryptoKey).key)
@@ -142,7 +143,7 @@ namespace webcrypto.liner.ec {
                         .then(() =>
                             crypto.subtle.exportKey("jwk", algorithm.public))
                         .then((jwk: any) =>
-                            this.importKey("jwk", jwk, baseKey.algorithm, true, baseKey.usages)
+                            this.importKey("jwk", jwk, baseKey.algorithm as EcdhKeyDeriveParams, true, baseKey.usages)
                         );
                 promise.then((k: EcCryptoKey) => {
                     if (k)
@@ -155,7 +156,7 @@ namespace webcrypto.liner.ec {
             });
         }
 
-        static exportKey(format: string, key: EcCryptoKey): PromiseLike<webcrypto.aes.AesJWK | ArrayBuffer> {
+        static exportKey(format: string, key: EcCryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
             return new Promise((resolve, reject) => {
                 const ecKey = key.key;
                 if (format.toLowerCase() === "jwk") {
@@ -165,8 +166,8 @@ namespace webcrypto.liner.ec {
                     if (key.type === "public") {
                         // public
 
-                        let jwk: webcrypto.ec.EcJWKPublicKey = {
-                            crv: (key.algorithm as webcrypto.ec.EcKeyAlgorithm).namedCurve,
+                        let jwk: JsonWebKey = {
+                            crv: (key.algorithm as EcKeyGenParams).namedCurve,
                             ext: key.extractable,
                             x: Base64Url.encode(hex2buffer(hexX)),
                             y: Base64Url.encode(hex2buffer(hexY)),
@@ -177,8 +178,8 @@ namespace webcrypto.liner.ec {
                     }
                     else {
                         // private
-                        let jwk: webcrypto.ec.EcJWKPrivateKey = {
-                            crv: (key.algorithm as webcrypto.ec.EcKeyAlgorithm).namedCurve,
+                        let jwk: JsonWebKey = {
+                            crv: (key.algorithm as EcKeyGenParams).namedCurve,
                             ext: key.extractable,
                             d: Base64Url.encode(hex2buffer(ecKey.getPrivate("hex"))),
                             x: Base64Url.encode(hex2buffer(hexX)),
@@ -195,15 +196,15 @@ namespace webcrypto.liner.ec {
             });
         }
 
-        static importKey(format: string, keyData: webcrypto.ec.EcJWKPrivateKey | webcrypto.ec.EcJWKPublicKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        static importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             return new Promise((resolve, reject) => {
                 const key: EcCryptoKey = new CryptoKey();
                 key.algorithm = algorithm;
                 if (format.toLowerCase() === "jwk") {
-                    const ecKey = new elliptic.ec((keyData as webcrypto.ec.EcJWKPrivateKey).crv.replace("-", "").toLowerCase());
-                    if ((keyData as webcrypto.ec.EcJWKPrivateKey).d) {
+                    const ecKey = new elliptic.ec((keyData as JsonWebKey).crv!.replace("-", "").toLowerCase());
+                    if ((keyData as JsonWebKey).d) {
                         // Private key
-                        key.key = ecKey.keyFromPrivate(Base64Url.decode((keyData as webcrypto.ec.EcJWKPrivateKey).d));
+                        key.key = ecKey.keyFromPrivate(Base64Url.decode((keyData as JsonWebKey).d!));
                         key.type = "private";
                     }
                     else {
@@ -211,8 +212,8 @@ namespace webcrypto.liner.ec {
                         key.key = ecKey.keyFromPublic(
                             concat(
                                 new Uint8Array([4]),
-                                Base64Url.decode((keyData as webcrypto.ec.EcJWKPrivateKey).x),
-                                Base64Url.decode((keyData as webcrypto.ec.EcJWKPrivateKey).y)
+                                Base64Url.decode((keyData as JsonWebKey).x!),
+                                Base64Url.decode((keyData as JsonWebKey).y!)
                             ));
                         key.type = "public";
                     }

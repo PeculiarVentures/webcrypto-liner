@@ -46,10 +46,13 @@ If you do not load any of the dependencies that provide cryptographic implementa
 ```html
 <head>
     <!-- ... -->
+    <!-- ... -->
+    <!-- promise.js is needed for IE Promise implementation -->
     <script src="https://www.promisejs.org/polyfills/promise-7.0.4.min.js"></script>
+    <!-- asmcrypto.js is needed for AES and RSA crypto implementation -->
     <script src="src/asmcrypto.js"></script>
+    <!-- elliptic.js is needed for EC crypto implementation -->
     <script src="src/elliptic.js"></script>
-    <script src="src/webcrypto-core.js"></script>
     <script src="src/webcrypto-liner.js"></script>
 </head>
 <body>

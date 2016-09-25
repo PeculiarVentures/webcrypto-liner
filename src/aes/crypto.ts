@@ -10,7 +10,7 @@ namespace webcrypto.liner.aes {
                 throw new LinerError(LinerError.MODULE_NOT_FOUND, "asmCrypto", "https://github.com/vibornoff/asmcrypto.js");
         }
 
-        static generateKey(alg: webcrypto.aes.AesKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKey> {
+        static generateKey(alg: AesKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKey> {
             return new Promise<CryptoKey>(resolve => {
                 this.checkModule();
 
@@ -33,13 +33,15 @@ namespace webcrypto.liner.aes {
                 let res: Uint8Array;
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesCBC:
-                        let algCBC = algorithm as webcrypto.aes.AesCbcParams;
+                        let algCBC = algorithm as AesCbcParams;
                         res = asmCrypto.AES_CBC.encrypt(data, key.key, undefined, algCBC.iv) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
-                        let algGCM = algorithm as webcrypto.aes.AesGcmParams;
+                        let algGCM = algorithm as AesGcmParams;
                         res = asmCrypto.AES_GCM.encrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
+                    default:
+                        throw new LinerError(AlgorithmError.UNSUPPORTED_ALGORITHM, algorithm.name);
                 }
                 resolve(res.buffer);
             });
@@ -51,13 +53,15 @@ namespace webcrypto.liner.aes {
 
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesCBC:
-                        let algCBC = algorithm as webcrypto.aes.AesCbcParams;
+                        let algCBC = algorithm as AesCbcParams;
                         res = asmCrypto.AES_CBC.decrypt(data, key.key, undefined, algCBC.iv) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
-                        let algGCM = algorithm as webcrypto.aes.AesGcmParams;
+                        let algGCM = algorithm as AesGcmParams;
                         res = asmCrypto.AES_GCM.decrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
+                    default:
+                        throw new LinerError(AlgorithmError.UNSUPPORTED_ALGORITHM, algorithm.name);
                 }
                 resolve(res.buffer);
             });
@@ -97,12 +101,12 @@ namespace webcrypto.liner.aes {
             });
         }
 
-        static exportKey(format: string, key: AesCryptoKey): PromiseLike<webcrypto.aes.AesJWK | ArrayBuffer> {
+        static exportKey(format: string, key: AesCryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
             return new Promise((resolve, reject) => {
                 const raw = key.key;
                 if (format.toLowerCase() === "jwk") {
-                    let jwk: webcrypto.aes.AesJWK = {
-                        alg: `A${(key.algorithm as webcrypto.aes.AesKeyAlgorithm).length}${/-(\w+)/i.exec(key.algorithm.name.toUpperCase())[1]}`,
+                    let jwk: JsonWebKey = {
+                        alg: `A${(key.algorithm as AesKeyAlgorithm).length}${/-(\w+)/i.exec(key.algorithm.name!.toUpperCase())![1]}`,
                         ext: key.extractable,
                         k: Base64Url.encode(raw),
                         key_ops: key.usages,
@@ -116,12 +120,12 @@ namespace webcrypto.liner.aes {
             });
         }
 
-        static importKey(format: string, keyData: webcrypto.aes.AesJWK | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             return new Promise((resolve, reject) => {
                 let raw: Uint8Array;
                 if (format.toLowerCase() === "jwk") {
-                    const jwk = keyData as webcrypto.aes.AesJWK;
-                    raw = Base64Url.decode(jwk.k);
+                    const jwk = keyData as JsonWebKey;
+                    raw = Base64Url.decode(jwk.k!);
                 }
                 else
                     raw = new Uint8Array(keyData as Uint8Array);
