@@ -1,4 +1,6 @@
 # webcrypto-liner
+[![license](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/PeculiarVentures/webcrypto-liner/master/LICENSE)
+[![npm version](https://badge.fury.io/js/webcrypto-liner.svg)](https://badge.fury.io/js/webcrypto-liner)
 
 A polyfill for WebCrypto that "smooths out" the rough-edges in existing User Agent implementations.
 
