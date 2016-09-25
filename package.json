@@ -1,7 +1,7 @@
 {
   "name": "webcrypto-liner",
   "version": "0.1.1",
-  "description": "A polyfill for WebCrypto that 'smooths out' the rough-edges in existing User Agent implementations.",
+  "description": "A polyfill for WebCrypto that smooths out the rough-edges in existing User Agent implementations.",
   "main": "index.js",
   "scripts": {
     "build": "node scripts/copy && tsc && npm run minify && node scripts/install",
