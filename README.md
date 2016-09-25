@@ -105,4 +105,6 @@ npm run build
 ## Related
  - [node-webcrypto-p11](https://github.com/PeculiarVentures/node-webcrypto-p11)
  - [node-webcrypto-ossl](https://github.com/PeculiarVentures/node-webcrypto-ossl)
+ - [pv-webcrypto-tests](https://peculiarventures.github.io/pv-webcrypto-tests)
+ - [webcrypto-core](https://peculiarventures.github.io/webcrypto-core)
  - [WebCrypto Examples](https://github.com/diafygi/webcrypto-examples)
