@@ -1,4 +1,6 @@
 # webcrypto-liner
+[![license](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/PeculiarVentures/webcrypto-liner/master/LICENSE)
+[![npm version](https://badge.fury.io/js/webcrypto-liner.svg)](https://badge.fury.io/js/webcrypto-liner)
 
 A polyfill for WebCrypto that "smooths out" the rough-edges in existing User Agent implementations.
 
@@ -16,14 +18,14 @@ The libraries `webcrypto-liner` relies on include:
 |------------------------------------------------------------|----------------------------------------------------------------------------------------|--------|-------------|
 | [asmcrypto.js](https://github.com/vibornoff/asmcrypto.js/) | A [performant](https://medium.com/@encryb/comparing-performance-of-javascript-cryptography-libraries-42fb138116f3) JavaScript implementation of popular cryptographic utilities with performance in mind. | 131&#160;KB | Yes |
 | [elliptic](https://github.com/indutny/elliptic)            | Fast Elliptic Curve Cryptography in plain javascript                                   | 130&#160;KB | Yes  |
-| [webcrypto-core](https://github.com/PeculiarVentures/webcrypto-core)            | A input validation layer for WebCrypto polyfills                 | 25&#160;KB | No  |
-
+| [webcrypto-core](https://github.com/PeculiarVentures/webcrypto-core)            | A input validation layer for WebCrypto polyfills <sub>1</sub>    | 25&#160;KB | No  |
+<sub>1 This library is compiled into webcrypto-liner.</sub>
 
 `webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example, it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
 
 We have done no security review or take a position on the security of these third-party libraries. **YOU HAVE BEEN WARNED**.
 
-To keep `webcrypto-liner` as small as possible (right now it is ~11kb without dependencies). Additionally, it was designed to be modular, so if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
+To keep `webcrypto-liner` as small as possible (right now it is ~11kb without dependencies) it was designed to be modular, so if you do not need ECC support, do not include `elliptic` as a dependency and it will not be loaded.
 
 If you do not load any of the dependencies that provide cryptographic implementations `webcrypto-liner` will work as an interoperability layer, very similar to [webcrypto-shim](https://github.com/vibornoff/webcrypto-shim).
 
@@ -32,7 +34,7 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | Capability                | Details                                       |
 |---------------------------|-----------------------------------------------|
 | Encryption/Decryption     | RSA-OAEP, AES-CBC, and AES-GCM                |
-| Sign/Verify               | RSA-PSS, RSA-PKCSv1_5, and ECDSA              |
+| Sign/Verify               | RSA-PSS, ~~RSASSA-PKCS1-v1_5,~~ and ECDSA              |
 | Hash                      | SHA-1, SHA-224, SHA-256, and SHA-384          |
 | Derive Key/Bits           | ECDH                                          |
 | Keywrap                   | AES-GCM, AES-CBC                              |
@@ -40,6 +42,7 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | RSA Key Lengths           | 1024, 2048, 3072, and 4096                    |
 | AES Key Lengths           | 128, 192 and 256                              |
 
+You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](https://peculiarventures.github.io/pv-webcrypto-tests/).
 
 ## Using
 
@@ -77,7 +80,7 @@ If you do not load any of the dependencies that provide cryptographic implementa
 
 
 ## Important
-This library is not ready for consumption, we have more work to do, including samples, amongst other things.
+This library idoes not yet support any RSA related operations and we do not as of yet have regression tests for it. With that said it works, and you could start working with the library if you were so inclined.
 
 ## Dependencies
 typescript
@@ -85,18 +88,24 @@ typescript
 npm install typescript --global
 ```
 
-## Compilation 
-Compile the source code using the following command:
+## Installation
+Install dependencies and compile the project using the following commands:
+
 ```
-tsc
-```
-Compile the source code with declaration using the next command:
-```
-tsc --declaration
+npm install
+npm run build
 ```
 
 ## FAQ
 - **Do I need to use a promise library?** - No, not if your browser supports promises.
 - **Do I need to include asmcrypto.js?** No, not unless you want to use the algorithms it exposes.
 - **Do I need to include elliptic.js?** No, not unless you want to use the algorithms it exposes.
-- **How big is the total package?** Right now, if you include all optional dependencies (minfied) the package is ~300 KB, if you include only ECC or only RSA support that is lowered to about 180 KB. Additionally you will see GZIP compression provide about 30% savings above and beyond that. If you use `webcrypto-liner` as just an interopability shim and do not use any of the third-party libraries it will be under 40 KB in size.
+- **How big is the total package?** Right now, if you include all optional dependencies (minfied) the package is ~300 KB, if you include only ECC or only RSA support that is lowered to about 180 KB. Additionally you will see GZIP compression provide about 30% savings above and beyond that. If you use `webcrypto-liner` as just an interopability shim and do not use any of the optional third-party libraries it will be under 44 KB in size.
+- **Will it work in Node?** No. It is compiles to pure Javascript but uses the `window` object so it wont work in Node at this time. With some minor changes it should also be able to work in Node also but you really should be using [node-webcrypto-ossl](https://github.com/PeculiarVentures/node-webcrypto-ossl) on Node instead.
+
+## Related
+ - [node-webcrypto-p11](https://github.com/PeculiarVentures/node-webcrypto-p11)
+ - [node-webcrypto-ossl](https://github.com/PeculiarVentures/node-webcrypto-ossl)
+ - [pv-webcrypto-tests](https://peculiarventures.github.io/pv-webcrypto-tests)
+ - [webcrypto-core](https://peculiarventures.github.io/webcrypto-core)
+ - [WebCrypto Examples](https://github.com/diafygi/webcrypto-examples)
