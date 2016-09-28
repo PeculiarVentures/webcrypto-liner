@@ -14,7 +14,7 @@ namespace webcrypto.liner.rsa {
             return supported.filter(item1 => !!given.filter(item2 => item1 === item2).length);
         }
 
-        static generateKey(alg: webcrypto.rsa.RsaKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKeyPair> {
+        static generateKey(alg: RsaKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKeyPair> {
             return new Promise<CryptoKeyPair>(resolve => {
                 this.checkModule();
 
@@ -39,7 +39,6 @@ namespace webcrypto.liner.rsa {
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name);
                 }
-
                 resolve({ privateKey, publicKey });
             });
         }
@@ -49,10 +48,10 @@ namespace webcrypto.liner.rsa {
 
                 switch (algorithm.name.toLowerCase()) {
                     case AlgorithmNames.RsaPSS.toLowerCase():
-                        let keyAlg: webcrypto.rsa.RsaHashedKeyGenParams = key.algorithm as any;
-                        let _alg: webcrypto.rsa.RsaPssParams = algorithm as any;
+                        let keyAlg: RsaHashedKeyGenParams = key.algorithm as any;
+                        let _alg: RsaPssParams = algorithm as any;
                         let sign: typeof asmCrypto.RSA_PSS_SHA1.sign;
-                        switch (keyAlg.hash.name.toUpperCase()) {
+                        switch ((keyAlg.hash as Algorithm).name.toUpperCase()) {
                             case AlgorithmNames.Sha1:
                                 sign = asmCrypto.RSA_PSS_SHA1.sign;
                                 break;
@@ -75,10 +74,10 @@ namespace webcrypto.liner.rsa {
 
                 switch (algorithm.name.toLowerCase()) {
                     case AlgorithmNames.RsaPSS.toLowerCase():
-                        let keyAlg: webcrypto.rsa.RsaHashedKeyGenParams = key.algorithm as any;
-                        let _alg: webcrypto.rsa.RsaPssParams = algorithm as any;
+                        let keyAlg: RsaHashedKeyGenParams = key.algorithm as any;
+                        let _alg: RsaPssParams = algorithm as any;
                         let verify: typeof asmCrypto.RSA_PSS_SHA1.verify;
-                        switch (keyAlg.hash.name.toUpperCase()) {
+                        switch ((keyAlg.hash as Algorithm).name.toUpperCase()) {
                             case AlgorithmNames.Sha1:
                                 verify = asmCrypto.RSA_PSS_SHA1.verify;
                                 break;
@@ -101,10 +100,10 @@ namespace webcrypto.liner.rsa {
 
                 switch (algorithm.name.toLowerCase()) {
                     case AlgorithmNames.RsaOAEP.toLowerCase():
-                        let keyAlg: webcrypto.rsa.RsaHashedKeyGenParams = key.algorithm as any;
-                        let _alg: webcrypto.rsa.RsaOaepParams = algorithm as any;
+                        let keyAlg: RsaHashedKeyGenParams = key.algorithm as any;
+                        let _alg: RsaOaepParams = algorithm as any;
                         let encrypt: typeof asmCrypto.RSA_OAEP_SHA1.encrypt;
-                        switch (keyAlg.hash.name.toUpperCase()) {
+                        switch ((keyAlg.hash as Algorithm).name.toUpperCase()) {
                             case AlgorithmNames.Sha1:
                                 encrypt = asmCrypto.RSA_OAEP_SHA1.encrypt;
                                 break;
@@ -112,7 +111,7 @@ namespace webcrypto.liner.rsa {
                                 encrypt = asmCrypto.RSA_OAEP_SHA256.encrypt;
                                 break;
                             default:
-                                throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
+                                throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, `${keyAlg.name} ${(keyAlg.hash as Algorithm).name}`);
                         }
                         resolve(encrypt(data, key.key, _alg.label));
                         break;
@@ -127,10 +126,10 @@ namespace webcrypto.liner.rsa {
 
                 switch (algorithm.name.toLowerCase()) {
                     case AlgorithmNames.RsaOAEP.toLowerCase():
-                        let keyAlg: webcrypto.rsa.RsaHashedKeyGenParams = key.algorithm as any;
-                        let _alg: webcrypto.rsa.RsaOaepParams = algorithm as any;
+                        let keyAlg: RsaHashedKeyGenParams = key.algorithm as any;
+                        let _alg: RsaOaepParams = algorithm as any;
                         let decrypt: typeof asmCrypto.RSA_OAEP_SHA1.decrypt;
-                        switch (keyAlg.hash.name.toUpperCase()) {
+                        switch ((keyAlg.hash as Algorithm).name.toUpperCase()) {
                             case AlgorithmNames.Sha1:
                                 decrypt = asmCrypto.RSA_OAEP_SHA1.decrypt;
                                 break;
@@ -138,7 +137,7 @@ namespace webcrypto.liner.rsa {
                                 decrypt = asmCrypto.RSA_OAEP_SHA256.decrypt;
                                 break;
                             default:
-                                throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
+                                throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, `${keyAlg.name} ${(keyAlg.hash as Algorithm).name}`);
                         }
                         resolve(decrypt(data, key.key, _alg.label));
                         break;
@@ -182,26 +181,75 @@ namespace webcrypto.liner.rsa {
             });
         }
 
-        static exportKey(format: string, key: RsaCryptoKey): PromiseLike<webcrypto.aes.AesJWK | ArrayBuffer> {
+        static exportKey(format: string, key: RsaCryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
             return new Promise((resolve, reject) => {
-                throw new LinerError(LinerError.NOT_SUPPORTED);
+                if (format.toLowerCase() === "jwk") {
+                    const jwk: JsonWebKey = {
+                        kty: "RSA",
+                        ext: true,
+                        key_ops: key.usages
+                    };
+                    const hash = (key.algorithm as RsaHashedKeyAlgorithm).hash as Algorithm;
+                    const hashSize = /(\d)+/.exec(hash.name) ![1];
+                    switch (key.algorithm.name!.toUpperCase()) {
+                        case AlgorithmNames.RsaOAEP.toUpperCase():
+                            jwk.alg = `RSA-OAEP-${hashSize}`;
+                            break;
+                        case AlgorithmNames.RsaPSS.toUpperCase():
+                            jwk.alg = `PS${hashSize}`;
+                            break;
+                        case AlgorithmNames.RsaOAEP.toUpperCase():
+                            jwk.alg = `RS${hashSize}`;
+                            break;
+                        default:
+                            throw new AlgorithmError(AlgorithmError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
+                    }
+                    jwk.n = Base64Url.encode(key.key[0]);
+                    jwk.e = Base64Url.encode(key.key[1]);
+                    if (key.type === "private") {
+                        jwk.d = Base64Url.encode(key.key[2]);
+                        jwk.p = Base64Url.encode(key.key[3]);
+                        jwk.q = Base64Url.encode(key.key[4]);
+                        jwk.dp = Base64Url.encode(key.key[5]);
+                        jwk.dq = Base64Url.encode(key.key[6]);
+                        jwk.qi = Base64Url.encode(key.key[7]);
+                    }
+                    console.log("Export:", jwk);
+                    resolve(jwk);
+                }
+                else {
+                    throw new LinerError(LinerError.NOT_SUPPORTED);
+                }
             });
         }
 
-        static importKey(format: string, keyData: webcrypto.aes.AesJWK | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             return new Promise((resolve, reject) => {
                 let raw: Uint8Array;
-                if (format.toLowerCase() === "jwk") {
-                    const jwk = keyData as webcrypto.aes.AesJWK;
-                    raw = Base64Url.decode(jwk.k);
-                }
-                else
-                    raw = new Uint8Array(keyData as Uint8Array);
+                let jwk: JsonWebKey;
                 const key = new CryptoKey();
                 key.algorithm = algorithm;
-                key.type = "secret";
                 key.usages = keyUsages;
-                key.key = raw;
+                key.key = [];
+                if (format.toLowerCase() === "jwk") {
+                    jwk = keyData as JsonWebKey;
+                    key.key[0] = Base64Url.decode(jwk.n!);
+                    key.key[1] = Base64Url.decode(jwk.e!);
+                    if (jwk.d) {
+                        key.type = "private";
+                        key.key[2] = Base64Url.decode(jwk.d!);
+                        key.key[3] = Base64Url.decode(jwk.p!);
+                        key.key[4] = Base64Url.decode(jwk.q!);
+                        key.key[5] = Base64Url.decode(jwk.dp!);
+                        key.key[6] = Base64Url.decode(jwk.dq!);
+                        key.key[7] = Base64Url.decode(jwk.qi!);
+                    }
+                    else
+                        key.type = "public";
+                    resolve(key);
+                }
+                else
+                    throw new LinerError(LinerError.NOT_SUPPORTED);
                 resolve(key);
             });
         }

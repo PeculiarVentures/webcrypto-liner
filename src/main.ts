@@ -1,15 +1,7 @@
-type NativeCrypto = Crypto;
-type NativeSubtleCrypto = SubtleCrypto;
-
 namespace webcrypto.liner {
 
-
     let _w: any = window;
-
-    export const nativeCrypto: NativeCrypto = _w.crypto || _w.msCrypto;
-    export const nativeSubtle = nativeCrypto.subtle || (nativeCrypto as any).webkitSubtle;
     export const browser = BrowserInfo();
-
 
     if (_w.msCrypto) {
         if (!_w.Promise)
@@ -23,11 +15,11 @@ namespace webcrypto.liner {
                     op.oncomplete = (e: any) => {
                         console.log("Complited");
                         resolve(e.target.result);
-                    }
+                    };
                     op.onerror = (e: any) => {
                         console.log("Error");
                         reject(`Error on running '${name}' function`);
-                    }
+                    };
                 });
             };
         }

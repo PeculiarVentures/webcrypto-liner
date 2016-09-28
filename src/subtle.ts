@@ -2,7 +2,24 @@ namespace webcrypto.liner {
 
     declare type IE = any;
 
-    export class CryptoSubtle extends Subtle {
+    function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<CryptoKey> {
+        let promise = Promise.resolve(key);
+        if (!key.key)
+            if (!key.extractable) {
+                throw new LinerError("'key' is Native CryptoKey. It can't be converted to JS CryptoKey");
+            }
+            else {
+                promise = promise.then(() =>
+                    crypto.subtle.exportKey("jwk", key)
+                )
+                    .then((jwk: any) =>
+                        subtle.importKey("jwk", jwk, key.algorithm as Algorithm, true, key.usages)
+                    );
+            }
+        return promise;
+    }
+
+    export class SubtleCrypto extends webcrypto.SubtleCrypto {
 
         generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey | CryptoKeyPair> {
             const args = arguments;
@@ -31,7 +48,7 @@ namespace webcrypto.liner {
                         }
                         return new Promise(resolve => resolve(keys));
                     }
-                    let Class: typeof BaseCrypto = null;
+                    let Class: typeof BaseCrypto;
                     switch (_alg.name.toLowerCase()) {
                         case AlgorithmNames.AesCBC.toLowerCase():
                         case AlgorithmNames.AesGCM.toLowerCase():
@@ -52,7 +69,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        digest(algorithm: AlgorithmIdentifier, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        digest(algorithm: AlgorithmIdentifier, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
@@ -77,13 +94,13 @@ namespace webcrypto.liner {
                 });
         }
 
-        sign(algorithm: AlgorithmIdentifier, key: CryptoKey, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        sign(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
             return super.sign.apply(this, args)
                 .then((d: Uint8Array) => {
-                    _alg = PrepareAlgorithm(algorithm);
+                    _alg = PrepareAlgorithm(algorithm as string);
                     _data = PrepareData(data, "data");
 
                     try {
@@ -109,18 +126,19 @@ namespace webcrypto.liner {
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "sign");
                     }
-                    return Class.sign(_alg, key, _data);
+                    return PrepareKey(key, Class)
+                        .then(key => Class.sign(_alg, key, _data));
                 });
         }
 
-        verify(algorithm: AlgorithmIdentifier, key: CryptoKey, signature: CryptoBuffer, data: CryptoBuffer): PromiseLike<boolean> {
+        verify(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, key: CryptoKey, signature: BufferSource, data: BufferSource): PromiseLike<boolean> {
             const args = arguments;
             let _alg: Algorithm;
             let _signature: Uint8Array;
             let _data: Uint8Array;
             return super.verify.apply(this, args)
                 .then((d: boolean) => {
-                    _alg = PrepareAlgorithm(algorithm);
+                    _alg = PrepareAlgorithm(algorithm as string);
                     _signature = PrepareData(signature, "data");
                     _data = PrepareData(data, "data");
 
@@ -147,7 +165,8 @@ namespace webcrypto.liner {
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "sign");
                     }
-                    return Class.verify(_alg, key, _signature, _data);
+                    return PrepareKey(key, Class)
+                        .then(key => Class.verify(_alg, key, _signature, _data));
                 });
         }
 
@@ -217,7 +236,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        encrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        encrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
@@ -250,10 +269,11 @@ namespace webcrypto.liner {
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
                     }
-                    return Class.encrypt(_alg, key, _data);
+                    return PrepareKey(key, Class)
+                        .then(key => Class.encrypt(_alg, key, _data));
                 });
         }
-        decrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: CryptoBuffer): PromiseLike<ArrayBuffer> {
+        decrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: Uint8Array;
@@ -286,7 +306,8 @@ namespace webcrypto.liner {
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
                     }
-                    return Class.decrypt(_alg, key, _data);
+                    return PrepareKey(key, Class)
+                        .then(key => Class.decrypt(_alg, key, _data));
                 });
         }
 
@@ -315,6 +336,9 @@ namespace webcrypto.liner {
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = aes.AesCrypto;
                             break;
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = rsa.RsaCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "wrapKey");
                     }
@@ -322,7 +346,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        unwrapKey(format: string, wrappedKey: CryptoBuffer, unwrappingKey: CryptoKey, unwrapAlgorithm: AlgorithmIdentifier, unwrappedKeyAlgorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        unwrapKey(format: string, wrappedKey: BufferSource, unwrappingKey: CryptoKey, unwrapAlgorithm: AlgorithmIdentifier, unwrappedKeyAlgorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             const args = arguments;
             let _alg: Algorithm;
             let _algKey: Algorithm;
@@ -351,6 +375,9 @@ namespace webcrypto.liner {
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = aes.AesCrypto;
                             break;
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = rsa.RsaCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "unwrapKey");
                     }
@@ -358,7 +385,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        exportKey(format: string, key: CryptoKey): PromiseLike<JWK | ArrayBuffer> {
+        exportKey(format: string, key: CryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
             const args = arguments;
             return super.exportKey.apply(this, args)
                 .then(() => {
@@ -374,9 +401,11 @@ namespace webcrypto.liner {
                     }
                 })
                 .then((msg: ArrayBuffer) => {
-                    if (msg) return new Promise(resolve => resolve(msg));
+                    if (msg) return Promise.resolve(msg);
+                    if (!key.key)
+                        throw new LinerError("Cannot export native CryptoKey from JS implementation");
                     let Class: typeof BaseCrypto;
-                    switch (key.algorithm.name.toLowerCase()) {
+                    switch (key.algorithm.name!.toLowerCase()) {
                         case AlgorithmNames.AesCBC.toLowerCase():
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = aes.AesCrypto;
@@ -385,6 +414,10 @@ namespace webcrypto.liner {
                         case AlgorithmNames.EcDSA.toLowerCase():
                             Class = ec.EcCrypto;
                             break;
+                        case AlgorithmNames.RsaPSS.toLowerCase():
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = rsa.RsaCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "exportKey");
                     }
@@ -392,7 +425,7 @@ namespace webcrypto.liner {
                 });
         }
 
-        importKey(format: string, keyData: JWK | CryptoBuffer, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+        importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
             const args = arguments;
             let _alg: Algorithm;
             let _data: any;
@@ -425,6 +458,10 @@ namespace webcrypto.liner {
                         case AlgorithmNames.EcDH.toLowerCase():
                         case AlgorithmNames.EcDSA.toLowerCase():
                             Class = ec.EcCrypto;
+                            break;
+                        case AlgorithmNames.RsaPSS.toLowerCase():
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = rsa.RsaCrypto;
                             break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "importKey");

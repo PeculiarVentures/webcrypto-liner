@@ -9,8 +9,10 @@ namespace webcrypto.liner {
 
     export class Crypto {
 
-        subtle = new CryptoSubtle();
-        getRandomValues = nativeCrypto.getRandomValues;
+        subtle = new SubtleCrypto();
+        getRandomValues(array: ArrayBufferView): ArrayBufferView {
+            return nativeCrypto.getRandomValues(array);
+        }
 
     }
 

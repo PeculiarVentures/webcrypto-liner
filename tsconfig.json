@@ -1,12 +1,16 @@
 {
     "compilerOptions": {
         "module": "amd",
-        "target": "es5",
+        "lib": [
+            "es5", "dom", "es2015.promise"
+        ],
         "noImplicitAny": true,
+        "strictNullChecks": true,
         "sourceMap": false,
         "outFile": "build/webcrypto-liner.js"
     },
     "files": [
+        "src/init.ts",
         "typings/webcrypto-core/webcrypto-core.d.ts",
         "src/typings/asmcrypto.d.ts",
         "src/declare.d.ts",
