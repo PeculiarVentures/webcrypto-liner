@@ -79,9 +79,6 @@ You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](http
 ```
 
 
-## Important
-This library idoes not yet support any RSA related operations and we do not as of yet have regression tests for it. With that said it works, and you could start working with the library if you were so inclined.
-
 ## Dependencies
 typescript
 ```
