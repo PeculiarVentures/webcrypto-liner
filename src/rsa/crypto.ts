@@ -61,7 +61,7 @@ namespace webcrypto.liner.rsa {
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                         }
-                        resolve(sign(data, key.key, _alg.saltLength / 8).buffer);
+                        resolve(sign(data, key.key, _alg.saltLength).buffer);
                         break;
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, algorithm.name);
@@ -87,7 +87,7 @@ namespace webcrypto.liner.rsa {
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                         }
-                        resolve(verify(signature, data, key.key, _alg.saltLength / 8));
+                        resolve(verify(signature, data, key.key, _alg.saltLength));
                         break;
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, algorithm.name);
@@ -198,14 +198,14 @@ namespace webcrypto.liner.rsa {
                         case AlgorithmNames.RsaPSS.toUpperCase():
                             jwk.alg = `PS${hashSize}`;
                             break;
-                        case AlgorithmNames.RsaOAEP.toUpperCase():
+                        case AlgorithmNames.RsaSSA.toUpperCase():
                             jwk.alg = `RS${hashSize}`;
                             break;
                         default:
                             throw new AlgorithmError(AlgorithmError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                     }
                     jwk.n = Base64Url.encode(key.key[0]);
-                    jwk.e = Base64Url.encode(key.key[1]);
+                    jwk.e = Base64Url.encode(key.key[1][3] === 3 ? new Uint8Array([3]) : new Uint8Array([1, 0, 1]));
                     if (key.type === "private") {
                         jwk.d = Base64Url.encode(key.key[2]);
                         jwk.p = Base64Url.encode(key.key[3]);
@@ -214,7 +214,6 @@ namespace webcrypto.liner.rsa {
                         jwk.dq = Base64Url.encode(key.key[6]);
                         jwk.qi = Base64Url.encode(key.key[7]);
                     }
-                    console.log("Export:", jwk);
                     resolve(jwk);
                 }
                 else {
@@ -234,7 +233,7 @@ namespace webcrypto.liner.rsa {
                 if (format.toLowerCase() === "jwk") {
                     jwk = keyData as JsonWebKey;
                     key.key[0] = Base64Url.decode(jwk.n!);
-                    key.key[1] = Base64Url.decode(jwk.e!);
+                    key.key[1] = Base64Url.decode(jwk.e!)[0] === 3 ? new Uint8Array([0, 0, 0, 3]) : new Uint8Array([0, 1, 0, 1]);
                     if (jwk.d) {
                         key.type = "private";
                         key.key[2] = Base64Url.decode(jwk.d!);
