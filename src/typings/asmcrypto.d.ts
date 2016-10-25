@@ -40,3 +40,7 @@ declare namespace asmCrypto {
     class RSA_PSS_SHA256 extends RSA_PSS_SHA1 {
     }
 }
+
+declare module "asmcrypto.js" {
+    export = asmCrypto;
+}

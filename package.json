@@ -4,8 +4,7 @@
   "description": "A WebCrypto pollyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "index.js",
   "scripts": {
-    "build": "node scripts/copy && tsc && npm run minify && node scripts/install",
-    "minify": "uglifyjs build/webcrypto-liner.js -o build/webcrypto-liner.min.js -m -c",
+    "build": "tsc",
     "prepublish": "npm run build"
   },
   "repository": {
@@ -17,8 +16,8 @@
     "webcrypto-core": "latest",
     "asmcrypto.js": "*",
     "elliptic": "*",
-    "uglify-js": "*",
-    "typescript": "*"
+    "typescript": "*",
+    "mocha": "*"
   },
   "author": "PeculiarVentures",
   "license": "MIT"
