@@ -43,6 +43,7 @@ export class AesCrypto extends BaseCrypto {
                     break;
                 case AlgorithmNames.AesGCM:
                     let algGCM = algorithm as AesGcmParams;
+                    algGCM.tagLength = algGCM.tagLength || 128;
                     res = asmCrypto.AES_GCM.encrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
                     break;
                 default:
@@ -63,6 +64,7 @@ export class AesCrypto extends BaseCrypto {
                     break;
                 case AlgorithmNames.AesGCM:
                     let algGCM = algorithm as AesGcmParams;
+                    algGCM.tagLength = algGCM.tagLength || 128;
                     res = asmCrypto.AES_GCM.decrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
                     break;
                 default:

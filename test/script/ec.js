@@ -36,6 +36,26 @@ describe("EC crypto", () => {
             .catch(done);
     });
 
+    context("generateKey", () => {
+        keys.forEach(key =>
+            it(`${key.algorithm.name} ${key.algorithm.namedCurve}`, done =>
+                crypto.subtle.generateKey(key.algorithm, true, key.usages)
+                    .then(keyPair =>
+                        crypto.subtle.exportKey("jwk", keyPair.privateKey)
+                    )
+                    .then(jwk =>
+                        nativeSubtle.importKey("jwk", jwk, key.algorithm, true, key.usages.filter(usage => usage !== "verify"))
+                    )
+                    .then(k => {
+                        assert(!!k, true);
+                        done();
+                    })
+                    .catch(done)
+
+            )
+        )
+    });
+
     context("import", () =>
         keys.forEach(key =>
             ["privateKey", "publicKey"].forEach(type =>
@@ -104,7 +124,7 @@ describe("EC crypto", () => {
     context("deriveBits", () =>
         keys.filter(key => key.algorithm.name === "ECDH").forEach(key =>
             [128, 192, 256].forEach(len =>
-                it(`${key.algorithm.name} ${key.algorithm.namedCurve}`, done => {
+                it(`${key.algorithm.name} ${key.algorithm.namedCurve} length:${len}`, done => {
                     let subtle = {
                         native: nativeSubtle,
                         js: crypto.subtle
