@@ -18,19 +18,40 @@ function b2a(buffer: ArrayBuffer | ArrayBufferView) {
     return res;
 }
 
-function hex2buffer(hexString: string) {
+function hex2buffer(hexString: string, padded?: boolean) {
+    if (hexString.length % 2) {
+        hexString = "0" + hexString;
+    }
     let res = new Uint8Array(hexString.length / 2);
-    for (let i = 0; i < hexString.length; i++)
-        res[i / 2] = parseInt(hexString.slice(i, ++i), 16);
+    for (let i = 0; i < hexString.length; i++) {
+        const c = hexString.slice(i, ++i + 1);
+        res[(i - 1) / 2] = parseInt(c, 16);
+    }
+    // BN padding
+    if (padded) {
+        let len = res.length;
+        len = len > 32 ? len > 48 ? 66 : 48 : 32;
+        if (res.length < len)
+            res = concat(new Uint8Array(len - res.length), res);
+    }
     return res;
 }
 
-function buffer2hex(buffer: Uint8Array): string {
+function buffer2hex(buffer: Uint8Array, padded?: boolean): string {
     let res = "";
     for (let i = 0; i < buffer.length; i++) {
         const char = buffer[i].toString(16);
-        res += char.length % 2 ? char : "0" + char;
+        res += char.length % 2 ? "0" + char : char;
     }
+
+    // BN padding
+    if (padded) {
+        let len = buffer.length;
+        len = len > 32 ? len > 48 ? 66 : 48 : 32;
+        if ((res.length / 2) < len)
+            res = new Array(len * 2 - res.length + 1).join("0") + res;
+    }
+
     return res;
 }
 
@@ -75,18 +96,29 @@ export class EcCrypto extends BaseCrypto {
             // get digest
             (self.crypto.subtle.digest(_alg.hash, data) as Promise<ArrayBuffer>)
                 .then(hash => {
-                    const array = b2a(data);
+                    const array = b2a(hash);
                     const signature = key.key.sign(array);
-                    resolve(new Uint8Array(signature.toDER()).buffer);
-                    return Promise.resolve(undefined);
+                    const hexSignature = buffer2hex(signature.r.toArray(), true) + buffer2hex(signature.s.toArray(), true);
+                    resolve(hex2buffer(hexSignature).buffer);
                 })
                 .catch(reject);
         });
     }
 
     static verify(algorithm: Algorithm, key: CryptoKey, signature: Uint8Array, data: Uint8Array): PromiseLike<boolean> {
-        return new Promise(resolve => {
-            resolve(key.key.verify(data, signature));
+        return new Promise((resolve, reject) => {
+            const _alg: EcdsaParams = algorithm as any;
+            const sig = {
+                r: signature.slice(0, signature.byteLength / 2),
+                s: signature.slice(signature.byteLength / 2)
+            };
+            // get digest
+            (self.crypto.subtle.digest(_alg.hash, data) as Promise<ArrayBuffer>)
+                .then(hash => {
+                    const array = b2a(hash);
+                    resolve(key.key.verify(array, sig));
+                })
+                .catch(reject);
         });
     }
 
@@ -104,7 +136,13 @@ export class EcCrypto extends BaseCrypto {
         return new Promise((resolve, reject) => {
             let promise = (Promise as any).resolve(null);
             const shared = baseKey.key.derive((algorithm.public as CryptoKey).key.getPublic());
-            const buf = new Uint8Array(shared.toArray().slice(0, length / 8)).buffer;
+            let array = new Uint8Array(shared.toArray());
+            // Padding
+            let len = array.length;
+            len = len > 32 ? len > 48 ? 66 : 48 : 32;
+            if (array.length < len)
+                array = concat(new Uint8Array(len - array.length), array);
+            const buf = array.slice(0, length / 8).buffer;
             resolve(buf);
         });
     }
@@ -118,12 +156,11 @@ export class EcCrypto extends BaseCrypto {
                 const hexY = hexPub.slice(hexPub.length / 2, hexPub.length);
                 if (key.type === "public") {
                     // public
-
                     let jwk: JsonWebKey = {
                         crv: (key.algorithm as EcKeyGenParams).namedCurve,
                         ext: key.extractable,
-                        x: Base64Url.encode(hex2buffer(hexX)),
-                        y: Base64Url.encode(hex2buffer(hexY)),
+                        x: Base64Url.encode(hex2buffer(hexX, true)),
+                        y: Base64Url.encode(hex2buffer(hexY, true)),
                         key_ops: key.usages,
                         kty: "EC"
                     };
@@ -134,9 +171,9 @@ export class EcCrypto extends BaseCrypto {
                     let jwk: JsonWebKey = {
                         crv: (key.algorithm as EcKeyGenParams).namedCurve,
                         ext: key.extractable,
-                        d: Base64Url.encode(hex2buffer(ecKey.getPrivate("hex"))),
-                        x: Base64Url.encode(hex2buffer(hexX)),
-                        y: Base64Url.encode(hex2buffer(hexY)),
+                        d: Base64Url.encode(hex2buffer(ecKey.getPrivate("hex"), true)),
+                        x: Base64Url.encode(hex2buffer(hexX, true)),
+                        y: Base64Url.encode(hex2buffer(hexY, true)),
                         key_ops: key.usages,
                         kty: "EC"
                     };
@@ -162,12 +199,14 @@ export class EcCrypto extends BaseCrypto {
                 }
                 else {
                     // Public key
-                    key.key = ecKey.keyFromPublic(
-                        concat(
-                            new Uint8Array([4]),
-                            Base64Url.decode((keyData as JsonWebKey).x!),
-                            Base64Url.decode((keyData as JsonWebKey).y!)
-                        ));
+                    let bufferPubKey = concat(
+                        new Uint8Array([4]),
+                        Base64Url.decode((keyData as JsonWebKey).x!),
+                        Base64Url.decode((keyData as JsonWebKey).y!)
+                    );
+                    const hexPubKey = buffer2hex(bufferPubKey);
+
+                    key.key = ecKey.keyFromPublic(hexPubKey, "hex");
                     key.type = "public";
                 }
             }

@@ -7,8 +7,8 @@ declare namespace EllipticJS {
     }
 
     class EllipticKeyPair {
-        getPrivate(enc: string): any;
-        getPublic(enc: string): any;
+        getPrivate(enc?: string): any;
+        getPublic(enc?: string): any;
     }
 
     class EllipticModule {

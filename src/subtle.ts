@@ -1,10 +1,15 @@
+// Core
 import { BaseCrypto, AlgorithmNames, AlgorithmError, Base64Url } from "webcrypto-core";
 import * as core from "webcrypto-core";
 import { PrepareAlgorithm, PrepareData } from "webcrypto-core";
+
+// Base
 import { nativeSubtle } from "./init";
 import { LinerError } from "./crypto";
 import { CryptoKey, CryptoKeyPair } from "./key";
 import { string2buffer, buffer2string, concat } from "./helper";
+
+// Crypto
 import { AesCrypto } from "./aes/crypto";
 import { ShaCrypto } from "./sha/crypto";
 import { RsaCrypto } from "./rsa/crypto";

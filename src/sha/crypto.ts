@@ -2,7 +2,7 @@ import { BaseCrypto, AlgorithmNames, AlgorithmError, Base64Url } from "webcrypto
 import { LinerError } from "../crypto";
 import { CryptoKey, CryptoKeyPair } from "../key";
 import { string2buffer, buffer2string, concat } from "../helper";
-// import * as asmCrypto from "asmcrypto.js";
+import * as asmCrypto from "asmcrypto.js";
 
 export class ShaCrypto extends BaseCrypto {
     static digest(alg: Algorithm, message: Uint8Array) {

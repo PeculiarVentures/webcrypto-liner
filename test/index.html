@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>WebCrypto Tests</title>
+	<link href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" rel="stylesheet" />
+</head>
+
+<body>
+	<div id="mocha">
+		<p><a href=".">Index</a></p>
+	</div>
+	<div id="messages"></div>
+	<div id="fixtures"></div>
+	<script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
+	<script src="vendor/assert.js"></script>
+	<script>
+		// Chrome, Mozilla
+		var nativeSubtle = crypto.subtle;
+		delete crypto.__proto__.subtle;
+		crypto.subtle = {};
+	</script>
+	<script src="../index.js"></script>
+	<script>mocha.setup('bdd')</script>
+	<script src="script/ec.js"></script>
+	<script>mocha.run();</script>
+</body>
+
+</html>

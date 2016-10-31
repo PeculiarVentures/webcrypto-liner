@@ -4,7 +4,7 @@
   "description": "A WebCrypto pollyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "webpack",
     "prepublish": "npm run build"
   },
   "repository": {
@@ -13,11 +13,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "webcrypto-core": "latest",
     "asmcrypto.js": "*",
     "elliptic": "*",
-    "typescript": "*",
-    "mocha": "*"
+    "ts-loader": "^0.9.5",
+    "typescript": "^2.0.6",
+    "webcrypto-core": "latest"
   },
   "author": "PeculiarVentures",
   "license": "MIT"

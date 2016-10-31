@@ -1,5 +1,6 @@
 import { BrowserInfo } from "./helper";
 import { LinerError, Crypto } from "./crypto";
+import { nativeSubtle } from "./init";
 
 let _w: any = self;
 export const browser = BrowserInfo();
