@@ -8,6 +8,18 @@ interface RsaCryptoKey extends CryptoKey {
     key: asmCrypto.RsaKey;
 }
 
+function removeLeadingZero(buf: Uint8Array) {
+    let first = true;
+    return buf.filter(v => {
+        if (first && v === 0)
+            return false;
+        else {
+            first = false;
+            return true;
+        }
+    });
+}
+
 export class RsaCrypto extends BaseCrypto {
     protected static checkModule() {
         if (typeof asmCrypto === "undefined")
@@ -194,10 +206,10 @@ export class RsaCrypto extends BaseCrypto {
                     key_ops: key.usages
                 };
                 const hash = (key.algorithm as RsaHashedKeyAlgorithm).hash as Algorithm;
-                const hashSize = /(\d)+/.exec(hash.name) ![1];
+                const hashSize = /(\d+)/.exec(hash.name) ![1];
                 switch (key.algorithm.name!.toUpperCase()) {
                     case AlgorithmNames.RsaOAEP.toUpperCase():
-                        jwk.alg = `RSA-OAEP-${hashSize}`;
+                        jwk.alg = `RSA-OAEP${hashSize === "1" ? "" : `-${hashSize}`}`;
                         break;
                     case AlgorithmNames.RsaPSS.toUpperCase():
                         jwk.alg = `PS${hashSize}`;
@@ -208,15 +220,15 @@ export class RsaCrypto extends BaseCrypto {
                     default:
                         throw new AlgorithmError(AlgorithmError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                 }
-                jwk.n = Base64Url.encode(key.key[0]);
-                jwk.e = Base64Url.encode(key.key[1][3] === 3 ? new Uint8Array([3]) : new Uint8Array([1, 0, 1]));
+                jwk.n = Base64Url.encode(removeLeadingZero(key.key[0]));
+                jwk.e = Base64Url.encode(removeLeadingZero(key.key[1]));
                 if (key.type === "private") {
-                    jwk.d = Base64Url.encode(key.key[2]);
-                    jwk.p = Base64Url.encode(key.key[3]);
-                    jwk.q = Base64Url.encode(key.key[4]);
-                    jwk.dp = Base64Url.encode(key.key[5]);
-                    jwk.dq = Base64Url.encode(key.key[6]);
-                    jwk.qi = Base64Url.encode(key.key[7]);
+                    jwk.d = Base64Url.encode(removeLeadingZero(key.key[2]));
+                    jwk.p = Base64Url.encode(removeLeadingZero(key.key[3]));
+                    jwk.q = Base64Url.encode(removeLeadingZero(key.key[4]));
+                    jwk.dp = Base64Url.encode(removeLeadingZero(key.key[5]));
+                    jwk.dq = Base64Url.encode(removeLeadingZero(key.key[6]));
+                    jwk.qi = Base64Url.encode(removeLeadingZero(key.key[7]));
                 }
                 resolve(jwk);
             }

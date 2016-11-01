@@ -141,7 +141,6 @@ describe("EC crypto", () => {
                     )
                     Promise.all(promises)
                         .then(() => {
-                            console.log(bits);
                             bits["js"].forEach((bit, index) => assert(bits["native"][index] === bit, true, `Bits JS <> Native (${bits["native"][index]} : ${bit})`));
                             done();
                         })

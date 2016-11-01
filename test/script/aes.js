@@ -131,7 +131,6 @@ describe("AES crypto", () => {
                         const alg = Object.assign({}, key.algorithm, param.data);
                         const revType = type === "native" ? "js" : "native";
                         const data = new Uint8Array(16);
-                        console.log(rsa);
                         subtle[type].wrapKey("jwk", rsa[type], key[type], alg)
                             .then(enc => {
                                 assert.equal(!!enc, true);
