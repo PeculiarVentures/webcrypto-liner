@@ -72,7 +72,8 @@ export class EcCrypto extends BaseCrypto {
             const pubKey = new CryptoKey();
             prvKey.key = pubKey.key = key.genKeyPair();
             prvKey.algorithm = pubKey.algorithm = _alg;
-            prvKey.extractable = pubKey.extractable = extractable;
+            prvKey.extractable = extractable;
+            pubKey.extractable = true;
             prvKey.type = "private";
             pubKey.type = "public";
             if (alg.name === AlgorithmNames.EcDSA) {

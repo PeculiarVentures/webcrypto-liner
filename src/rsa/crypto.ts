@@ -40,7 +40,8 @@ export class RsaCrypto extends BaseCrypto {
             const publicKey: RsaCryptoKey = new CryptoKey();
             privateKey.key = publicKey.key = rsaKey;
             privateKey.algorithm = publicKey.algorithm = alg;
-            privateKey.extractable = publicKey.extractable = extractable;
+            privateKey.extractable = extractable;
+            publicKey.extractable = true;
             privateKey.type = "private";
             publicKey.type = "public";
             switch (alg.name.toLowerCase()) {
