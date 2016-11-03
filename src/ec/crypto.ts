@@ -162,7 +162,7 @@ export class EcCrypto extends BaseCrypto {
                         ext: key.extractable,
                         x: Base64Url.encode(hex2buffer(hexX, true)),
                         y: Base64Url.encode(hex2buffer(hexY, true)),
-                        key_ops: key.usages,
+                        key_ops: [],
                         kty: "EC"
                     };
                     resolve(jwk);
