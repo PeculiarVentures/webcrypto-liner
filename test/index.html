@@ -16,16 +16,65 @@
 	<script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
 	<script src="vendor/assert.js"></script>
 	<script>
+		var REPEAT = 1; // Number of test iterations
+
 		// Chrome, Mozilla
 		var nativeSubtle = crypto.subtle;
 		delete crypto.__proto__.subtle;
 		crypto.subtle = {};
+
+		var util = {
+			// Compare the contents of two ArrayBuffer(View)s
+			memcmp: function util_memcmp(x, y) {
+				if (!x || !y) { return false; }
+
+				var xb = new Uint8Array(x);
+				var yb = new Uint8Array(y);
+				if (x.byteLength !== y.byteLength) { return false; }
+
+				for (var i=0; i<xb.byteLength; ++i) {
+					if (xb[i] !== yb[i]) {
+						return false;
+					}
+				}
+				return true;
+			},
+
+			// Convert an ArrayBufferView to a hex string
+			abv2hex: function util_abv2hex(abv) {
+				var b = new Uint8Array(abv.buffer, abv.byteOffset, abv.byteLength);
+				var hex = "";
+				for (var i=0; i <b.length; ++i) {
+					var zeropad = (b[i] < 0x10) ? "0" : "";
+					hex += zeropad + b[i].toString(16);
+				}
+				return hex;
+			},
+
+			// Convert a hex string to an ArrayBufferView
+			hex2abv: function util_hex2abv(hex) {
+				if (hex.length % 2 !== 0) {
+					hex = "0" + hex;
+				}
+
+				var abv = new Uint8Array(hex.length / 2);
+				for (var i=0; i<abv.length; ++i) {
+					abv[i] = parseInt(hex.substr(2*i, 2), 16);
+				}
+				return abv;
+			},
+		};
 	</script>
 	<script src="../index.js"></script>
 	<script>mocha.setup('bdd')</script>
+	<script src="script/sha.js"></script>
 	<script src="script/ec.js"></script>
 	<script src="script/aes.js"></script>
 	<script src="script/rsa.js"></script>
+	<!--
+	<script src="script/test-vectors.js"></script>
+	<script src="script/test.js"></script>
+	-->
 	<script>mocha.run();</script>
 </body>
 
