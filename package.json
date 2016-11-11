@@ -8,8 +8,7 @@
     "build:es5": "tsc --module commonjs --target es5",
     "build:es2015": "tsc --module es2015 --target es2015",
     "build:rollup": "npm run build:es2015 && rollup -o=index.js -i=build/src/index.js",
-    "build:webpack": "webpack",
-    "prepublish": "npm run build"
+    "build:webpack": "webpack"
   },
   "repository": {
     "type": "git",
@@ -21,6 +20,7 @@
     "asmcrypto.js": "*",
     "elliptic": "*",
     "ts-loader": "^0.9.5",
+    "typescript": "*",
     "webcrypto-core": "git+https://github.com/PeculiarVentures/webcrypto-core#types"
   },
   "author": "PeculiarVentures",
