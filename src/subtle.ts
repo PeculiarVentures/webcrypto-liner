@@ -36,7 +36,7 @@ function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<Cryp
 
 export class SubtleCrypto extends core.SubtleCrypto {
 
-    generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey | CryptoKeyPair> {
+    generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<NativeCryptoKey | NativeCryptoKeyPair> {
         const args = arguments;
         let _alg: Algorithm;
         return super.generateKey.apply(this, args)
