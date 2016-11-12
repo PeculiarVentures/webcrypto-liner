@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@types/node": "*",
-    "webcrypto-core": "git+https://github.com/PeculiarVentures/webcrypto-core#types"
+    "webcrypto-core": "git+https://github.com/PeculiarVentures/webcrypto-core#types",
     "asmcrypto.js": "*",
     "elliptic": "*"
   },
