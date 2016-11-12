@@ -15,14 +15,15 @@
     "type": "git",
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "@types/node": "*",
-    "asmcrypto.js": "*",
-    "elliptic": "*",
-    "ts-loader": "^0.9.5",
-    "typescript": "*",
     "webcrypto-core": "git+https://github.com/PeculiarVentures/webcrypto-core#types"
+    "asmcrypto.js": "*",
+    "elliptic": "*"
+  },
+  "devDependencies": {
+    "ts-loader": "^0.9.5",
+    "typescript": "*"
   },
   "author": "PeculiarVentures",
   "license": "MIT"
