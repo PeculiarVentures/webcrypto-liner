@@ -1,7 +1,3 @@
 /.vscode
 /node_modules
 /scripts
-/src
-/typings
-tsconfig.json
-tslint.json
