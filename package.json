@@ -7,7 +7,7 @@
     "build": "npm run build:es5",
     "build:es5": "tsc --module commonjs --target es5",
     "build:es2015": "tsc --module es2015 --target es2015",
-    "build:rollup": "npm run build:es2015 && rollup -o=index.js -i=build/src/index.js",
+    "build:rollup": "npm run build:es2015 && rollup -o=index.js -i=build/index.js",
     "build:webpack": "webpack",
     "install": "npm run build"
   },
