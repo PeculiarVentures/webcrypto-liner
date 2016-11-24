@@ -86,12 +86,26 @@ npm install typescript --global
 ```
 
 ## Installation
-The module has been designed to be useful in ES6 and ES5 projects, this allows the use of tools like rollup. To install and build for ES5 you would use the following commands:
+The module has been designed to be useful in ES6 and ES5 projects. The default is ES5 with commonjs, to install and build you would run:
 
 ```
 npm install
-npm run build:es2015
+npm run build
 ```
+
+The package also supports rollup and webpack, if you want a ES5 build with Webpack you would use the following commands:
+
+```
+npm install
+npm run build:webpack
+```
+
+If you want a ES5 build with rollup you would use the following commands:
+```
+npm install
+npm run build:webpack
+```
+
 
 ## FAQ
 - **Do I need to use a promise library?** - No, not if your browser supports promises.
