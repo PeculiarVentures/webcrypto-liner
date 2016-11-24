@@ -100,10 +100,10 @@ npm install
 npm run build:webpack
 ```
 
-If you want a ES5 build with rollup you would use the following commands:
+If you want a ES2015 build for rollup you would use the following commands:
 ```
 npm install
-npm run build:webpack
+npm run build:es2015
 ```
 
 
