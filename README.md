@@ -52,10 +52,6 @@ You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](http
     <!-- ... -->
     <!-- promise.js is needed for IE Promise implementation -->
     <script src="https://www.promisejs.org/polyfills/promise-7.0.4.min.js"></script>
-    <!-- asmcrypto.js is needed for AES and RSA crypto implementation -->
-    <script src="src/asmcrypto.js"></script>
-    <!-- elliptic.js is needed for EC crypto implementation -->
-    <script src="src/elliptic.js"></script>
     <script src="src/webcrypto-liner.js"></script>
 </head>
 <body>

@@ -415,8 +415,12 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e.message || "");
                 }
             })
-            .then((msg: ArrayBuffer) => {
-                if (msg) return Promise.resolve(msg);
+            .then((msg: any) => {
+                if (msg) {
+                    if (format ===  "jwk" && msg instanceof ArrayBuffer)
+                        msg = buffer2string(new Uint8Array(msg));
+                    return Promise.resolve(msg);
+                }
                 if (!key.key)
                     throw new LinerError("Cannot export native CryptoKey from JS implementation");
                 let Class: typeof BaseCrypto;
