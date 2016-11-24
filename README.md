@@ -2,6 +2,9 @@
 [![license](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/PeculiarVentures/webcrypto-liner/master/LICENSE)
 [![npm version](https://badge.fury.io/js/webcrypto-liner.svg)](https://badge.fury.io/js/webcrypto-liner)
 
+[![NPM](https://nodei.co/npm-dl/webcrypto-liner.png?months=2&height=2)](https://nodei.co/npm/webcrypto-liner/)
+
+
 A polyfill for WebCrypto that "smooths out" the rough-edges in existing User Agent implementations.
 
 Though WebCrypto is well [supported across browsers](http://caniuse.com/cryptography), several browsers still have prefixed and buggy implementations. Additionally, they do not always support the same algorithms, for example, Edge does not support SHA1 or ECC while both Firefox and Chrome do. 
