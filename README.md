@@ -86,11 +86,11 @@ npm install typescript --global
 ```
 
 ## Installation
-Install dependencies and compile the project using the following commands:
+The module has been designed to be useful in ES6 and ES5 projects, this allows the use of tools like rollup. To install and build for ES5 you would use the following commands:
 
 ```
 npm install
-npm run build
+npm run build:es2015
 ```
 
 ## FAQ
