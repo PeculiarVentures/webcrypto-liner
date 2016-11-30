@@ -168,7 +168,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
             })
             .then((result: boolean) => {
-                if (typeof result === "boolean") return new Promise(resolve => resolve(signature));
+                if (typeof result === "boolean") return new Promise(resolve => resolve(result));
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDSA.toLowerCase():
