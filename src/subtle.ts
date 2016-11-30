@@ -458,8 +458,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 // Fix: Safari
                 if (BrowserInfo().name === Browser.Safari) {
                     // Converts JWK to ArrayBuffer
-                    _data = string2buffer(JSON.stringify(keyData)).buffer;
-                    args[1] = _data;
+                    args[1] = string2buffer(JSON.stringify(keyData)).buffer;
                 }
                 // End: Fix
                 if (ArrayBuffer.isView(keyData)) {
