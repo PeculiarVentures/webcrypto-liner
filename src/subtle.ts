@@ -7,7 +7,7 @@ import { PrepareAlgorithm, PrepareData } from "webcrypto-core";
 import { nativeSubtle } from "./init";
 import { LinerError } from "./crypto";
 import { CryptoKey, CryptoKeyPair } from "./key";
-import { string2buffer, buffer2string, concat } from "./helper";
+import { string2buffer, buffer2string, concat, Browser, BrowserInfo, assign } from "./helper";
 
 // Crypto
 import { AesCrypto } from "./aes/crypto";
@@ -417,8 +417,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
             })
             .then((msg: any) => {
                 if (msg) {
-                    if (format ===  "jwk" && msg instanceof ArrayBuffer)
+                    if (format ===  "jwk" && msg instanceof ArrayBuffer) {
                         msg = buffer2string(new Uint8Array(msg));
+                        msg = JSON.parse(msg);
+                    }
                     return Promise.resolve(msg);
                 }
                 if (!key.key)
@@ -452,6 +454,14 @@ export class SubtleCrypto extends core.SubtleCrypto {
             .then((bits: ArrayBuffer) => {
                 _alg = PrepareAlgorithm(algorithm);
                 _data = keyData;
+                
+                // Fix: Safari
+                if (BrowserInfo().name === Browser.Safari) {
+                    // Converts JWK to ArrayBuffer
+                    _data = string2buffer(JSON.stringify(keyData)).buffer;
+                    args[1] = _data;
+                }
+                // End: Fix
                 if (ArrayBuffer.isView(keyData)) {
                     _data = PrepareData(keyData, "keyData");
                 }

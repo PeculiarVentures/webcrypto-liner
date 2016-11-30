@@ -14,7 +14,7 @@ export function BrowserInfo() {
         name: "",
         version: ""
     };
-    if (typeof module === "object" && module.exports !== void 0)
+    if (typeof window !== "object" && typeof self !== void "object")
         return {
             name: "NodeJS",
             version: process.version
@@ -64,5 +64,16 @@ export function concat(...buf: Uint8Array[]) {
             res[offset + i] = item[i];
         offset += item.length;
     });
+    return res;
+}
+
+export function assign(target: any, ...sources: any[]) {
+    let res = arguments[0];
+    for (let i = 1; i < arguments.length; i++) {
+        let obj = arguments[i];
+        for (let prop in obj) {
+            res[prop] = obj[prop];
+        }
+    }
     return res;
 }
