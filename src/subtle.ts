@@ -417,7 +417,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
             })
             .then((msg: any) => {
                 if (msg) {
-                    if (format ===  "jwk" && msg instanceof ArrayBuffer) {
+                    if (format === "jwk" && msg instanceof ArrayBuffer) {
                         msg = buffer2string(new Uint8Array(msg));
                         msg = JSON.parse(msg);
                     }
@@ -454,7 +454,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
             .then((bits: ArrayBuffer) => {
                 _alg = PrepareAlgorithm(algorithm);
                 _data = keyData;
-                
+
                 // Fix: Safari
                 if (BrowserInfo().name === Browser.Safari) {
                     // Converts JWK to ArrayBuffer
