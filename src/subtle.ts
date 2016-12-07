@@ -17,7 +17,7 @@ import { EcCrypto } from "./ec/crypto";
 
 declare type IE = any;
 
-const EdgeKeys: { key: CryptoKey, hash: Algorithm }[] = [];
+const keys: { key: CryptoKey, hash: Algorithm }[] = [];
 
 function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<CryptoKey> {
     let promise = Promise.resolve(key);
@@ -509,20 +509,20 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
 // save hash alg for RSA keys
 function SetHashAlgorithm(alg: Algorithm, key: CryptoKey | CryptoKeyPair) {
-    if (BrowserInfo().name === Browser.Edge && /^rsa/i.test(alg.name)) {
+    if ((BrowserInfo().name === Browser.Edge || BrowserInfo().name === Browser.Safari) && /^rsa/i.test(alg.name)) {
         if ((key as CryptoKeyPair).privateKey) {
-            EdgeKeys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).privateKey });
-            EdgeKeys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).publicKey });
+            keys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).privateKey });
+            keys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).publicKey });
         }
         else
-            EdgeKeys.push({ hash: (alg as any).hash, key: key as CryptoKey });
+            keys.push({ hash: (alg as any).hash, key: key as CryptoKey });
     }
 }
 
 // fix hash alg for rsa key
 function GetHashAlgorithm(alg: Algorithm, key: CryptoKey) {
-    if (BrowserInfo().name === Browser.Edge && /^rsa/i.test(alg.name)) {
-        EdgeKeys.some(item => {
+    if ((BrowserInfo().name === Browser.Edge || BrowserInfo().name === Browser.Safari) && /^rsa/i.test(alg.name)) {
+        keys.some(item => {
             if (item.key = key) {
                 (alg as any).hash = item.hash;
                 return true;
