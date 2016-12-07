@@ -12,6 +12,10 @@ There are a few things to keep in mind:
 ### Chrome
 ![image](https://cloud.githubusercontent.com/assets/1619279/20986888/57d8f1d2-bc7f-11e6-95a0-ac6a16231543.png)
 
+### Firefox
+![image](https://cloud.githubusercontent.com/assets/1619279/20987087/1bdf91ee-bc80-11e6-9030-812ef9048bbf.png)
+
+
 ### Edge
 
 ### IE
