@@ -4,7 +4,8 @@ Each browser supports a different set of cryptographic algorithms and capabiliti
 There are a few things to keep in mind:
 - Wherever possible the native implementations are used,
 - Some features, such as non-exportable keys, can not be implemented in Javascript,
-- Size is a concern so although it is possible to implement some export formats we have decided not to.
+- Size is a concern so although it is possible to implement some export formats we have decided not to,
+- The Javascript implementation of algorithms is notably slower than their native counterparts.
 
 ### Safari
 ![image](https://cloud.githubusercontent.com/assets/1619279/20986863/3560aea6-bc7f-11e6-997a-b8f30df86ef6.png)
