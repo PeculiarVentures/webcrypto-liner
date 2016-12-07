@@ -17,6 +17,8 @@ import { EcCrypto } from "./ec/crypto";
 
 declare type IE = any;
 
+const EdgeKeys: { key: CryptoKey, hash: Algorithm }[] = [];
+
 function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<CryptoKey> {
     let promise = Promise.resolve(key);
     if (!key.key)
@@ -61,6 +63,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         if (!_keys.privateKey)
                             _keys.usages = keyUsages;
                     }
+                    SetHashAlgorithm(_alg, keys);
                     return new Promise(resolve => resolve(keys));
                 }
                 let Class: typeof BaseCrypto;
@@ -118,6 +121,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 _alg = PrepareAlgorithm(algorithm as string);
                 _data = PrepareData(data, "data");
 
+                GetHashAlgorithm(_alg, key);
                 try {
                     return nativeSubtle.sign.apply(nativeSubtle, args)
                         .catch((e: Error) => {
@@ -157,6 +161,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 _signature = PrepareData(signature, "data");
                 _data = PrepareData(data, "data");
 
+                GetHashAlgorithm(_alg, key);
                 try {
                     return nativeSubtle.verify.apply(nativeSubtle, args)
                         .catch((e: Error) => {
@@ -475,8 +480,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     console.warn(`WebCrypto: native 'importKey' for ${_alg.name} doesn't work.`, e.message || "");
                 }
             })
-            .then((msg: ArrayBuffer) => {
-                if (msg) return new Promise(resolve => resolve(msg));
+            .then((msg: CryptoKey) => {
+                if (msg) {
+                    SetHashAlgorithm(_alg, msg);
+                    return new Promise(resolve => resolve(msg));
+                }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
@@ -496,5 +504,30 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
                 return Class.importKey(format, _data, _alg, extractable, keyUsages);
             });
+    }
+}
+
+// save hash alg for RSA keys
+function SetHashAlgorithm(alg: Algorithm, key: CryptoKey | CryptoKeyPair) {
+    if (BrowserInfo().name === Browser.Edge && /^rsa/i.test(alg.name)) {
+        if ((key as CryptoKeyPair).privateKey) {
+            EdgeKeys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).privateKey });
+            EdgeKeys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).publicKey });
+        }
+        else
+            EdgeKeys.push({ hash: (alg as any).hash, key: key as CryptoKey });
+    }
+}
+
+// fix hash alg for rsa key
+function GetHashAlgorithm(alg: Algorithm, key: CryptoKey) {
+    if (BrowserInfo().name === Browser.Edge && /^rsa/i.test(alg.name)) {
+        EdgeKeys.some(item => {
+            if (item.key = key) {
+                (alg as any).hash = item.hash;
+                return true;
+            }
+            return false;
+        });
     }
 }
