@@ -568,3 +568,13 @@ if (!Uint8Array.prototype.slice) {
         return new Uint8Array(this.buffer.slice(start, end));
     };
 }
+if (!Uint8Array.prototype.filter) {
+    (Uint8Array as any).prototype.filter = function (cb: (value: number, index: number, array: Uint8Array) => void) {
+        let buf: number[] = [];
+        for (let i = 0; i < this.length; i++) {
+            if (cb(this[i], i, this))
+                buf.push(this[i]);
+        }
+        return new Uint8Array(buf);
+    };
+}
