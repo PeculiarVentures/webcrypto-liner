@@ -37,8 +37,8 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | Capability                | Details                                       |
 |---------------------------|-----------------------------------------------|
 | Encryption/Decryption     | RSA-OAEP, AES-CBC, and AES-GCM                |
-| Sign/Verify               | RSA-PSS, ~~RSASSA-PKCS1-v1_5,~~ and ECDSA              |
-| Hash                      | SHA-1, SHA-224, SHA-256, and SHA-384          |
+| Sign/Verify               | RSA-PSS, RSASSA_PKCS1-v1_5 and ECDSA          |
+| Hash                      | SHA-1, and SHA-224                            |
 | Derive Key/Bits           | ECDH                                          |
 | Keywrap                   | AES-GCM, AES-CBC                              |
 | ECC Curves                | P-256, P-384, and  P-512                      |
