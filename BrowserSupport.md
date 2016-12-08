@@ -18,9 +18,6 @@ There are a few things to keep in mind:
 ![image](https://cloud.githubusercontent.com/assets/1619279/20987087/1bdf91ee-bc80-11e6-9030-812ef9048bbf.png)
 
 ### Edge
-![image](https://cloud.githubusercontent.com/assets/1619279/20992080/bec8b898-bc96-11e6-97ec-33b9948c722b.png)
-![image](https://cloud.githubusercontent.com/assets/1619279/20993104/097ff58a-bc9d-11e6-958a-16ffd7e053cc.png)
-
-<sup>* The JS implementation is very slow on Edge for some reason, for this reason we broke the tests into two chunks for the purpose of this document. Hopefully when not running a barage of tests the performance issue wont be a problem for users of this library.</sup>
+![image](https://cloud.githubusercontent.com/assets/1619279/20998446/b9315648-bcc2-11e6-9866-016725c8eaf8.png)
 
 ### IE
