@@ -19,6 +19,6 @@ There are a few things to keep in mind:
 
 ### Edge
 ![image](https://cloud.githubusercontent.com/assets/1619279/20992080/bec8b898-bc96-11e6-97ec-33b9948c722b.png)
-
+* asymcrypto, which is required for the JS RSA implementation has issues on Edge and IE so it has to be disabled to run on this platform.
 
 ### IE
