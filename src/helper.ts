@@ -29,6 +29,9 @@ export function BrowserInfo() {
     } else if (/msie/i.test(userAgent)) {
         res.name = Browser.IE;
         res.version = /msie ([\d\.]+)/i.exec(userAgent) ![1];
+    } else if (/Trident/i.test(userAgent)) {
+        res.name = Browser.IE;
+        res.version = /rv:([\d\.]+)/i.exec(userAgent) ![1];
     } else if (/chrome/i.test(userAgent)) {
         res.name = Browser.Chrome;
         res.version = /chrome\/([\d\.]+)/i.exec(userAgent) ![1];

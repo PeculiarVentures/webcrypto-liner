@@ -275,8 +275,20 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     console.warn(`WebCrypto: native 'encrypt' for ${_alg.name} doesn't work.`, e.message || "");
                 }
             })
-            .then((msg: ArrayBuffer) => {
-                if (msg) return new Promise(resolve => resolve(msg));
+            .then((msg: any) => {
+                if (msg) {
+                    if (BrowserInfo().name === Browser.IE &&
+                        _alg.name.toUpperCase() === AlgorithmNames.AesGCM &&
+                        msg.ciphertext) {
+                        // Concatinate values in IE
+                        let buf = new Uint8Array(msg.ciphertext.byteLength + msg.tag.byteLength);
+                        let count = 0;
+                        new Uint8Array(msg.ciphertext).forEach((v: number) => buf[count++] = v);
+                        new Uint8Array(msg.tag).forEach((v: number) => buf[count++] = v);
+                        msg = buf.buffer;
+                    }
+                    return Promise.resolve(msg);
+                }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
@@ -302,8 +314,19 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 _alg = PrepareAlgorithm(algorithm);
                 _data = PrepareData(data, "data");
 
+                let _data2: any = _data;
+                if (BrowserInfo().name === Browser.IE &&
+                    _alg.name.toUpperCase() === AlgorithmNames.AesGCM) {
+                    // Split buffer
+                    const len = _data.byteLength - ((_alg as any).tagLength / 8);
+                    _data2 = {
+                        ciphertext: _data.buffer.slice(0, len),
+                        tag: _data.buffer.slice(len, _data.byteLength)
+                    };
+                }
+
                 try {
-                    return nativeSubtle.decrypt.apply(nativeSubtle, args)
+                    return nativeSubtle.decrypt.call(nativeSubtle, _alg, key, _data2)
                         .catch((e: Error) => {
                             console.warn(`WebCrypto: native 'decrypt' for ${_alg.name} doesn't work.`, e.message || "");
                         });
@@ -523,11 +546,25 @@ function SetHashAlgorithm(alg: Algorithm, key: CryptoKey | CryptoKeyPair) {
 function GetHashAlgorithm(alg: Algorithm, key: CryptoKey) {
     if ((BrowserInfo().name === Browser.Edge || BrowserInfo().name === Browser.Safari) && /^rsa/i.test(alg.name)) {
         keys.some(item => {
-            if (item.key = key) {
+            if (item.key === key) {
                 (alg as any).hash = item.hash;
                 return true;
             }
             return false;
         });
     }
+}
+
+// Extend Uint8Array for IE
+if (!Uint8Array.prototype.forEach) {
+    (Uint8Array as any).prototype.forEach = function (cb: (value: number, index: number, array: Uint8Array) => void) {
+        for (let i = 0; i < this.length; i++) {
+            cb(this[i], i, this);
+        }
+    };
+}
+if (!Uint8Array.prototype.slice) {
+    (Uint8Array as any).prototype.slice = function (start: number, end: number) {
+        return new Uint8Array(this.buffer.slice(start, end));
+    };
 }
