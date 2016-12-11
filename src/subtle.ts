@@ -58,11 +58,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
             .then((keys: CryptoKey | CryptoKeyPair) => {
 
                 if (keys) {
-                    if ("keyUsage" in keys || ((keys as IE).privateKey && "keyUsage" in keys)) {
-                        let _keys: IE = keys;
-                        if (!_keys.privateKey)
-                            _keys.usages = keyUsages;
-                    }
+                    FixCryptoKeyUsages(keys, keyUsages);
                     SetHashAlgorithm(_alg, keys);
                     return new Promise(resolve => resolve(keys));
                 }
@@ -243,7 +239,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
             })
             .then((key: CryptoKey) => {
-                if (key) return new Promise(resolve => resolve(key));
+                if (key) {
+                    FixCryptoKeyUsages(key, keyUsages);
+                    return new Promise(resolve => resolve(key));
+                }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDH.toLowerCase():
@@ -410,8 +409,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     console.warn(`WebCrypto: native 'unwrapKey' for ${_alg.name} doesn't work.`, e.message || "");
                 }
             })
-            .then((msg: ArrayBuffer) => {
-                if (msg) return new Promise(resolve => resolve(msg));
+            .then((k: CryptoKey) => {
+                if (k) {
+                    FixCryptoKeyUsages(k, keyUsages);
+                    return new Promise(resolve => resolve(k));
+                }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
@@ -503,10 +505,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     console.warn(`WebCrypto: native 'importKey' for ${_alg.name} doesn't work.`, e.message || "");
                 }
             })
-            .then((msg: CryptoKey) => {
-                if (msg) {
-                    SetHashAlgorithm(_alg, msg);
-                    return new Promise(resolve => resolve(msg));
+            .then((k: CryptoKey) => {
+                if (k) {
+                    SetHashAlgorithm(_alg, k);
+                    FixCryptoKeyUsages(k, keyUsages);
+                    return Promise.resolve(k);
                 }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
@@ -577,4 +580,33 @@ if (!Uint8Array.prototype.filter) {
         }
         return new Uint8Array(buf);
     };
+}
+
+function FixCryptoKeyUsages(key: CryptoKey | CryptoKeyPair, keyUsages: string[]) {
+    const keys: CryptoKey[] = [];
+    if ((key as CryptoKeyPair).privateKey) {
+        keys.push((key as CryptoKeyPair).privateKey);
+        keys.push((key as CryptoKeyPair).publicKey);
+    }
+    else {
+        keys.push(key as CryptoKey);
+    }
+    keys.forEach((k: any) => {
+        if ("keyUsage" in k) {
+            k.usages = k.keyUsage || [];
+            // add usages
+            if (!k.usages.length) {
+                ["verify", "encrypt", "wrapKey"]
+                    .forEach(usage => {
+                        if (keyUsages.indexOf(usage) > -1 && (k.type === "public" || k.type === "secret"))
+                            k.usages.push(usage);
+                    });
+                ["sign", "decrypt", "unwrapKey", "deriveKey", "deriveBits"]
+                    .forEach(usage => {
+                        if (keyUsages.indexOf(usage) > -1 && (k.type === "private" || k.type === "secret"))
+                            k.usages.push(usage);
+                    });
+            }
+        }
+    });
 }
