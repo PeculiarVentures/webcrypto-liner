@@ -117,7 +117,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 _alg = PrepareAlgorithm(algorithm as string);
                 _data = PrepareData(data, "data");
 
-                GetHashAlgorithm(_alg, key);
+                const _alg2 = GetHashAlgorithm(key);
+                if (_alg2) {
+                    args[0] = assign(_alg, _alg2);
+                }
                 try {
                     return nativeSubtle.sign.apply(nativeSubtle, args)
                         .catch((e: Error) => {
@@ -157,7 +160,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 _signature = PrepareData(signature, "data");
                 _data = PrepareData(data, "data");
 
-                GetHashAlgorithm(_alg, key);
+                const _alg2 = GetHashAlgorithm(key);
+                if (_alg2) {
+                    args[0] = assign(_alg, _alg2);
+                }
                 try {
                     return nativeSubtle.verify.apply(nativeSubtle, args)
                         .catch((e: Error) => {
@@ -434,7 +440,6 @@ export class SubtleCrypto extends core.SubtleCrypto {
         const args = arguments;
         return super.exportKey.apply(this, args)
             .then(() => {
-
                 try {
                     return nativeSubtle.exportKey.apply(nativeSubtle, args)
                         .catch((e: Error) => {
@@ -451,6 +456,9 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         msg = buffer2string(new Uint8Array(msg));
                         msg = JSON.parse(msg);
                     }
+                    let alg = GetHashAlgorithm(key);
+                    if (!alg) alg = assign({}, key.algorithm)
+                    FixExportJwk(msg, alg, key.usages);
                     return Promise.resolve(msg);
                 }
                 if (!key.key)
@@ -486,8 +494,12 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 _data = keyData;
 
                 // Fix: Safari
-                if (BrowserInfo().name === Browser.Safari) {
+                if (BrowserInfo().name === Browser.Safari || BrowserInfo().name === Browser.IE) {
                     // Converts JWK to ArrayBuffer
+                    if (BrowserInfo().name === Browser.IE) {
+                        keyData = assign({}, keyData);
+                        FixImportJwk(keyData);
+                    }
                     args[1] = string2buffer(JSON.stringify(keyData)).buffer;
                 }
                 // End: Fix
@@ -535,7 +547,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
 // save hash alg for RSA keys
 function SetHashAlgorithm(alg: Algorithm, key: CryptoKey | CryptoKeyPair) {
-    if ((BrowserInfo().name === Browser.Edge || BrowserInfo().name === Browser.Safari) && /^rsa/i.test(alg.name)) {
+    if ((BrowserInfo().name === Browser.IE || BrowserInfo().name === Browser.Edge || BrowserInfo().name === Browser.Safari) && /^rsa/i.test(alg.name)) {
         if ((key as CryptoKeyPair).privateKey) {
             keys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).privateKey });
             keys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).publicKey });
@@ -546,16 +558,16 @@ function SetHashAlgorithm(alg: Algorithm, key: CryptoKey | CryptoKeyPair) {
 }
 
 // fix hash alg for rsa key
-function GetHashAlgorithm(alg: Algorithm, key: CryptoKey) {
-    if ((BrowserInfo().name === Browser.Edge || BrowserInfo().name === Browser.Safari) && /^rsa/i.test(alg.name)) {
-        keys.some(item => {
-            if (item.key === key) {
-                (alg as any).hash = item.hash;
-                return true;
-            }
-            return false;
-        });
-    }
+function GetHashAlgorithm(key: CryptoKey) {
+    let alg: Algorithm | null = null;
+    keys.some(item => {
+        if (item.key === key) {
+            alg = assign({}, key.algorithm, { hash: item.hash });
+            return true;
+        }
+        return false;
+    });
+    return alg;
 }
 
 // Extend Uint8Array for IE
@@ -610,3 +622,46 @@ function FixCryptoKeyUsages(key: CryptoKey | CryptoKeyPair, keyUsages: string[])
         }
     });
 }
+
+function FixExportJwk(jwk: any, alg: any, keyUsages: string[]) {
+    if (alg && BrowserInfo().name === Browser.IE) {
+        // ext
+        if ("extractable" in jwk) {
+            jwk.ext = jwk.extractable;
+            delete jwk.extractable;
+        }
+        // add alg
+        let CryptoClass: AlgorithmConverter | null = null;
+        switch (alg.name.toUpperCase()) {
+            case AlgorithmNames.RsaOAEP.toUpperCase():
+            case AlgorithmNames.RsaPSS.toUpperCase():
+            case AlgorithmNames.RsaSSA.toUpperCase():
+                CryptoClass = RsaCrypto;
+                break;
+            case AlgorithmNames.AesCBC.toUpperCase():
+            case AlgorithmNames.AesGCM.toUpperCase():
+                CryptoClass = AesCrypto;
+                break;
+        }
+
+        if (CryptoClass && !jwk.alg) {
+            jwk.alg = CryptoClass.alg2jwk(alg);
+        }
+
+        // add key_ops
+        if (!("key_ops" in jwk))
+            jwk.key_ops = keyUsages;
+    }
+}
+
+function FixImportJwk(jwk: any) {
+    if (BrowserInfo().name === Browser.IE) {
+        // ext
+        if ("ext" in jwk) {
+            jwk.extractable = jwk.ext;
+            delete jwk.ext;
+        }
+        delete jwk.key_ops;
+        delete jwk.alg;
+    }
+} 

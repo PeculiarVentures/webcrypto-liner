@@ -198,6 +198,25 @@ export class RsaCrypto extends BaseCrypto {
         });
     }
 
+    static alg2jwk(alg: Algorithm) {
+        const hash = (alg as any).hash as Algorithm;
+        const hashSize = /(\d+)/.exec(hash.name) ![1];
+        switch (alg.name!.toUpperCase()) {
+            case AlgorithmNames.RsaOAEP.toUpperCase():
+                return `RSA-OAEP${hashSize === "1" ? "" : `-${hashSize}`}`;
+            case AlgorithmNames.RsaPSS.toUpperCase():
+                return `PS${hashSize}`;
+            case AlgorithmNames.RsaSSA.toUpperCase():
+                return `RS${hashSize}`;
+            default:
+                throw new AlgorithmError(AlgorithmError.UNSUPPORTED_ALGORITHM, alg.name);
+        }
+    }
+
+    static jwk2alg(alg: string): Algorithm {
+        throw new Error("Not implemented");
+    }
+
     static exportKey(format: string, key: RsaCryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
         return new Promise((resolve, reject) => {
             if (format.toLowerCase() === "jwk") {
@@ -206,21 +225,7 @@ export class RsaCrypto extends BaseCrypto {
                     ext: true,
                     key_ops: key.usages
                 };
-                const hash = (key.algorithm as RsaHashedKeyAlgorithm).hash as Algorithm;
-                const hashSize = /(\d+)/.exec(hash.name) ![1];
-                switch (key.algorithm.name!.toUpperCase()) {
-                    case AlgorithmNames.RsaOAEP.toUpperCase():
-                        jwk.alg = `RSA-OAEP${hashSize === "1" ? "" : `-${hashSize}`}`;
-                        break;
-                    case AlgorithmNames.RsaPSS.toUpperCase():
-                        jwk.alg = `PS${hashSize}`;
-                        break;
-                    case AlgorithmNames.RsaSSA.toUpperCase():
-                        jwk.alg = `RS${hashSize}`;
-                        break;
-                    default:
-                        throw new AlgorithmError(AlgorithmError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
-                }
+                jwk.alg = this.alg2jwk(key.algorithm as Algorithm);
                 jwk.n = Base64Url.encode(removeLeadingZero(key.key[0]));
                 jwk.e = Base64Url.encode(removeLeadingZero(key.key[1]));
                 if (key.type === "private") {

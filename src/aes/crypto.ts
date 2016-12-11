@@ -108,12 +108,20 @@ export class AesCrypto extends BaseCrypto {
         });
     }
 
+    static alg2jwk(alg: Algorithm): string {
+        return `A${(alg as AesKeyAlgorithm).length}${/-(\w+)/i.exec(alg.name!.toUpperCase()) ![1]}`;
+    }
+
+    static jwk2alg(alg: string): Algorithm {
+        throw new Error("Not implemented");
+    }
+
     static exportKey(format: string, key: AesCryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
         return new Promise((resolve, reject) => {
             const raw = key.key;
             if (format.toLowerCase() === "jwk") {
                 let jwk: JsonWebKey = {
-                    alg: `A${(key.algorithm as AesKeyAlgorithm).length}${/-(\w+)/i.exec(key.algorithm.name!.toUpperCase()) ![1]}`,
+                    alg: this.alg2jwk(key.algorithm as Algorithm),
                     ext: key.extractable,
                     k: Base64Url.encode(raw),
                     key_ops: key.usages,
