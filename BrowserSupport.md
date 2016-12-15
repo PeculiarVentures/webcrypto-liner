@@ -9,13 +9,13 @@ There are a few things to keep in mind:
 - Lack of promise support on some browsersrequires promise polyfills which have their own issues.
 
 ### Safari
-![image](https://cloud.githubusercontent.com/assets/1619279/20992128/0d0fe3e6-bc97-11e6-81c4-ed3a4697835c.png)
+![image](https://cloud.githubusercontent.com/assets/1619279/21236576/ec131aee-c2fb-11e6-96e3-418a0e84dde9.png)
 
 ### Chrome
-![image](https://cloud.githubusercontent.com/assets/1619279/20986888/57d8f1d2-bc7f-11e6-95a0-ac6a16231543.png)
+![image](https://cloud.githubusercontent.com/assets/1619279/21236656/354a37e2-c2fc-11e6-9669-9df1b989a187.png)
 
 ### Firefox
-![image](https://cloud.githubusercontent.com/assets/1619279/20987087/1bdf91ee-bc80-11e6-9030-812ef9048bbf.png)
+![image](https://cloud.githubusercontent.com/assets/1619279/21236692/5f91c8a8-c2fc-11e6-8fe0-0594dcd464e2.png)
 
 ### Edge
 ![image](https://cloud.githubusercontent.com/assets/1619279/20998446/b9315648-bcc2-11e6-9866-016725c8eaf8.png)
