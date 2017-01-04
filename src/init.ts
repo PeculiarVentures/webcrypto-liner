@@ -1,7 +1,6 @@
-import * as crypto from "crypto";
 let _w: any;
 if (typeof self === "undefined") {
-    // const crypto = require("crypto");
+    const crypto = require("crypto");
     _w = {
         crypto: {
             subtle: {},
@@ -9,7 +8,7 @@ if (typeof self === "undefined") {
                 let buf = array.buffer;
                 let uint8buf = new Uint8Array(buf);
                 const rnd = crypto.randomBytes(uint8buf.length);
-                rnd.forEach((octet, index) => uint8buf[index] = octet);
+                rnd.forEach((octet: number, index: number) => uint8buf[index] = octet);
                 return array;
             }
         }

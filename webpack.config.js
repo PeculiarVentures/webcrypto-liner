@@ -1,8 +1,9 @@
 "use strict"
 
 const path = require("path");
+const webpack = require("webpack");
 
-module.exports = {  
+module.exports = {
   entry: "./src/index.ts",
   output: {
     filename: "index.js"
@@ -12,11 +13,14 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /\.ts$/, loader: "ts-loader", exclude:path.resolve(__dirname, "node_modules") }
+      { test: /\.ts$/, loader: "ts-loader", exclude: path.resolve(__dirname, "node_modules") }
     ]
   },
+  externals: {
+    crypto: "require(\"crypto\");",
+  },
   node: {
-      Buffer: false,
-      crypto: false,
+    Buffer: false,
+    crypto: false
   }
 }
