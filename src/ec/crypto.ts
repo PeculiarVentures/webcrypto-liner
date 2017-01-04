@@ -2,7 +2,8 @@ import { BaseCrypto, AlgorithmNames, AlgorithmError, Base64Url } from "webcrypto
 import { LinerError } from "../crypto";
 import { CryptoKey, CryptoKeyPair } from "../key";
 import { string2buffer, buffer2string, concat } from "../helper";
-import * as elliptic from "elliptic";
+// import * as elliptic from "elliptic";
+declare let elliptic: any;
 
 
 interface EcCryptoKey extends CryptoKey {

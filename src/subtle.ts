@@ -457,7 +457,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         msg = JSON.parse(msg);
                     }
                     let alg = GetHashAlgorithm(key);
-                    if (!alg) alg = assign({}, key.algorithm)
+                    if (!alg) alg = assign({}, key.algorithm);
                     FixExportJwk(msg, alg, key.usages);
                     return Promise.resolve(msg);
                 }

@@ -1,6 +1,19 @@
+import * as crypto from "crypto";
 let _w: any;
 if (typeof self === "undefined") {
-    _w = { crypto: { subtle: {} } };
+    // const crypto = require("crypto");
+    _w = {
+        crypto: {
+            subtle: {},
+            getRandomValues: (array: ArrayBufferView) => {
+                let buf = array.buffer;
+                let uint8buf = new Uint8Array(buf);
+                const rnd = crypto.randomBytes(uint8buf.length);
+                rnd.forEach((octet, index) => uint8buf[index] = octet);
+                return array;
+            }
+        }
+    };
 }
 else
     _w = self;

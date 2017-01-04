@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "module": "es2015",
+        "target": "es2015",
+        "lib": [
+            "dom", "es5", "es2015.promise", "es2015.symbol"
+        ]
+    }
+}
