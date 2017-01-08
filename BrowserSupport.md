@@ -9,7 +9,7 @@ There are a few things to keep in mind:
 - Lack of promise support on some browsersrequires promise polyfills which have their own issues.
 
 ### Safari
-![image](https://cloud.githubusercontent.com/assets/1619279/21236576/ec131aee-c2fb-11e6-96e3-418a0e84dde9.png)
+![image](https://cloud.githubusercontent.com/assets/1619279/21753856/4f03b922-d5aa-11e6-8f63-c2bad2e54cd1.png)
 
 ### Chrome
 ![image](https://cloud.githubusercontent.com/assets/1619279/21236656/354a37e2-c2fc-11e6-9669-9df1b989a187.png)
