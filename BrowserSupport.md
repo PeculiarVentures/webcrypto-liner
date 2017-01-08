@@ -12,11 +12,11 @@ There are a few things to keep in mind:
 ### IE
 ![image](https://cloud.githubusercontent.com/assets/1619279/20998720/b0566818-bcc4-11e6-994b-a0943fcea527.png)
 
-### Edge
-![image](https://cloud.githubusercontent.com/assets/1619279/20998446/b9315648-bcc2-11e6-9866-016725c8eaf8.png)
-
 ### Safari
 ![image](https://cloud.githubusercontent.com/assets/1619279/21753856/4f03b922-d5aa-11e6-8f63-c2bad2e54cd1.png)
+
+### Edge
+![image](https://cloud.githubusercontent.com/assets/1619279/20998446/b9315648-bcc2-11e6-9866-016725c8eaf8.png)
 
 ### Firefox
 ![image](https://cloud.githubusercontent.com/assets/1619279/21236692/5f91c8a8-c2fc-11e6-8fe0-0594dcd464e2.png)
