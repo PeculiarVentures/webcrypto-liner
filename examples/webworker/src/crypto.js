@@ -131,7 +131,7 @@ onmessage = function (e) {
                 });
             break;
         case "sign":
-            let jwk;
+            var jwk;
             Promise.resolve()
                 .then(function () { return App.generateKey(); })
                 .then(function () { return App.exportKey(); })
