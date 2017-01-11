@@ -157,14 +157,10 @@ function getRandomArbitrary(min, max) {
 function getRandomValues(buffer) {
     var buf = new Uint8Array(buffer.buffer);
     var i = 0;
-    var ar = [];
     while (i < buf.length) {
         buf[i++] = getRandomArbitrary(0, 255);
-        ar.push(buf[i - 1]);
     }
-    console.log(buffer[0]);
-    console.log(ar);
-    return buf;
+    return buffer;
 }
 
 var PATH = "../../src/";
