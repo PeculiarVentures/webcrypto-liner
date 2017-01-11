@@ -5,7 +5,8 @@ import { PrepareAlgorithm, PrepareData } from "webcrypto-core";
 
 // Base
 import { nativeSubtle } from "./init";
-import { LinerError } from "./crypto";
+import { LinerError } from "./error";
+import { Crypto } from "./crypto";
 import { CryptoKey, CryptoKeyPair } from "./key";
 import { string2buffer, buffer2string, concat, Browser, BrowserInfo, assign } from "./helper";
 
@@ -20,20 +21,23 @@ declare type IE = any;
 const keys: { key: CryptoKey, hash: Algorithm }[] = [];
 
 function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<CryptoKey> {
-    let promise = Promise.resolve(key);
-    if (!key.key)
-        if (!key.extractable) {
-            throw new LinerError("'key' is Native CryptoKey. It can't be converted to JS CryptoKey");
-        }
-        else {
-            promise = promise.then(() =>
-                self.crypto.subtle.exportKey("jwk", key)
-            )
-                .then((jwk: any) =>
-                    subtle.importKey("jwk", jwk, key.algorithm as Algorithm, true, key.usages)
-                );
-        }
-    return promise;
+    return Promise.resolve()
+        .then(() => {
+            if (!key.key) {
+                if (!key.extractable) {
+                    throw new LinerError("'key' is Native CryptoKey. It can't be converted to JS CryptoKey");
+                }
+                else {
+                    let crypto = new Crypto();
+                    return crypto.subtle.exportKey("jwk", key)
+                        .then((jwk: any) =>
+                            subtle.importKey("jwk", jwk, key.algorithm as Algorithm, true, key.usages)
+                        );
+                }
+            }
+            else
+                return key;
+        });
 }
 
 export class SubtleCrypto extends core.SubtleCrypto {
@@ -60,7 +64,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 if (keys) {
                     FixCryptoKeyUsages(keys, keyUsages);
                     SetHashAlgorithm(_alg, keys);
-                    return new Promise(resolve => resolve(keys));
+                    return keys;
                 }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
@@ -103,7 +107,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
             })
             .then((digest: ArrayBuffer) => {
-                if (digest) return new Promise(resolve => resolve(digest));
+                if (digest) return digest;
                 return ShaCrypto.digest(_alg, _data);
             });
     }
@@ -132,7 +136,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
             })
             .then((signature: ArrayBuffer) => {
-                if (signature) return new Promise(resolve => resolve(signature));
+                if (signature) return signature;
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDSA.toLowerCase():
@@ -175,7 +179,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
             })
             .then((result: boolean) => {
-                if (typeof result === "boolean") return new Promise(resolve => resolve(result));
+                if (typeof result === "boolean") return result;
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDSA.toLowerCase():
@@ -212,7 +216,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
             })
             .then((bits: ArrayBuffer) => {
-                if (bits) return new Promise(resolve => resolve(bits));
+                if (bits) return bits;
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDH.toLowerCase():
@@ -247,7 +251,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
             .then((key: CryptoKey) => {
                 if (key) {
                     FixCryptoKeyUsages(key, keyUsages);
-                    return new Promise(resolve => resolve(key));
+                    return key;
                 }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
@@ -341,7 +345,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
             })
             .then((msg: ArrayBuffer) => {
-                if (msg) return new Promise(resolve => resolve(msg));
+                if (msg) return msg;
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
@@ -377,7 +381,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
             })
             .then((msg: ArrayBuffer) => {
-                if (msg) return new Promise(resolve => resolve(msg));
+                if (msg) return msg;
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
@@ -418,7 +422,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
             .then((k: CryptoKey) => {
                 if (k) {
                     FixCryptoKeyUsages(k, keyUsages);
-                    return new Promise(resolve => resolve(k));
+                    return k;
                 }
                 let Class: typeof BaseCrypto;
                 switch (_alg.name.toLowerCase()) {

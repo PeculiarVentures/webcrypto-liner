@@ -4,9 +4,14 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-  entry: "./src/index.ts",
+  entry: {
+    "webcrypto-liner.shim": "./src/shim.ts",
+    "webcrypto-liner.lib": "./src/lib.ts",
+  },
   output: {
-    filename: "index.js"
+    library: "liner",
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
   },
   resolve: {
     extensions: ["", ".webpack.js", ".web.js", ".ts", ".js"]

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebCrypto Liner with dynamic crypto libraries</title>
+    <script src="src/main.js"></script>
+</head>
+
+<body>
+    <h3>WebCrypto Liner example</h3>
+    <div>
+        <h4>Signing</h4>
+        <textarea id="text" cols="10" rows="10" style="width: 100%">Some text</textarea>
+        <br/>
+        <input type="button" value="Sign" onclick="sign()"/>
+        <div id="result"></div>
+    </div>
+    <div>
+        <h4>Verifying</h4>
+        <label for="jwk">JWK key:</label><br/>
+        <textarea id="jwk" cols="10" rows="3" style="width: 100%"></textarea>
+        <label for="signed_text">Signed text:</label><br/>
+        <textarea id="signed_text" cols="10" rows="10" style="width: 100%">Some text</textarea>
+        <label for="signature">Signature:</label><br/>
+        <textarea id="signature" cols="10" rows="1" style="width: 100%"></textarea>
+        <input type="button" value="Verify" onclick="verify()"/>
+        <div id="verify_result"></div>
+    </div>
+</body>
+
+</html>
