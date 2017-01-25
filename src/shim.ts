@@ -11,4 +11,3 @@ if (nativeCrypto)
 
 delete self.crypto;
 _w.crypto = new Crypto();
-Object.freeze(_w.crypto);
