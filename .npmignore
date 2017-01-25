@@ -2,4 +2,6 @@
 /node_modules
 /scripts
 /build
+/tmp
+/examples
 index.js
