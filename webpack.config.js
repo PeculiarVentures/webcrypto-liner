@@ -1,22 +1,31 @@
 "use strict"
 
 const path = require("path");
+const webpack = require("webpack");
 
-module.exports = {  
-  entry: "./src/index.ts",
+module.exports = {
+  entry: {
+    "webcrypto-liner.shim": "./src/shim.ts",
+    "webcrypto-liner.lib": "./src/lib.ts",
+  },
   output: {
-    filename: "index.js"
+    library: "liner",
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
   },
   resolve: {
     extensions: ["", ".webpack.js", ".web.js", ".ts", ".js"]
   },
   module: {
     loaders: [
-      { test: /\.ts$/, loader: "ts-loader", exclude:path.resolve(__dirname, "node_modules") }
+      { test: /\.ts$/, loader: "ts-loader", exclude: path.resolve(__dirname, "node_modules") }
     ]
   },
+  externals: {
+    crypto: "require(\"crypto\");",
+  },
   node: {
-      Buffer: false,
-      crypto: false,
+    Buffer: false,
+    crypto: false
   }
 }

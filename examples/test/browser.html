@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="src/browser.js"></script>
+    <script>
+        function sign() {
+            crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, false, ["sign", "verify"])
+                .then(function (keyPair) {
+                    return crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, keyPair.privateKey, new Uint8Array([1, 2, 3, 4, 5]));
+                })
+                .then(function (signature) {
+                    console.log("Signature:", new Uint8Array(signature));
+                    alert("Success");
+                })
+                .catch(function (error) {
+                    console.error(error);
+                    alert(error.message);
+                });
+        }
+    </script>
+    <input type="button" onclick="sign()" value="Sign">
+</body>
+
+</html>

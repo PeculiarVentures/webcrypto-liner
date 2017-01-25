@@ -14,15 +14,9 @@ export function BrowserInfo() {
         name: "",
         version: ""
     };
-    if (typeof window !== "object" && typeof self !== void "object")
-        return {
-            name: "NodeJS",
-            version: process.version
-        };
-
     const userAgent = self.navigator.userAgent;
 
-    let reg: RegExpExecArray | null;
+    let reg: string[] | null;
     if (reg = /edge\/([\d\.]+)/i.exec(userAgent)) {
         res.name = Browser.Edge;
         res.version = reg[1];
