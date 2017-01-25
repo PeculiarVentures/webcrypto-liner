@@ -49,7 +49,7 @@ function BrowserInfo()
 	return res;
 }
 //**************************************************************************************
-function importScript(src)
+function importScripts(src)
 {
 	var script = document.createElement("script");
 	script.setAttribute("src", src);
@@ -62,7 +62,7 @@ function linerBrowserInit(path)
 	if(!(self.crypto || self.msCrypto))
 		importScripts("//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js");
 
-	importScript(path + "webcrypto-liner.shim.min.js")
+	importScripts(path + "webcrypto-liner.shim.min.js")
 	
 	switch(BrowserInfo().name)
 	{
@@ -73,7 +73,6 @@ function linerBrowserInit(path)
 			importScripts(path + "asmcrypto.min.js");
 			importScripts(path + "elliptic.min.js");
 		default:
-			console.log("UNKNOWN BROWSER, CAN NOT INITIALIZE");
 	}
 }
 //**************************************************************************************
