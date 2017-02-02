@@ -56,7 +56,7 @@ function getRandomArbitrary(min, max)
 //**************************************************************************************
 function getRandomValues(buffer)
 {
-	Math.seedrandom(self.location.href, { entropy: true });
+	self.Math.seedrandom(self.location.href, { entropy: true });
 	
 	const buf = new Uint8Array(buffer.buffer);
 	let i = 0;
@@ -88,7 +88,6 @@ export default function linerWorkerInit(path)
 			importScripts(path + "asmcrypto.min.js");
 			importScripts(path + "elliptic.min.js");
 		default:
-			console.log("UNKNOWN BROWSER, CAN NOT INITIALIZE");
 	}
 }
 //**************************************************************************************
