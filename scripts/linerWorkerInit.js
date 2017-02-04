@@ -51,7 +51,7 @@ function BrowserInfo()
 //**************************************************************************************
 function getRandomArbitrary(min, max)
 {
-	return Math.random() * (max - min) + min;
+	return self.Math.random() * (max - min) + min;
 }
 //**************************************************************************************
 function getRandomValues(buffer)
