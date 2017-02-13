@@ -32,6 +32,12 @@ declare namespace asmCrypto {
 
     class RSA_OAEP_SHA256 extends RSA_OAEP_SHA1 { }
 
+    class RSA_PKCS1_v1_5_SHA1 {
+        static sign(data: BufferSource, key: RsaKey): ArrayBufferView;
+        static verify(signature: BufferSource, data: BufferSource, key: RsaKey): boolean;
+    }
+    class RSA_PKCS1_v1_5_SHA256 extends RSA_PKCS1_v1_5_SHA1 { }
+
     class RSA_PSS_SHA1 {
         static sign(data: BufferSource, key: RsaKey, saltLength?: number): ArrayBufferView;
         static verify(signature: BufferSource, data: BufferSource, key: RsaKey, saltLength?: number): boolean;

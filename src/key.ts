@@ -4,9 +4,9 @@ export interface CryptoKeyPair extends NativeCryptoKeyPair {
 }
 
 export class CryptoKey implements NativeCryptoKey {
-    key: any;
-    algorithm: KeyAlgorithm;
-    extractable: boolean;
-    type: string;
-    usages: string[];
+    public key: any;
+    public algorithm: KeyAlgorithm;
+    public extractable: boolean;
+    public type: string;
+    public usages: string[];
 }

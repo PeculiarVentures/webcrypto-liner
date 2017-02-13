@@ -3,3 +3,4 @@
 /typings
 /node_modules
 index.js
+*.log

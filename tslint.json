@@ -1,57 +1,27 @@
 {
+    "extends": [
+        "tslint:recommended"
+    ],
     "rules": {
-        "class-name": true,
-        "comment-format": [
-            true,
-            "check-space"
+        "interface-name": [
+            false
         ],
-        "indent": [
-            true,
-            "spaces"
+        "prefer-const": true,
+        "no-var-requires": false,
+        "object-literal-sort-keys": false,
+        "ordered-imports": [
+            false
         ],
-        "no-duplicate-variable": true,
-        "no-eval": true,
-        "no-internal-module": true,
-        "no-trailing-whitespace": true,
-        "no-var-keyword": true,
-        "one-line": [
-            true,
-            "check-open-brace",
-            "check-whitespace"
+        "no-bitwise": false,
+        "forin": false,
+        "max-line-length": [
+            false
         ],
-        "quotemark": [
-            true,
-            "double"
+        "max-classes-per-file": [
+            false
         ],
-        "semicolon": [
-            true,
-            "always"
-        ],
-        "triple-equals": [
-            true,
-            "allow-null-check"
-        ],
-        "typedef-whitespace": [
-            true,
-            {
-                "call-signature": "nospace",
-                "index-signature": "nospace",
-                "parameter": "nospace",
-                "property-declaration": "nospace",
-                "variable-declaration": "nospace"
-            }
-        ],
-        "variable-name": [
-            true,
-            "ban-keywords"
-        ],
-        "whitespace": [
-            true,
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-type"
+        "no-console": [
+            false
         ]
     }
 }

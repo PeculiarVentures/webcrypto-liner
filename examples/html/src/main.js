@@ -1,5 +1,6 @@
+var alg = { name: "RSASSA-PKCS1-v1_5", hash: "SHA-1", publicExponent: new Uint8Array([1, 0, 1]), modulusLength: 2048 };
 // var alg = { name: "RSA-PSS", hash: "SHA-256", publicExponent: new Uint8Array([1, 0, 1]), modulusLength: 1024, saltLength: 32 };
-var alg = { name: "ECDSA", namedCurve: "P-256", hash: "SHA-1" };
+// var alg = { name: "ECDSA", namedCurve: "P-256", hash: "SHA-1" };
 
 function App() {
 }
@@ -13,7 +14,7 @@ App.generateKey = function () {
 };
 App.exportKey = function () {
     var _this = this;
-    return crypto.subtle.exportKey("jwk", _this.keys.publicKey);
+    return crypto.subtle.exportKey("jwk", _this.keys.privateKey);
 }
 App.importKey = function (jwk) {
     var _this = this;
@@ -33,13 +34,16 @@ App.sign = function (text) {
         .then(function () { // Sign
             return crypto.subtle.sign(alg, _this.keys.privateKey, _this.stringToBuffer(text));
         })
-        .then(function (sig) { // VErify
+        .then(function (sig) { // Verify
             signature = sig;
+            console.log(new Uint8Array(_this.stringToBuffer(text)));
+            console.log(new Uint8Array(signature));
             return crypto.subtle.verify(alg, _this.keys.publicKey, sig, _this.stringToBuffer(text));
         })
         .then(function (res) {
-            if (!res)
-                throw new Error("Wrong signature. Verification is false");
+            console.log("Result", res);
+            // if (!res)
+            //     throw new Error("Wrong signature. Verification is false");
             return signature;
         });
 };

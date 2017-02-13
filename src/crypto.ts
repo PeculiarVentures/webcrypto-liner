@@ -3,8 +3,9 @@ import { nativeCrypto } from "./init";
 
 export class Crypto {
 
-    subtle = new SubtleCrypto();
-    getRandomValues(array: ArrayBufferView): ArrayBufferView {
+    public subtle = new SubtleCrypto();
+
+    public getRandomValues(array: ArrayBufferView): ArrayBufferView {
         return nativeCrypto.getRandomValues(array);
     }
 

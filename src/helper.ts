@@ -10,9 +10,9 @@ export let Browser = {
  * Returns info about browser 
  */
 export function BrowserInfo() {
-    let res = {
+    const res = {
         name: "",
-        version: ""
+        version: "",
     };
     const userAgent = self.navigator.userAgent;
 
@@ -40,35 +40,39 @@ export function BrowserInfo() {
 }
 
 export function string2buffer(binaryString: string) {
-    let res = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++)
+    const res = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
         res[i] = binaryString.charCodeAt(i);
+    }
     return res;
 }
 
 export function buffer2string(buffer: Uint8Array) {
     let res = "";
-    for (let i = 0; i < buffer.length; i++)
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < buffer.length; i++) {
         res += String.fromCharCode(buffer[i]);
+    }
     return res;
 }
 
 export function concat(...buf: Uint8Array[]) {
-    const res = new Uint8Array(buf.map(item => item.length).reduce((prev, cur) => prev + cur));
+    const res = new Uint8Array(buf.map((item) => item.length).reduce((prev, cur) => prev + cur));
     let offset = 0;
     buf.forEach((item, index) => {
-        for (let i = 0; i < item.length; i++)
+        for (let i = 0; i < item.length; i++) {
             res[offset + i] = item[i];
+        }
         offset += item.length;
     });
     return res;
 }
 
 export function assign(target: any, ...sources: any[]) {
-    let res = arguments[0];
+    const res = arguments[0];
     for (let i = 1; i < arguments.length; i++) {
-        let obj = arguments[i];
-        for (let prop in obj) {
+        const obj = arguments[i];
+        for (const prop in obj) {
             res[prop] = obj[prop];
         }
     }

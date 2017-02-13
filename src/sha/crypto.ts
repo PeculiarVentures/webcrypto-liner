@@ -4,11 +4,13 @@ import { CryptoKey, CryptoKeyPair } from "../key";
 import { string2buffer, buffer2string, concat } from "../helper";
 
 export class ShaCrypto extends BaseCrypto {
-    static digest(alg: Algorithm, message: Uint8Array) {
+
+    public static digest(alg: Algorithm, message: Uint8Array) {
         return Promise.resolve()
             .then(() => {
-                if (typeof asmCrypto === "undefined")
+                if (typeof asmCrypto === "undefined") {
                     throw new LinerError(LinerError.MODULE_NOT_FOUND, "asmCrypto", "https://github.com/vibornoff/asmcrypto.js");
+                }
                 switch (alg.name.toUpperCase()) {
                     case AlgorithmNames.Sha1:
                         return asmCrypto.SHA1.bytes(message).buffer;

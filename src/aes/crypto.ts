@@ -9,12 +9,8 @@ interface AesCryptoKey extends CryptoKey {
 }
 
 export class AesCrypto extends BaseCrypto {
-    protected static checkModule() {
-        if (typeof asmCrypto === "undefined")
-            throw new LinerError(LinerError.MODULE_NOT_FOUND, "asmCrypto", "https://github.com/vibornoff/asmcrypto.js");
-    }
 
-    static generateKey(alg: AesKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKey> {
+    public static generateKey(alg: AesKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
                 this.checkModule();
@@ -33,17 +29,17 @@ export class AesCrypto extends BaseCrypto {
             });
     }
 
-    static encrypt(algorithm: Algorithm, key: AesCryptoKey, data: Uint8Array): PromiseLike<ArrayBuffer> {
+    public static encrypt(algorithm: Algorithm, key: AesCryptoKey, data: Uint8Array): PromiseLike<ArrayBuffer> {
         return Promise.resolve()
             .then(() => {
                 let res: Uint8Array;
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesCBC:
-                        let algCBC = algorithm as AesCbcParams;
+                        const algCBC = algorithm as AesCbcParams;
                         res = asmCrypto.AES_CBC.encrypt(data, key.key, undefined, algCBC.iv) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
-                        let algGCM = algorithm as AesGcmParams;
+                        const algGCM = algorithm as AesGcmParams;
                         algGCM.tagLength = algGCM.tagLength || 128;
                         res = asmCrypto.AES_GCM.encrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
@@ -54,18 +50,18 @@ export class AesCrypto extends BaseCrypto {
             });
     }
 
-    static decrypt(algorithm: Algorithm, key: AesCryptoKey, data: Uint8Array): PromiseLike<ArrayBuffer> {
+    public static decrypt(algorithm: Algorithm, key: AesCryptoKey, data: Uint8Array): PromiseLike<ArrayBuffer> {
         return Promise.resolve()
             .then(() => {
                 let res: Uint8Array;
 
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesCBC:
-                        let algCBC = algorithm as AesCbcParams;
+                        const algCBC = algorithm as AesCbcParams;
                         res = asmCrypto.AES_CBC.decrypt(data, key.key, undefined, algCBC.iv) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
-                        let algGCM = algorithm as AesGcmParams;
+                        const algGCM = algorithm as AesGcmParams;
                         algGCM.tagLength = algGCM.tagLength || 128;
                         res = asmCrypto.AES_GCM.decrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
@@ -76,7 +72,7 @@ export class AesCrypto extends BaseCrypto {
             });
     }
 
-    static wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: Algorithm): PromiseLike<ArrayBuffer> {
+    public static wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: Algorithm): PromiseLike<ArrayBuffer> {
         let crypto: Crypto;
         return Promise.resolve()
             .then(() => {
@@ -88,8 +84,7 @@ export class AesCrypto extends BaseCrypto {
                 if (!(data instanceof ArrayBuffer)) {
                     // JWK
                     raw = string2buffer(JSON.stringify(data));
-                }
-                else {
+                } else {
                     // ArrayBuffer
                     raw = new Uint8Array(data);
                 }
@@ -97,7 +92,7 @@ export class AesCrypto extends BaseCrypto {
             });
     }
 
-    static unwrapKey(format: string, wrappedKey: Uint8Array, unwrappingKey: CryptoKey, unwrapAlgorithm: Algorithm, unwrappedKeyAlgorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public static unwrapKey(format: string, wrappedKey: Uint8Array, unwrappingKey: CryptoKey, unwrapAlgorithm: Algorithm, unwrappedKeyAlgorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
         let crypto: Crypto;
         return Promise.resolve()
             .then(() => {
@@ -105,53 +100,53 @@ export class AesCrypto extends BaseCrypto {
                 return crypto.subtle.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey);
             })
             .then((data: any) => {
-                let _data: any;
-                if (format.toLowerCase() === "jwk")
-                    _data = JSON.parse(buffer2string(new Uint8Array(data)));
-                else
-                    _data = new Uint8Array(data);
-                return crypto.subtle.importKey(format, _data, unwrappedKeyAlgorithm, extractable, keyUsages);
+                let dataAny: any;
+                if (format.toLowerCase() === "jwk") {
+                    dataAny = JSON.parse(buffer2string(new Uint8Array(data)));
+                } else {
+                    dataAny = new Uint8Array(data);
+                }
+                return crypto.subtle.importKey(format, dataAny, unwrappedKeyAlgorithm, extractable, keyUsages);
             });
     }
 
-    static alg2jwk(alg: Algorithm): string {
+    public static alg2jwk(alg: Algorithm): string {
         return `A${(alg as AesKeyAlgorithm).length}${/-(\w+)/i.exec(alg.name!.toUpperCase()) ![1]}`;
     }
 
-    static jwk2alg(alg: string): Algorithm {
+    public static jwk2alg(alg: string): Algorithm {
         throw new Error("Not implemented");
     }
 
-    static exportKey(format: string, key: AesCryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
+    public static exportKey(format: string, key: AesCryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
         return Promise.resolve()
             .then(() => {
                 const raw = key.key;
                 if (format.toLowerCase() === "jwk") {
-                    let jwk: JsonWebKey = {
+                    const jwk: JsonWebKey = {
                         alg: this.alg2jwk(key.algorithm as Algorithm),
                         ext: key.extractable,
                         k: Base64Url.encode(raw),
                         key_ops: key.usages,
-                        kty: "oct"
+                        kty: "oct",
                     };
                     return jwk;
-                }
-                else {
+                } else {
                     return raw.buffer;
                 }
             });
     }
 
-    static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
                 let raw: Uint8Array;
                 if (format.toLowerCase() === "jwk") {
                     const jwk = keyData as JsonWebKey;
                     raw = Base64Url.decode(jwk.k!);
-                }
-                else
+                } else {
                     raw = new Uint8Array(keyData as Uint8Array);
+                }
                 const key = new CryptoKey();
                 key.algorithm = algorithm;
                 key.type = "secret";
@@ -160,6 +155,13 @@ export class AesCrypto extends BaseCrypto {
                 return key;
             });
     }
+
+    protected static checkModule() {
+        if (typeof asmCrypto === "undefined") {
+            throw new LinerError(LinerError.MODULE_NOT_FOUND, "asmCrypto", "https://github.com/vibornoff/asmcrypto.js");
+        }
+    }
+
 }
 
 import { Crypto } from "../crypto";

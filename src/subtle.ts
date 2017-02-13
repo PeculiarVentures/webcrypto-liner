@@ -5,10 +5,10 @@ import { PrepareAlgorithm, PrepareData } from "webcrypto-core";
 
 // Base
 import { nativeSubtle } from "./init";
-import { LinerError } from "./error";
 import { Crypto } from "./crypto";
-import { CryptoKey, CryptoKeyPair } from "./key";
+import { LinerError } from "./error";
 import { string2buffer, buffer2string, concat, Browser, BrowserInfo, assign } from "./helper";
+import { CryptoKey, CryptoKeyPair } from "./key";
 
 // Crypto
 import { AesCrypto } from "./aes/crypto";
@@ -18,7 +18,7 @@ import { EcCrypto } from "./ec/crypto";
 
 declare type IE = any;
 
-const keys: { key: CryptoKey, hash: Algorithm }[] = [];
+const keys: Array<{ key: CryptoKey, hash: Algorithm }> = [];
 
 function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<CryptoKey> {
     return Promise.resolve()
@@ -26,48 +26,43 @@ function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<Cryp
             if (!key.key) {
                 if (!key.extractable) {
                     throw new LinerError("'key' is Native CryptoKey. It can't be converted to JS CryptoKey");
-                }
-                else {
-                    let crypto = new Crypto();
+                } else {
+                    const crypto = new Crypto();
                     return crypto.subtle.exportKey("jwk", key)
-                        .then((jwk: any) =>
-                            subtle.importKey("jwk", jwk, key.algorithm as Algorithm, true, key.usages)
-                        );
+                        .then((jwk: any) => subtle.importKey("jwk", jwk, key.algorithm as Algorithm, true, key.usages));
                 }
-            }
-            else
+            } else {
                 return key;
+            }
         });
 }
 
 export class SubtleCrypto extends core.SubtleCrypto {
 
-    generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<NativeCryptoKey | NativeCryptoKeyPair> {
+    public generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<NativeCryptoKey | NativeCryptoKeyPair> {
         const args = arguments;
-        let _alg: Algorithm;
+        let alg: Algorithm;
         return super.generateKey.apply(this, args)
             .then((d: Uint8Array) => {
-                _alg = PrepareAlgorithm(algorithm);
+                alg = PrepareAlgorithm(algorithm);
 
                 try {
                     return nativeSubtle.generateKey.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native generateKey for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native generateKey for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native generateKey for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native generateKey for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
-            .then((keys: CryptoKey | CryptoKeyPair) => {
-
-                if (keys) {
-                    FixCryptoKeyUsages(keys, keyUsages);
-                    SetHashAlgorithm(_alg, keys);
-                    return keys;
+            .then((generatedKeys: CryptoKey | CryptoKeyPair) => {
+                if (generatedKeys) {
+                    FixCryptoKeyUsages(generatedKeys, keyUsages);
+                    SetHashAlgorithm(alg, generatedKeys);
+                    return generatedKeys;
                 }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -78,174 +73,181 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         break;
                     case AlgorithmNames.RsaOAEP.toLowerCase():
                     case AlgorithmNames.RsaPSS.toLowerCase():
+                    case AlgorithmNames.RsaSSA.toLowerCase():
                         Class = RsaCrypto;
                         break;
                     default:
-                        throw new LinerError(LinerError.NOT_SUPPORTED, "generateKey");
+                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
                 }
-                return Class.generateKey(_alg, extractable, keyUsages);
+                return Class.generateKey(alg, extractable, keyUsages);
             });
     }
 
-    digest(algorithm: AlgorithmIdentifier, data: BufferSource): PromiseLike<ArrayBuffer> {
+    public digest(algorithm: AlgorithmIdentifier, data: BufferSource): PromiseLike<ArrayBuffer> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _data: Uint8Array;
+        let alg: Algorithm;
+        let dataBytes: Uint8Array;
         return super.digest.apply(this, args)
             .then((d: Uint8Array) => {
-                _alg = PrepareAlgorithm(algorithm);
-                _data = PrepareData(data, "data");
+                alg = PrepareAlgorithm(algorithm);
+                dataBytes = PrepareData(data, "data");
 
                 try {
                     return nativeSubtle.digest.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native digest for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native digest for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native digest for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native digest for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((digest: ArrayBuffer) => {
-                if (digest) return digest;
-                return ShaCrypto.digest(_alg, _data);
+                if (digest) {
+                    return digest;
+                }
+                return ShaCrypto.digest(alg, dataBytes);
             });
     }
 
-    sign(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
+    public sign(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _data: Uint8Array;
+        let alg: Algorithm;
+        let dataBytes: Uint8Array;
         return super.sign.apply(this, args)
             .then((d: Uint8Array) => {
-                _alg = PrepareAlgorithm(algorithm as string);
-                _data = PrepareData(data, "data");
+                alg = PrepareAlgorithm(algorithm as string);
+                dataBytes = PrepareData(data, "data");
 
-                const _alg2 = GetHashAlgorithm(key);
-                if (_alg2) {
-                    args[0] = assign(_alg, _alg2);
+                const alg2 = GetHashAlgorithm(key);
+                if (alg2) {
+                    args[0] = assign(alg, alg2);
                 }
                 try {
                     return nativeSubtle.sign.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native sign for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native sign for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native sign for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native sign for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((signature: ArrayBuffer) => {
-                if (signature) return signature;
+                if (signature) {
+                    return signature;
+                }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDSA.toLowerCase():
                         Class = EcCrypto;
                         break;
+                    case AlgorithmNames.RsaSSA.toLowerCase():
                     case AlgorithmNames.RsaPSS.toLowerCase():
                         Class = RsaCrypto;
                         break;
                     default:
-                        throw new LinerError(LinerError.NOT_SUPPORTED, "sign");
+                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
                 }
                 return PrepareKey(key, Class)
-                    .then(key => Class.sign(_alg, key, _data));
+                    .then((preparedKey) => Class.sign(alg, preparedKey, dataBytes));
             });
     }
 
-    verify(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, key: CryptoKey, signature: BufferSource, data: BufferSource): PromiseLike<boolean> {
+    public verify(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, key: CryptoKey, signature: BufferSource, data: BufferSource): PromiseLike<boolean> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _signature: Uint8Array;
-        let _data: Uint8Array;
+        let alg: Algorithm;
+        let signatureBytes: Uint8Array;
+        let dataBytes: Uint8Array;
         return super.verify.apply(this, args)
             .then((d: boolean) => {
-                _alg = PrepareAlgorithm(algorithm as string);
-                _signature = PrepareData(signature, "data");
-                _data = PrepareData(data, "data");
+                alg = PrepareAlgorithm(algorithm as string);
+                signatureBytes = PrepareData(signature, "data");
+                dataBytes = PrepareData(data, "data");
 
-                const _alg2 = GetHashAlgorithm(key);
-                if (_alg2) {
-                    args[0] = assign(_alg, _alg2);
+                const alg2 = GetHashAlgorithm(key);
+                if (alg2) {
+                    args[0] = assign(alg, alg2);
                 }
                 try {
                     return nativeSubtle.verify.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native verify for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native verify for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native verify for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native verify for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((result: boolean) => {
-                if (typeof result === "boolean") return result;
+                if (typeof result === "boolean") {
+                    return result;
+                }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDSA.toLowerCase():
                         Class = EcCrypto;
                         break;
+                    case AlgorithmNames.RsaSSA.toLowerCase():
                     case AlgorithmNames.RsaPSS.toLowerCase():
                         Class = RsaCrypto;
                         break;
                     default:
-                        throw new LinerError(LinerError.NOT_SUPPORTED, "sign");
+                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
                 }
                 return PrepareKey(key, Class)
-                    .then(key => Class.verify(_alg, key, _signature, _data));
+                    .then((preparedKey) => Class.verify(alg, key, signatureBytes, dataBytes));
             });
     }
 
-    deriveBits(algorithm: AlgorithmIdentifier, baseKey: CryptoKey, length: number): PromiseLike<ArrayBuffer> {
+    public deriveBits(algorithm: AlgorithmIdentifier, baseKey: CryptoKey, length: number): PromiseLike<ArrayBuffer> {
         const args = arguments;
-        let _alg: Algorithm;
+        let alg: Algorithm;
         return super.deriveBits.apply(this, args)
             .then((bits: ArrayBuffer) => {
-                _alg = PrepareAlgorithm(algorithm);
+                alg = PrepareAlgorithm(algorithm);
 
                 try {
                     return nativeSubtle.deriveBits.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native deriveBits for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native deriveBits for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
+                } catch (e) {
                     // Edge throws error. Don't know Why.
-                    console.warn(`WebCrypto: native deriveBits for ${_alg.name} doesn't work.`, e.message || "");
+                    console.warn(`WebCrypto: native deriveBits for ${alg.name} doesn't work.`, e.message || "");
                 }
 
             })
             .then((bits: ArrayBuffer) => {
-                if (bits) return bits;
+                if (bits) {
+                    return bits;
+                }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDH.toLowerCase():
                         Class = EcCrypto;
                         break;
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "deriveBits");
                 }
-                return Class.deriveBits(_alg, baseKey, length);
+                return Class.deriveBits(alg, baseKey, length);
             });
     }
 
-    deriveKey(algorithm: AlgorithmIdentifier, baseKey: CryptoKey, derivedKeyType: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public deriveKey(algorithm: AlgorithmIdentifier, baseKey: CryptoKey, derivedKeyType: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _algDerivedKey: Algorithm;
+        let alg: Algorithm;
+        let algDerivedKey: Algorithm;
         return super.deriveKey.apply(this, args)
             .then((bits: ArrayBuffer) => {
-                _alg = PrepareAlgorithm(algorithm);
-                _algDerivedKey = PrepareAlgorithm(derivedKeyType);
+                alg = PrepareAlgorithm(algorithm);
+                algDerivedKey = PrepareAlgorithm(derivedKeyType);
 
                 try {
                     return nativeSubtle.deriveKey.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native deriveKey for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native deriveKey for ${alg.name} doesn't work.`, e.message || "");
                         });
                 } catch (e) {
                     // Edge doesn't go to catch of Promise
-                    console.warn(`WebCrypto: native deriveKey for ${_alg.name} doesn't work.`, e.message || "");
+                    console.warn(`WebCrypto: native deriveKey for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((key: CryptoKey) => {
@@ -254,43 +256,42 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     return key;
                 }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDH.toLowerCase():
                         Class = EcCrypto;
                         break;
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "deriveBits");
                 }
-                return Class.deriveKey(_alg, baseKey, _algDerivedKey, extractable, keyUsages);
+                return Class.deriveKey(alg, baseKey, algDerivedKey, extractable, keyUsages);
             });
     }
 
-    encrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
+    public encrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _data: Uint8Array;
+        let alg: Algorithm;
+        let dataBytes: Uint8Array;
         return super.encrypt.apply(this, args)
             .then((bits: ArrayBuffer) => {
-                _alg = PrepareAlgorithm(algorithm);
-                _data = PrepareData(data, "data");
+                alg = PrepareAlgorithm(algorithm);
+                dataBytes = PrepareData(data, "data");
 
                 try {
                     return nativeSubtle.encrypt.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'encrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native 'encrypt' for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native 'encrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native 'encrypt' for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((msg: any) => {
                 if (msg) {
                     if (BrowserInfo().name === Browser.IE &&
-                        _alg.name.toUpperCase() === AlgorithmNames.AesGCM &&
+                        alg.name.toUpperCase() === AlgorithmNames.AesGCM &&
                         msg.ciphertext) {
-                        // Concatinate values in IE
-                        let buf = new Uint8Array(msg.ciphertext.byteLength + msg.tag.byteLength);
+                        // Concatenate values in IE
+                        const buf = new Uint8Array(msg.ciphertext.byteLength + msg.tag.byteLength);
                         let count = 0;
                         new Uint8Array(msg.ciphertext).forEach((v: number) => buf[count++] = v);
                         new Uint8Array(msg.tag).forEach((v: number) => buf[count++] = v);
@@ -299,7 +300,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     return Promise.resolve(msg);
                 }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -311,43 +312,45 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
                 }
                 return PrepareKey(key, Class)
-                    .then(key => Class.encrypt(_alg, key, _data));
+                    .then(preparedKey => Class.encrypt(alg, preparedKey, dataBytes));
             });
     }
-    decrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
+
+    public decrypt(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): PromiseLike<ArrayBuffer> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _data: Uint8Array;
+        let alg: Algorithm;
+        let dataBytes: Uint8Array;
         return super.decrypt.apply(this, args)
             .then((bits: ArrayBuffer) => {
-                _alg = PrepareAlgorithm(algorithm);
-                _data = PrepareData(data, "data");
+                alg = PrepareAlgorithm(algorithm);
+                dataBytes = PrepareData(data, "data");
 
-                let _data2: any = _data;
+                let dataBytes2: any = dataBytes;
                 if (BrowserInfo().name === Browser.IE &&
-                    _alg.name.toUpperCase() === AlgorithmNames.AesGCM) {
+                    alg.name.toUpperCase() === AlgorithmNames.AesGCM) {
                     // Split buffer
-                    const len = _data.byteLength - ((_alg as any).tagLength / 8);
-                    _data2 = {
-                        ciphertext: _data.buffer.slice(0, len),
-                        tag: _data.buffer.slice(len, _data.byteLength)
+                    const len = dataBytes.byteLength - ((alg as any).tagLength / 8);
+                    dataBytes2 = {
+                        ciphertext: dataBytes.buffer.slice(0, len),
+                        tag: dataBytes.buffer.slice(len, dataBytes.byteLength)
                     };
                 }
 
                 try {
-                    return nativeSubtle.decrypt.call(nativeSubtle, _alg, key, _data2)
+                    return nativeSubtle.decrypt.call(nativeSubtle, alg, key, dataBytes2)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'decrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native 'decrypt' for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native 'decrypt' for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native 'decrypt' for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((msg: ArrayBuffer) => {
-                if (msg) return msg;
+                if (msg) {
+                    return msg;
+                }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -359,31 +362,32 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
                 }
                 return PrepareKey(key, Class)
-                    .then(key => Class.decrypt(_alg, key, _data));
+                    .then((preparedKey) => Class.decrypt(alg, preparedKey, dataBytes));
             });
     }
 
-    wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: AlgorithmIdentifier): PromiseLike<ArrayBuffer> {
+    public wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: AlgorithmIdentifier): PromiseLike<ArrayBuffer> {
         const args = arguments;
-        let _alg: Algorithm;
+        let alg: Algorithm;
         return super.wrapKey.apply(this, args)
             .then((bits: ArrayBuffer) => {
-                _alg = PrepareAlgorithm(wrapAlgorithm);
+                alg = PrepareAlgorithm(wrapAlgorithm);
 
                 try {
                     return nativeSubtle.wrapKey.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'wrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native 'wrapKey' for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native 'wrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native 'wrapKey' for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((msg: ArrayBuffer) => {
-                if (msg) return msg;
+                if (msg) {
+                    return msg;
+                }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -394,29 +398,28 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "wrapKey");
                 }
-                return Class.wrapKey(format, key, wrappingKey, _alg);
+                return Class.wrapKey(format, key, wrappingKey, alg);
             });
     }
 
-    unwrapKey(format: string, wrappedKey: BufferSource, unwrappingKey: CryptoKey, unwrapAlgorithm: AlgorithmIdentifier, unwrappedKeyAlgorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public unwrapKey(format: string, wrappedKey: BufferSource, unwrappingKey: CryptoKey, unwrapAlgorithm: AlgorithmIdentifier, unwrappedKeyAlgorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _algKey: Algorithm;
-        let _data: Uint8Array;
+        let alg: Algorithm;
+        let algKey: Algorithm;
+        let dataBytes: Uint8Array;
         return super.unwrapKey.apply(this, args)
             .then((bits: ArrayBuffer) => {
-                _alg = PrepareAlgorithm(unwrapAlgorithm);
-                _algKey = PrepareAlgorithm(unwrappedKeyAlgorithm);
-                _data = PrepareData(wrappedKey, "wrappedKey");
+                alg = PrepareAlgorithm(unwrapAlgorithm);
+                algKey = PrepareAlgorithm(unwrappedKeyAlgorithm);
+                dataBytes = PrepareData(wrappedKey, "wrappedKey");
 
                 try {
                     return nativeSubtle.unwrapKey.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'unwrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native 'unwrapKey' for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native 'unwrapKey' for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native 'unwrapKey' for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((k: CryptoKey) => {
@@ -425,7 +428,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     return k;
                 }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -436,11 +439,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "unwrapKey");
                 }
-                return Class.unwrapKey(format, _data, unwrappingKey, _alg, _algKey, extractable, keyUsages);
+                return Class.unwrapKey(format, dataBytes, unwrappingKey, alg, algKey, extractable, keyUsages);
             });
     }
 
-    exportKey(format: string, key: CryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
+    public exportKey(format: string, key: CryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
         const args = arguments;
         return super.exportKey.apply(this, args)
             .then(() => {
@@ -449,8 +452,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         .catch((e: Error) => {
                             console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
+                } catch (e) {
                     console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e.message || "");
                 }
             })
@@ -461,12 +463,15 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         msg = JSON.parse(msg);
                     }
                     let alg = GetHashAlgorithm(key);
-                    if (!alg) alg = assign({}, key.algorithm);
+                    if (!alg) {
+                        alg = assign({}, key.algorithm);
+                    }
                     FixExportJwk(msg, alg, key.usages);
                     return Promise.resolve(msg);
                 }
-                if (!key.key)
+                if (!key.key) {
                     throw new LinerError("Cannot export native CryptoKey from JS implementation");
+                }
                 let Class: typeof BaseCrypto;
                 switch (key.algorithm.name!.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
@@ -477,25 +482,26 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     case AlgorithmNames.EcDSA.toLowerCase():
                         Class = EcCrypto;
                         break;
+                    case AlgorithmNames.RsaSSA.toLowerCase():
                     case AlgorithmNames.RsaPSS.toLowerCase():
                     case AlgorithmNames.RsaOAEP.toLowerCase():
                         Class = RsaCrypto;
                         break;
                     default:
-                        throw new LinerError(LinerError.NOT_SUPPORTED, "exportKey");
+                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name!.toLowerCase());
                 }
                 return Class.exportKey(format, key);
             });
     }
 
-    importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
         const args = arguments;
-        let _alg: Algorithm;
-        let _data: any;
+        let alg: Algorithm;
+        let dataAny: any;
         return super.importKey.apply(this, args)
             .then((bits: ArrayBuffer) => {
-                _alg = PrepareAlgorithm(algorithm);
-                _data = keyData;
+                alg = PrepareAlgorithm(algorithm);
+                dataAny = keyData;
 
                 // Fix: Safari
                 if (BrowserInfo().name === Browser.Safari || BrowserInfo().name === Browser.IE) {
@@ -508,27 +514,26 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
                 // End: Fix
                 if (ArrayBuffer.isView(keyData)) {
-                    _data = PrepareData(keyData, "keyData");
+                    dataAny = PrepareData(keyData, "keyData");
                 }
 
                 try {
                     return nativeSubtle.importKey.apply(nativeSubtle, args)
                         .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'importKey' for ${_alg.name} doesn't work.`, e.message || "");
+                            console.warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e.message || "");
                         });
-                }
-                catch (e) {
-                    console.warn(`WebCrypto: native 'importKey' for ${_alg.name} doesn't work.`, e.message || "");
+                } catch (e) {
+                    console.warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e.message || "");
                 }
             })
             .then((k: CryptoKey) => {
                 if (k) {
-                    SetHashAlgorithm(_alg, k);
+                    SetHashAlgorithm(alg, k);
                     FixCryptoKeyUsages(k, keyUsages);
                     return Promise.resolve(k);
                 }
                 let Class: typeof BaseCrypto;
-                switch (_alg.name.toLowerCase()) {
+                switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -537,14 +542,15 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     case AlgorithmNames.EcDSA.toLowerCase():
                         Class = EcCrypto;
                         break;
+                    case AlgorithmNames.RsaSSA.toLowerCase():
                     case AlgorithmNames.RsaPSS.toLowerCase():
                     case AlgorithmNames.RsaOAEP.toLowerCase():
                         Class = RsaCrypto;
                         break;
                     default:
-                        throw new LinerError(LinerError.NOT_SUPPORTED, "importKey");
+                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
                 }
-                return Class.importKey(format, _data, _alg, extractable, keyUsages);
+                return Class.importKey(format, dataAny, alg, extractable, keyUsages);
             });
     }
 }
@@ -555,16 +561,16 @@ function SetHashAlgorithm(alg: Algorithm, key: CryptoKey | CryptoKeyPair) {
         if ((key as CryptoKeyPair).privateKey) {
             keys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).privateKey });
             keys.push({ hash: (alg as any).hash, key: (key as CryptoKeyPair).publicKey });
-        }
-        else
+        } else {
             keys.push({ hash: (alg as any).hash, key: key as CryptoKey });
+        }
     }
 }
 
 // fix hash alg for rsa key
 function GetHashAlgorithm(key: CryptoKey) {
     let alg: Algorithm | null = null;
-    keys.some(item => {
+    keys.some((item) => {
         if (item.key === key) {
             alg = assign({}, key.algorithm, { hash: item.hash });
             return true;
@@ -576,6 +582,7 @@ function GetHashAlgorithm(key: CryptoKey) {
 
 // Extend Uint8Array for IE
 if (!Uint8Array.prototype.forEach) {
+    // tslint:disable-next-line:only-arrow-functions
     (Uint8Array as any).prototype.forEach = function (cb: (value: number, index: number, array: Uint8Array) => void) {
         for (let i = 0; i < this.length; i++) {
             cb(this[i], i, this);
@@ -583,44 +590,48 @@ if (!Uint8Array.prototype.forEach) {
     };
 }
 if (!Uint8Array.prototype.slice) {
+    // tslint:disable-next-line:only-arrow-functions
     (Uint8Array as any).prototype.slice = function (start: number, end: number) {
         return new Uint8Array(this.buffer.slice(start, end));
     };
 }
 if (!Uint8Array.prototype.filter) {
+    // tslint:disable-next-line:only-arrow-functions
     (Uint8Array as any).prototype.filter = function (cb: (value: number, index: number, array: Uint8Array) => void) {
-        let buf: number[] = [];
+        const buf: number[] = [];
         for (let i = 0; i < this.length; i++) {
-            if (cb(this[i], i, this))
+            if (cb(this[i], i, this)) {
                 buf.push(this[i]);
+            }
         }
         return new Uint8Array(buf);
     };
 }
 
 function FixCryptoKeyUsages(key: CryptoKey | CryptoKeyPair, keyUsages: string[]) {
-    const keys: CryptoKey[] = [];
+    const keyArray: CryptoKey[] = [];
     if ((key as CryptoKeyPair).privateKey) {
-        keys.push((key as CryptoKeyPair).privateKey);
-        keys.push((key as CryptoKeyPair).publicKey);
+        keyArray.push((key as CryptoKeyPair).privateKey);
+        keyArray.push((key as CryptoKeyPair).publicKey);
+    } else {
+        keyArray.push(key as CryptoKey);
     }
-    else {
-        keys.push(key as CryptoKey);
-    }
-    keys.forEach((k: any) => {
+    keyArray.forEach((k: any) => {
         if ("keyUsage" in k) {
             k.usages = k.keyUsage || [];
             // add usages
             if (!k.usages.length) {
                 ["verify", "encrypt", "wrapKey"]
-                    .forEach(usage => {
-                        if (keyUsages.indexOf(usage) > -1 && (k.type === "public" || k.type === "secret"))
+                    .forEach((usage) => {
+                        if (keyUsages.indexOf(usage) > -1 && (k.type === "public" || k.type === "secret")) {
                             k.usages.push(usage);
+                        }
                     });
                 ["sign", "decrypt", "unwrapKey", "deriveKey", "deriveBits"]
-                    .forEach(usage => {
-                        if (keyUsages.indexOf(usage) > -1 && (k.type === "private" || k.type === "secret"))
+                    .forEach((usage) => {
+                        if (keyUsages.indexOf(usage) > -1 && (k.type === "private" || k.type === "secret")) {
                             k.usages.push(usage);
+                        }
                     });
             }
         }
@@ -646,6 +657,8 @@ function FixExportJwk(jwk: any, alg: any, keyUsages: string[]) {
             case AlgorithmNames.AesGCM.toUpperCase():
                 CryptoClass = AesCrypto;
                 break;
+            default:
+                throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toUpperCase());
         }
 
         if (CryptoClass && !jwk.alg) {
@@ -653,8 +666,9 @@ function FixExportJwk(jwk: any, alg: any, keyUsages: string[]) {
         }
 
         // add key_ops
-        if (!("key_ops" in jwk))
+        if (!("key_ops" in jwk)) {
             jwk.key_ops = keyUsages;
+        }
     }
 }
 
@@ -668,4 +682,4 @@ function FixImportJwk(jwk: any) {
         delete jwk.key_ops;
         delete jwk.alg;
     }
-} 
+}

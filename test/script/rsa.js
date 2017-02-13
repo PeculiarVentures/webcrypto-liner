@@ -10,14 +10,14 @@ for (let i = 0; i < REPEAT; i++) {
         const cryptoType = ["native", "js"];
         const keys = [];
 
-        ["RSA-PSS", "RSA-OAEP"].forEach(name =>
+        ["RSA-PSS", "RSA-OAEP", "RSASSA-PKCS1-v1_5"].forEach(name =>
             [1024].forEach(modulusLength => {
                 [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach(publicExponent => {
                     ["SHA-1", "SHA-256"].forEach(hash => {
                         keys.push({
                             name: `${name} bits:${modulusLength} exp:${publicExponent[0] === 3 ? "3" : "65537"} hash: ${hash}`,
                             algorithm: { name, modulusLength, publicExponent, hash },
-                            usages: name === "RSA-PSS" ? ["sign", "verify"] : ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+                            usages: name !== "RSA-OAEP" ? ["sign", "verify"] : ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
                         })
                     })
                 })
@@ -128,7 +128,7 @@ for (let i = 0; i < REPEAT; i++) {
             )
         });
 
-        context("sign/verify", () =>
+        context("sign/verify", () => {
             keys.filter(key => key.algorithm.name === "RSA-PSS").forEach(key =>
                 ["native", "js"].forEach(type =>
                     [16, 32, 64].forEach(saltLength =>
@@ -152,7 +152,27 @@ for (let i = 0; i < REPEAT; i++) {
                     )
                 )
             )
-        )
+
+            keys.filter(key => key.algorithm.name === "RSASSA-PKCS1-v1_5").forEach(key =>
+                ["native", "js"].forEach(type =>
+                    it(`${key.name} type:${type}`, done => {
+                        const revType = type === "native" ? "js" : "native";
+                        const data = crypto.getRandomValues(new Uint8Array(16));
+                        let alg = { name: key.algorithm.name };
+                        subtle[type].sign(alg, key[type].privateKey, data)
+                            .then(signature => {
+                                assert.equal(!!signature, true);
+                                return subtle[revType].verify(alg, key[revType].publicKey, signature, data);
+                            })
+                            .then(verify => {
+                                assert.equal(verify, true);
+                                done();
+                            })
+                            .catch(done);
+                    })
+                )
+            )
+        })
 
     });
 }
