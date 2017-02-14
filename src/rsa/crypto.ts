@@ -1,4 +1,4 @@
-import { AlgorithmError, AlgorithmNames, Base64Url, BaseCrypto } from "webcrypto-core";
+import { AlgorithmError, AlgorithmNames, Base64Url, BaseCrypto, PrepareData } from "webcrypto-core";
 import { LinerError } from "../error";
 import { buffer2string, concat, string2buffer } from "../helper";
 import { CryptoKey, CryptoKeyPair } from "../key";
@@ -154,7 +154,11 @@ export class RsaCrypto extends BaseCrypto {
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, `${keyAlg.name} ${(keyAlg.hash as Algorithm).name}`);
                         }
-                        return encrypt(data, key.key, rsaAlg.label);
+                        let label;
+                        if (rsaAlg.label) {
+                            label = PrepareData(rsaAlg.label, "label");
+                        }
+                        return encrypt(data, key.key, label);
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, algorithm.name);
                 }
@@ -179,7 +183,11 @@ export class RsaCrypto extends BaseCrypto {
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, `${keyAlg.name} ${(keyAlg.hash as Algorithm).name}`);
                         }
-                        return decrypt(data, key.key, rsaAlg.label);
+                        let label;
+                        if (rsaAlg.label) {
+                            label = PrepareData(rsaAlg.label, "label");
+                        }
+                        return decrypt(data, key.key, label);
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, algorithm.name);
                 }

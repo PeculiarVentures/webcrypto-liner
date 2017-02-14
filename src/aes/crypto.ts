@@ -1,4 +1,4 @@
-import { BaseCrypto, AlgorithmNames, AlgorithmError, Base64Url } from "webcrypto-core";
+import { BaseCrypto, AlgorithmNames, AlgorithmError, Base64Url, PrepareData } from "webcrypto-core";
 import { LinerError } from "../error";
 import { CryptoKey, CryptoKeyPair } from "../key";
 import { string2buffer, buffer2string, concat } from "../helper";
@@ -36,12 +36,16 @@ export class AesCrypto extends BaseCrypto {
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
-                        res = asmCrypto.AES_CBC.encrypt(data, key.key, undefined, algCBC.iv) as Uint8Array;
+                        res = asmCrypto.AES_CBC.encrypt(data, key.key, undefined, PrepareData(algCBC.iv, "iv")) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
                         const algGCM = algorithm as AesGcmParams;
                         algGCM.tagLength = algGCM.tagLength || 128;
-                        res = asmCrypto.AES_GCM.encrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
+                        let additionalData;
+                        if (algGCM.additionalData) {
+                            additionalData = PrepareData(algGCM.additionalData, "additionalData");
+                        }
+                        res = asmCrypto.AES_GCM.encrypt(data, key.key, algGCM.iv, additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
                     default:
                         throw new LinerError(AlgorithmError.UNSUPPORTED_ALGORITHM, algorithm.name);
@@ -58,12 +62,16 @@ export class AesCrypto extends BaseCrypto {
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
-                        res = asmCrypto.AES_CBC.decrypt(data, key.key, undefined, algCBC.iv) as Uint8Array;
+                        res = asmCrypto.AES_CBC.decrypt(data, key.key, undefined, PrepareData(algCBC.iv, "iv")) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
                         const algGCM = algorithm as AesGcmParams;
                         algGCM.tagLength = algGCM.tagLength || 128;
-                        res = asmCrypto.AES_GCM.decrypt(data, key.key, algGCM.iv, algGCM.additionalData, algGCM.tagLength / 8) as Uint8Array;
+                        let additionalData;
+                        if (algGCM.additionalData) {
+                            additionalData = PrepareData(algGCM.additionalData, "additionalData");
+                        }
+                        res = asmCrypto.AES_GCM.decrypt(data, key.key, algGCM.iv, additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
                     default:
                         throw new LinerError(AlgorithmError.UNSUPPORTED_ALGORITHM, algorithm.name);

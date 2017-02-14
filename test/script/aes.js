@@ -55,6 +55,10 @@ for (let i = 0; i < REPEAT; i++) {
                         {
                             name: "iv:16",
                             data: { iv: crypto.getRandomValues(new Uint8Array(16)) }
+                        },
+                        {
+                            name: "iv:16 ArrayBuffer",
+                            data: { iv: crypto.getRandomValues(new Uint8Array(16)).buffer }
                         }
                     ]
                     break;
