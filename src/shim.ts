@@ -12,3 +12,6 @@ if (nativeCrypto) {
 
 delete self.crypto;
 w.crypto = new Crypto();
+Object.freeze(w.crypto);
+
+export const crypto = w.crypto;
