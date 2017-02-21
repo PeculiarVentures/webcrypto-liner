@@ -1,6 +1,6 @@
 {
   "name": "webcrypto-liner",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "A WebCrypto pollyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
   "scripts": {
