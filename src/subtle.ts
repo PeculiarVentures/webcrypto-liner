@@ -336,33 +336,23 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     };
                 }
 
-                try {
-                    return nativeSubtle.decrypt.call(nativeSubtle, alg, key, dataBytes2)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'decrypt' for ${alg.name} doesn't work.`, e.message || "");
-                        });
-                } catch (e) {
-                    console.warn(`WebCrypto: native 'decrypt' for ${alg.name} doesn't work.`, e.message || "");
+                if (!key.key) {
+                    return nativeSubtle.decrypt.call(nativeSubtle, alg, key, dataBytes2);
+                } else {
+                    let Class: typeof BaseCrypto;
+                    switch (alg.name.toLowerCase()) {
+                        case AlgorithmNames.AesCBC.toLowerCase():
+                        case AlgorithmNames.AesGCM.toLowerCase():
+                            Class = AesCrypto;
+                            break;
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = RsaCrypto;
+                            break;
+                        default:
+                            throw new LinerError(LinerError.NOT_SUPPORTED, "decrypt");
+                    }
+                    return Class.decrypt(alg, key, dataBytes);
                 }
-            })
-            .then((msg: ArrayBuffer) => {
-                if (msg) {
-                    return msg;
-                }
-                let Class: typeof BaseCrypto;
-                switch (alg.name.toLowerCase()) {
-                    case AlgorithmNames.AesCBC.toLowerCase():
-                    case AlgorithmNames.AesGCM.toLowerCase():
-                        Class = AesCrypto;
-                        break;
-                    case AlgorithmNames.RsaOAEP.toLowerCase():
-                        Class = RsaCrypto;
-                        break;
-                    default:
-                        throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
-                }
-                return PrepareKey(key, Class)
-                    .then((preparedKey) => Class.decrypt(alg, preparedKey, dataBytes));
             });
     }
 
@@ -413,33 +403,29 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 algKey = PrepareAlgorithm(unwrappedKeyAlgorithm);
                 dataBytes = PrepareData(wrappedKey, "wrappedKey");
 
-                try {
+                if (!unwrappingKey.key) {
                     return nativeSubtle.unwrapKey.apply(nativeSubtle, args)
-                        .catch((e: Error) => {
-                            console.warn(`WebCrypto: native 'unwrapKey' for ${alg.name} doesn't work.`, e.message || "");
+                        .then((k: CryptoKey) => {
+                            if (k) {
+                                FixCryptoKeyUsages(k, keyUsages);
+                                return k;
+                            }
                         });
-                } catch (e) {
-                    console.warn(`WebCrypto: native 'unwrapKey' for ${alg.name} doesn't work.`, e.message || "");
+                } else {
+                    let Class: typeof BaseCrypto;
+                    switch (alg.name.toLowerCase()) {
+                        case AlgorithmNames.AesCBC.toLowerCase():
+                        case AlgorithmNames.AesGCM.toLowerCase():
+                            Class = AesCrypto;
+                            break;
+                        case AlgorithmNames.RsaOAEP.toLowerCase():
+                            Class = RsaCrypto;
+                            break;
+                        default:
+                            throw new LinerError(LinerError.NOT_SUPPORTED, "unwrapKey");
+                    }
+                    return Class.unwrapKey(format, dataBytes, unwrappingKey, alg, algKey, extractable, keyUsages);
                 }
-            })
-            .then((k: CryptoKey) => {
-                if (k) {
-                    FixCryptoKeyUsages(k, keyUsages);
-                    return k;
-                }
-                let Class: typeof BaseCrypto;
-                switch (alg.name.toLowerCase()) {
-                    case AlgorithmNames.AesCBC.toLowerCase():
-                    case AlgorithmNames.AesGCM.toLowerCase():
-                        Class = AesCrypto;
-                        break;
-                    case AlgorithmNames.RsaOAEP.toLowerCase():
-                        Class = RsaCrypto;
-                        break;
-                    default:
-                        throw new LinerError(LinerError.NOT_SUPPORTED, "unwrapKey");
-                }
-                return Class.unwrapKey(format, dataBytes, unwrappingKey, alg, algKey, extractable, keyUsages);
             });
     }
 

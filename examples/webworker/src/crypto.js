@@ -106,7 +106,7 @@ var App = (function () {
         return res;
     };
     return App;
-} ());
+}());
 var SEED_LEN = 20;
 onmessage = function (e) {
     var command = e.data[0];

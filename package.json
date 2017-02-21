@@ -4,6 +4,7 @@
   "description": "A WebCrypto pollyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
   "scripts": {
+    "prepublish": "webpack -p",
     "build": "npm run build:es5",
     "build:es5": "tsc",
     "build:es2015": "tsc -p tsconfig.es2015.json",
