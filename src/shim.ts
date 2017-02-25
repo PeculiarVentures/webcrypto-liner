@@ -10,7 +10,7 @@ if (nativeCrypto) {
     Object.freeze(nativeCrypto.getRandomValues);
 }
 
-delete self.crypto;
+delete (self as any).crypto;
 w.crypto = new Crypto();
 Object.freeze(w.crypto);
 

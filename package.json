@@ -19,9 +19,9 @@
   },
   "dependencies": {
     "@types/node": "*",
-    "webcrypto-core": "^0.1.3",
     "asmcrypto.js": "*",
-    "elliptic": "*"
+    "elliptic": "*",
+    "webcrypto-core": "^0.1.12"
   },
   "devDependencies": {
     "ts-loader": "^0.9.5",
