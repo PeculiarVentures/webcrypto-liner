@@ -25,7 +25,8 @@
   },
   "devDependencies": {
     "ts-loader": "^0.9.5",
-    "typescript": "*"
+    "typescript": "*",
+    "webpack": "*"
   },
   "author": "PeculiarVentures",
   "license": "MIT"
