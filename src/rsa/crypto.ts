@@ -113,7 +113,12 @@ export class RsaCrypto extends BaseCrypto {
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                         }
-                        return verify(signature, data, key.key);
+                        try {
+                            return verify(signature, data, key.key);
+                        } catch (err) {
+                            console.warn(`Verify error: ${err.message}`);
+                            return false;
+                        }
                     }
                     case AlgorithmNames.RsaPSS.toLowerCase():
                         const keyAlg: RsaHashedKeyGenParams = key.algorithm as any;
@@ -129,7 +134,12 @@ export class RsaCrypto extends BaseCrypto {
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                         }
-                        return verify(signature, data, key.key, rsaAlg.saltLength);
+                        try {
+                            return verify(signature, data, key.key, rsaAlg.saltLength);
+                        } catch (err) {
+                            console.warn(`Verify error: ${err.message}`);
+                            return false;
+                        }
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, algorithm.name);
                 }
@@ -234,7 +244,7 @@ export class RsaCrypto extends BaseCrypto {
 
     public static alg2jwk(alg: Algorithm) {
         const hash = (alg as any).hash as Algorithm;
-        const hashSize = /(\d+)/.exec(hash.name) ![1];
+        const hashSize = /(\d+)/.exec(hash.name)![1];
         switch (alg.name!.toUpperCase()) {
             case AlgorithmNames.RsaOAEP.toUpperCase():
                 return `RSA-OAEP${hashSize === "1" ? "" : `-${hashSize}`}`;

@@ -29,7 +29,13 @@ function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<Cryp
                 } else {
                     const crypto = new Crypto();
                     return crypto.subtle.exportKey("jwk", key)
-                        .then((jwk: any) => subtle.importKey("jwk", jwk, key.algorithm as Algorithm, true, key.usages));
+                        .then((jwk: any) => {
+                            let alg = GetHashAlgorithm(key);
+                            if (alg) {
+                                alg = assign(alg, key.algorithm);
+                            }
+                            return subtle.importKey("jwk", jwk, alg as any, true, key.usages);
+                        });
                 }
             } else {
                 return key;
@@ -193,7 +199,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
                 }
                 return PrepareKey(key, Class)
-                    .then((preparedKey) => Class.verify(alg, key, signatureBytes, dataBytes));
+                    .then((preparedKey) => Class.verify(alg, preparedKey, signatureBytes, dataBytes));
             });
     }
 
@@ -554,7 +560,7 @@ function SetHashAlgorithm(alg: Algorithm, key: CryptoKey | CryptoKeyPair) {
 }
 
 // fix hash alg for rsa key
-function GetHashAlgorithm(key: CryptoKey) {
+function GetHashAlgorithm(key: CryptoKey): Algorithm | null {
     let alg: Algorithm | null = null;
     keys.some((item) => {
         if (item.key === key) {
