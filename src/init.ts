@@ -30,11 +30,9 @@ function WrapFunction(subtle: any, name: string) {
         return new Promise((resolve, reject) => {
             const op: any = fn.apply(subtle, args);
             op.oncomplete = (e: any) => {
-                console.log("Completed");
                 resolve(e.target.result);
             };
             op.onerror = (e: any) => {
-                console.log("Error");
                 reject(`Error on running '${name}' function`);
             };
         });
