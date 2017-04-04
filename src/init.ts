@@ -19,8 +19,13 @@ if (typeof self === "undefined") {
     w = self;
 }
 
-export const nativeCrypto: NativeCrypto = w.msCrypto || w.crypto;
-export const nativeSubtle: NativeSubtleCrypto = nativeCrypto.subtle || (nativeCrypto as any).webkitSubtle;
+export const nativeCrypto: NativeCrypto = w.msCrypto || w.crypto || {};
+export let nativeSubtle: NativeSubtleCrypto | null = null;
+try {
+    nativeSubtle = nativeCrypto.subtle || (nativeCrypto as any).webkitSubtle;
+} catch (err) {
+    // Safari throws error on crypto.webkitSubtle in Worker
+}
 
 function WrapFunction(subtle: any, name: string) {
     const fn = subtle[name];
