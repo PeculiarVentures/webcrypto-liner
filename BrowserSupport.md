@@ -13,8 +13,8 @@ There are a few things to keep in mind:
 ![image](https://cloud.githubusercontent.com/assets/1619279/20998720/b0566818-bcc4-11e6-994b-a0943fcea527.png)
 
 ### Safari
-![image](https://cloud.githubusercontent.com/assets/1619279/25400480/997a51b8-29a7-11e7-9c92-d7d3a9f951b8.png)
-![image](https://cloud.githubusercontent.com/assets/1619279/25400449/7b3a84f2-29a7-11e7-9f1a-8f10cb064dd8.png)
+![image](https://cloud.githubusercontent.com/assets/1619279/25404376/8893359c-29b4-11e7-8812-9e77c3fdc8cd.png)
+![image](https://cloud.githubusercontent.com/assets/1619279/25404397/a3a1e2ac-29b4-11e7-8463-67ee5f7c713b.png)
 
 ### Edge
 ![image](https://cloud.githubusercontent.com/assets/1619279/20998446/b9315648-bcc2-11e6-9866-016725c8eaf8.png)
