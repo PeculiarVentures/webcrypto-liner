@@ -17,8 +17,7 @@ There are a few things to keep in mind:
 ![image](https://cloud.githubusercontent.com/assets/1619279/25404397/a3a1e2ac-29b4-11e7-8463-67ee5f7c713b.png)
 
 ### Edge
-![image](https://cloud.githubusercontent.com/assets/1619279/25446584/d98f73d6-2a66-11e7-98b7-7d34ce88cadf.png)
-* Test duration is not correct in the Edge case, to work around Edge bugs the tests were manually executed.
+![image](https://cloud.githubusercontent.com/assets/1619279/25447872/a006560c-2a6b-11e7-893f-89a02bbfd209.png)
 
 ### Firefox
 ![image](https://cloud.githubusercontent.com/assets/1619279/25400303/f4577418-29a6-11e7-95e4-dfbb2da58811.png)
