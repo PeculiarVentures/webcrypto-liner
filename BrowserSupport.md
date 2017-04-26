@@ -17,7 +17,7 @@ There are a few things to keep in mind:
 ![image](https://cloud.githubusercontent.com/assets/1619279/25404397/a3a1e2ac-29b4-11e7-8463-67ee5f7c713b.png)
 
 ### Edge
-![image](https://cloud.githubusercontent.com/assets/1619279/20998446/b9315648-bcc2-11e6-9866-016725c8eaf8.png)
+![image](https://cloud.githubusercontent.com/assets/1619279/25445542/80445e34-2a63-11e7-8593-275ba57b4929.png)
 
 ### Firefox
 ![image](https://cloud.githubusercontent.com/assets/1619279/25400303/f4577418-29a6-11e7-95e4-dfbb2da58811.png)
