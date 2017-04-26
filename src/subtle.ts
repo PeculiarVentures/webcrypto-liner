@@ -52,6 +52,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
             .then((d: Uint8Array) => {
                 alg = PrepareAlgorithm(algorithm);
 
+                if (BrowserInfo().name === Browser.Edge && alg.name.toUpperCase() === AlgorithmNames.AesGCM) {
+                    // Don't do AES-GCM key generation, because Edge throws errors on GCM encrypt, decrypt, wrapKey, unwrapKey
+                    return;
+                }
+
                 if (nativeSubtle) {
                     try {
                         return nativeSubtle!.generateKey.apply(nativeSubtle, args)
@@ -428,11 +433,29 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
                 if (!unwrappingKey.key) {
                     return nativeSubtle!.unwrapKey.apply(nativeSubtle, args)
+                        .catch((err: Error) => {
+                            // Edge throws errors on unwrapKey native functions
+                            // Use custom unwrap function
+                            return this.decrypt(alg, unwrappingKey, wrappedKey)
+                                .then((decryptedData) => {
+                                    let preparedData: JsonWebKey | BufferSource;
+                                    if (format === "jwk") {
+                                        preparedData = JSON.parse(buffer2string(new Uint8Array(decryptedData)));
+                                    } else {
+                                        preparedData = decryptedData;
+                                    }
+                                    return this.importKey(format, preparedData, algKey, extractable, keyUsages);
+                                });
+                        })
                         .then((k: CryptoKey) => {
                             if (k) {
                                 FixCryptoKeyUsages(k, keyUsages);
                                 return k;
                             }
+                        })
+                        .catch((error: Error) => {
+                            console.error(error);
+                            throw new Error("Cannot unwrap key from incoming data");
                         });
                 } else {
                     let Class: typeof BaseCrypto;
