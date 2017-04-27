@@ -68,6 +68,9 @@ export class RsaCrypto extends BaseCrypto {
                             case AlgorithmNames.Sha256:
                                 sign = asmCrypto.RSA_PKCS1_v1_5_SHA256.sign;
                                 break;
+                            case AlgorithmNames.Sha512:
+                                sign = asmCrypto.RSA_PKCS1_v1_5_SHA512.sign;
+                                break;
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                         }
@@ -83,6 +86,9 @@ export class RsaCrypto extends BaseCrypto {
                                 break;
                             case AlgorithmNames.Sha256:
                                 sign = asmCrypto.RSA_PSS_SHA256.sign;
+                                break;
+                            case AlgorithmNames.Sha512:
+                                sign = asmCrypto.RSA_PSS_SHA512.sign;
                                 break;
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
@@ -110,6 +116,9 @@ export class RsaCrypto extends BaseCrypto {
                             case AlgorithmNames.Sha256:
                                 verify = asmCrypto.RSA_PKCS1_v1_5_SHA256.verify;
                                 break;
+                            case AlgorithmNames.Sha512:
+                                verify = asmCrypto.RSA_PKCS1_v1_5_SHA512.verify;
+                                break;
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
                         }
@@ -130,6 +139,9 @@ export class RsaCrypto extends BaseCrypto {
                                 break;
                             case AlgorithmNames.Sha256:
                                 verify = asmCrypto.RSA_PSS_SHA256.verify;
+                                break;
+                            case AlgorithmNames.Sha512:
+                                verify = asmCrypto.RSA_PSS_SHA512.verify;
                                 break;
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
@@ -161,6 +173,9 @@ export class RsaCrypto extends BaseCrypto {
                             case AlgorithmNames.Sha256:
                                 encrypt = asmCrypto.RSA_OAEP_SHA256.encrypt;
                                 break;
+                            case AlgorithmNames.Sha512:
+                                encrypt = asmCrypto.RSA_OAEP_SHA512.encrypt;
+                                break;
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, `${keyAlg.name} ${(keyAlg.hash as Algorithm).name}`);
                         }
@@ -189,6 +204,9 @@ export class RsaCrypto extends BaseCrypto {
                                 break;
                             case AlgorithmNames.Sha256:
                                 decrypt = asmCrypto.RSA_OAEP_SHA256.decrypt;
+                                break;
+                            case AlgorithmNames.Sha512:
+                                decrypt = asmCrypto.RSA_OAEP_SHA512.decrypt;
                                 break;
                             default:
                                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, `${keyAlg.name} ${(keyAlg.hash as Algorithm).name}`);

@@ -7,7 +7,7 @@ export let Browser = {
 };
 
 /**
- * Returns info about browser 
+ * Returns info about browser
  */
 export function BrowserInfo() {
     const res = {
@@ -17,6 +17,7 @@ export function BrowserInfo() {
     const userAgent = self.navigator.userAgent;
 
     let reg: string[] | null;
+    // tslint:disable-next-line:no-conditional-assignment
     if (reg = /edge\/([\d\.]+)/i.exec(userAgent)) {
         res.name = Browser.Edge;
         res.version = reg[1];

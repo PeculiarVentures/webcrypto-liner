@@ -76,6 +76,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
                 let Class: typeof BaseCrypto;
                 switch (alg.name.toLowerCase()) {
+                    case AlgorithmNames.AesECB.toLowerCase():
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -327,6 +328,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
                 let Class: typeof BaseCrypto;
                 switch (alg.name.toLowerCase()) {
+                    case AlgorithmNames.AesECB.toLowerCase():
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -338,7 +340,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
                 }
                 return PrepareKey(key, Class)
-                    .then(preparedKey => Class.encrypt(alg, preparedKey, dataBytes));
+                    .then((preparedKey) => Class.encrypt(alg, preparedKey, dataBytes));
             });
     }
 
@@ -358,7 +360,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     const len = dataBytes.byteLength - ((alg as any).tagLength / 8);
                     dataBytes2 = {
                         ciphertext: dataBytes.buffer.slice(0, len),
-                        tag: dataBytes.buffer.slice(len, dataBytes.byteLength)
+                        tag: dataBytes.buffer.slice(len, dataBytes.byteLength),
                     };
                 }
 
@@ -367,6 +369,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 } else {
                     let Class: typeof BaseCrypto;
                     switch (alg.name.toLowerCase()) {
+                        case AlgorithmNames.AesECB.toLowerCase():
                         case AlgorithmNames.AesCBC.toLowerCase():
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = AesCrypto;
@@ -406,6 +409,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
                 let Class: typeof BaseCrypto;
                 switch (alg.name.toLowerCase()) {
+                    case AlgorithmNames.AesECB.toLowerCase():
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -460,6 +464,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 } else {
                     let Class: typeof BaseCrypto;
                     switch (alg.name.toLowerCase()) {
+                        case AlgorithmNames.AesECB.toLowerCase():
                         case AlgorithmNames.AesCBC.toLowerCase():
                         case AlgorithmNames.AesGCM.toLowerCase():
                             Class = AesCrypto;
@@ -508,6 +513,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
                 let Class: typeof BaseCrypto;
                 switch (key.algorithm.name!.toLowerCase()) {
+                    case AlgorithmNames.AesECB.toLowerCase():
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -570,6 +576,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 }
                 let Class: typeof BaseCrypto;
                 switch (alg.name.toLowerCase()) {
+                    case AlgorithmNames.AesECB.toLowerCase():
                     case AlgorithmNames.AesCBC.toLowerCase():
                     case AlgorithmNames.AesGCM.toLowerCase():
                         Class = AesCrypto;
@@ -619,6 +626,7 @@ function GetHashAlgorithm(key: CryptoKey): Algorithm | null {
 // Extend Uint8Array for IE
 if (!Uint8Array.prototype.forEach) {
     // tslint:disable-next-line:only-arrow-functions
+    // tslint:disable-next-line:space-before-function-paren
     (Uint8Array as any).prototype.forEach = function (cb: (value: number, index: number, array: Uint8Array) => void) {
         for (let i = 0; i < this.length; i++) {
             cb(this[i], i, this);
@@ -627,12 +635,14 @@ if (!Uint8Array.prototype.forEach) {
 }
 if (!Uint8Array.prototype.slice) {
     // tslint:disable-next-line:only-arrow-functions
+    // tslint:disable-next-line:space-before-function-paren
     (Uint8Array as any).prototype.slice = function (start: number, end: number) {
         return new Uint8Array(this.buffer.slice(start, end));
     };
 }
 if (!Uint8Array.prototype.filter) {
     // tslint:disable-next-line:only-arrow-functions
+    // tslint:disable-next-line:space-before-function-paren
     (Uint8Array as any).prototype.filter = function (cb: (value: number, index: number, array: Uint8Array) => void) {
         const buf: number[] = [];
         for (let i = 0; i < this.length; i++) {
@@ -689,6 +699,7 @@ function FixExportJwk(jwk: any, alg: any, keyUsages: string[]) {
             case AlgorithmNames.RsaSSA.toUpperCase():
                 CryptoClass = RsaCrypto;
                 break;
+            case AlgorithmNames.AesECB.toUpperCase():
             case AlgorithmNames.AesCBC.toUpperCase():
             case AlgorithmNames.AesGCM.toUpperCase():
                 CryptoClass = AesCrypto;

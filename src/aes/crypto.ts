@@ -34,6 +34,10 @@ export class AesCrypto extends BaseCrypto {
             .then(() => {
                 let res: Uint8Array;
                 switch (algorithm.name.toUpperCase()) {
+                    case AlgorithmNames.AesECB:
+                        const algECB = algorithm;
+                        res = asmCrypto.AES_ECB.encrypt(data, key.key, true) as Uint8Array;
+                        break;
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
                         res = asmCrypto.AES_CBC.encrypt(data, key.key, undefined, PrepareData(algCBC.iv, "iv")) as Uint8Array;
@@ -60,6 +64,10 @@ export class AesCrypto extends BaseCrypto {
                 let res: Uint8Array;
 
                 switch (algorithm.name.toUpperCase()) {
+                    case AlgorithmNames.AesECB:
+                        const algECB = algorithm;
+                        res = asmCrypto.AES_ECB.decrypt(data, key.key, true) as Uint8Array;
+                        break;
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
                         res = asmCrypto.AES_CBC.decrypt(data, key.key, undefined, PrepareData(algCBC.iv, "iv")) as Uint8Array;

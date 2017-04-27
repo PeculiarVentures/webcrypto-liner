@@ -16,6 +16,8 @@ export class ShaCrypto extends BaseCrypto {
                         return asmCrypto.SHA1.bytes(message).buffer;
                     case AlgorithmNames.Sha256:
                         return asmCrypto.SHA256.bytes(message).buffer;
+                    case AlgorithmNames.Sha512:
+                        return asmCrypto.SHA512.bytes(message).buffer;
                     default:
                         throw new LinerError(`Not supported algorithm '${alg.name}'`);
                 }
