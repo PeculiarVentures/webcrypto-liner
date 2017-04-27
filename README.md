@@ -41,10 +41,11 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | Sign/Verify               | RSA-PSS, RSASSA_PKCS1-v1_5 and ECDSA          |
 | Hash                      | SHA-1, and SHA-224                            |
 | Derive Key/Bits           | ECDH                                          |
-| Keywrap                   | AES-GCM, AES-CBC                              |
+| Keywrap                   | AES-GCM, AES-CBC, AES-ECB <sub>2</sub>        |
 | ECC Curves                | P-256, P-384, and  P-512                      |
 | RSA Key Lengths           | 1024, 2048, 3072, and 4096                    |
 | AES Key Lengths           | 128, 192 and 256                              |
+<sub>2 ECB support is not defined by the WebCrypto specifications. Use of EBC in a safe way is hard, it was added for the purpose of enabling interoperability with an existing system. We recommend against its use unless needed for interoperability.</sub>
 
 You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](https://peculiarventures.github.io/pv-webcrypto-tests/).
 
