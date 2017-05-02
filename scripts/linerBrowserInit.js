@@ -36,7 +36,7 @@ function BrowserInfo()
 			break;
 		case (/safari/i.test(userAgent)):
 			res.name = Browser.Safari;
-			res.version = /([\d\.]+) safari/i.exec(userAgent)[1];
+			res.version = /version\/([\d\.]+)/i.exec(userAgent)[1];
 			break;
 		case (/firefox/i.test(userAgent)):
 			res.name = Browser.Firefox;
