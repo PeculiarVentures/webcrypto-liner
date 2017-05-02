@@ -30,8 +30,7 @@ try {
 function WrapFunction(subtle: any, name: string) {
     const fn = subtle[name];
     // tslint:disable-next-line:only-arrow-functions
-    // tslint:disable-next-line:space-before-function-paren
-    subtle[name] = function () {
+    subtle[name] = function() {
         const args = arguments;
         return new Promise((resolve, reject) => {
             const op: any = fn.apply(subtle, args);

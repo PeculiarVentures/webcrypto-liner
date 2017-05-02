@@ -32,7 +32,7 @@ export function BrowserInfo() {
         res.version = /chrome\/([\d\.]+)/i.exec(userAgent) ![1];
     } else if (/safari/i.test(userAgent)) {
         res.name = Browser.Safari;
-        res.version = /([\d\.]+) safari/i.exec(userAgent) ![1];
+        res.version = /version\/([\d\.]+)/i.exec(userAgent) ![1];
     } else if (/firefox/i.test(userAgent)) {
         res.name = Browser.Firefox;
         res.version = /firefox\/([\d\.]+)/i.exec(userAgent) ![1];
