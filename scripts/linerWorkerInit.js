@@ -5,13 +5,14 @@ const Browser = {
 	Edge: "Edge",
 	Chrome: "Chrome",
 	Firefox: "Firefox Mozilla",
+	Mobile: "Mobile",
 };
 //**************************************************************************************
 function BrowserInfo()
 {
 	const res = {
-		name: "",
-		version: ""
+		name: "Unknown",
+		version: "0"
 	};
 	
 	const userAgent = self.navigator.userAgent;
@@ -29,6 +30,10 @@ function BrowserInfo()
 		case (/Trident/i.test(userAgent)):
 			res.name = Browser.IE;
 			res.version = /rv:([\d\.]+)/i.exec(userAgent)[1];
+			break;
+		case (/mobile/i.test(userAgent)):
+        	res.name = Browser.Mobile;
+        	res.version = /mobile\/([\w]+)/i.exec(userAgent)[1];
 			break;
 		case (/chrome/i.test(userAgent)):
 			res.name = Browser.Chrome;
@@ -85,6 +90,7 @@ export default function linerWorkerInit(path)
 			importScripts(path + "promise.min.js");
 		case Browser.Edge:
 		case Browser.Safari:
+		case Browser.Mobile:
 			importScripts(path + "asmcrypto.min.js");
 			importScripts(path + "elliptic.min.js");
 		default:

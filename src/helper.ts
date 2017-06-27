@@ -4,6 +4,7 @@ export let Browser = {
     Edge: "Edge",
     Chrome: "Chrome",
     Firefox: "Firefox Mozilla",
+    Mobile: "Mobile",
 };
 
 /**
@@ -11,8 +12,8 @@ export let Browser = {
  */
 export function BrowserInfo() {
     const res = {
-        name: "",
-        version: "",
+        name: "Unknown",
+        version: "0",
     };
     const userAgent = self.navigator.userAgent;
 
@@ -27,6 +28,9 @@ export function BrowserInfo() {
     } else if (/Trident/i.test(userAgent)) {
         res.name = Browser.IE;
         res.version = /rv:([\d\.]+)/i.exec(userAgent) ![1];
+    } else if (/mobile/i.test(userAgent)) {
+        res.name = Browser.Mobile;
+        res.version = /mobile\/([\w]+)/i.exec(userAgent) ![1];
     } else if (/chrome/i.test(userAgent)) {
         res.name = Browser.Chrome;
         res.version = /chrome\/([\d\.]+)/i.exec(userAgent) ![1];
