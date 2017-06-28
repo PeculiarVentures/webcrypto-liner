@@ -20,7 +20,7 @@ declare type IE = any;
 
 const keys: Array<{ key: CryptoKey, hash: Algorithm }> = [];
 
-function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<CryptoKey> {
+function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto) {
     return Promise.resolve()
         .then(() => {
             if (!key.key) {
@@ -45,7 +45,7 @@ function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto): PromiseLike<Cryp
 
 export class SubtleCrypto extends core.SubtleCrypto {
 
-    public generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<NativeCryptoKey | NativeCryptoKeyPair> {
+    public generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]) {
         const args = arguments;
         let alg: Algorithm;
         return super.generateKey.apply(this, args)
@@ -480,7 +480,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
             });
     }
 
-    public exportKey(format: string, key: CryptoKey): PromiseLike<JsonWebKey | ArrayBuffer> {
+    public exportKey(format: string, key: CryptoKey) {
         const args = arguments;
         return super.exportKey.apply(this, args)
             .then(() => {
@@ -534,7 +534,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
             });
     }
 
-    public importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]) {
         const args = arguments;
         let alg: Algorithm;
         let dataAny: any;

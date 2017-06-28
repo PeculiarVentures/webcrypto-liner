@@ -31,8 +31,8 @@ declare namespace asmCrypto {
     }
 
     class RSA_OAEP_SHA1 {
-        static encrypt(data: BufferSource, key: RsaKey, label?: BufferSource): BufferSource;
-        static decrypt(data: BufferSource, key: RsaKey, label?: BufferSource): BufferSource;
+        static encrypt(data: BufferSource, key: RsaKey, label?: BufferSource): ArrayBuffer;
+        static decrypt(data: BufferSource, key: RsaKey, label?: BufferSource): ArrayBuffer;
     }
 
 

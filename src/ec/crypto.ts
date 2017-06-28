@@ -198,7 +198,7 @@ export class EcCrypto extends BaseCrypto {
         return Promise.resolve()
             .then(() => {
                 const key: EcCryptoKey = new CryptoKey();
-                key.algorithm = algorithm;
+                key.algorithm = algorithm as any;
                 if (format.toLowerCase() === "jwk") {
                     const ecKey = new elliptic.ec((keyData as JsonWebKey).crv!.replace("-", "").toLowerCase());
                     if ((keyData as JsonWebKey).d) {

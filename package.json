@@ -18,15 +18,15 @@
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
   "dependencies": {
-    "@types/node": "*",
+    "@types/node": "^7.0.32",
     "asmcrypto.js": "*",
     "elliptic": "*",
-    "webcrypto-core": "^0.1.15"
+    "typescript": "2.3.4",
+    "webcrypto-core": "^0.1.16"
   },
   "devDependencies": {
     "ts-loader": "^0.9.5",
-    "typescript": "*",
-    "webpack": "^2.4.1"
+    "webpack": "^2.6.1"
   },
   "author": "PeculiarVentures",
   "license": "MIT"
