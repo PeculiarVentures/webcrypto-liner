@@ -31,13 +31,13 @@ function BrowserInfo()
 			res.name = Browser.IE;
 			res.version = /rv:([\d\.]+)/i.exec(userAgent)[1];
 			break;
-		case (/mobile/i.test(userAgent)):
-        	res.name = Browser.Mobile;
-        	res.version = /mobile\/([\w]+)/i.exec(userAgent)[1];
-			break;
 		case (/chrome/i.test(userAgent)):
 			res.name = Browser.Chrome;
 			res.version = /chrome\/([\d\.]+)/i.exec(userAgent)[1];
+			break;
+		case (/mobile/i.test(userAgent)):
+        	res.name = Browser.Mobile;
+        	res.version = /mobile\/([\w]+)/i.exec(userAgent)[1];
 			break;
 		case (/safari/i.test(userAgent)):
 			res.name = Browser.Safari;

@@ -8,17 +8,15 @@ const Browser = {
 	Mobile: "Mobile",
 };
 //**************************************************************************************
-function BrowserInfo()
-{
+function BrowserInfo() {
 	const res = {
 		name: "Unknown",
 		version: "0"
 	};
-	
+
 	const userAgent = self.navigator.userAgent;
-	
-	switch(true)
-	{
+
+	switch (true) {
 		case (/edge\/([\d\.]+)/i.test(userAgent)):
 			res.name = Browser.Edge;
 			res.version = /edge\/([\d\.]+)/i.exec(userAgent)[1];
@@ -31,13 +29,13 @@ function BrowserInfo()
 			res.name = Browser.IE;
 			res.version = /rv:([\d\.]+)/i.exec(userAgent)[1];
 			break;
-		case (/mobile/i.test(userAgent)):
-        	res.name = Browser.Mobile;
-        	res.version = /mobile\/([\w]+)/i.exec(userAgent)[1];
-			break;
 		case (/chrome/i.test(userAgent)):
 			res.name = Browser.Chrome;
 			res.version = /chrome\/([\d\.]+)/i.exec(userAgent)[1];
+			break;
+		case (/mobile/i.test(userAgent)):
+			res.name = Browser.Mobile;
+			res.version = /mobile\/([\w]+)/i.exec(userAgent)[1];
 			break;
 		case (/safari/i.test(userAgent)):
 			res.name = Browser.Safari;
@@ -50,27 +48,24 @@ function BrowserInfo()
 		default:
 			console.log("UNKNOWN BROWSER");
 	}
-	
+
 	return res;
 }
 //**************************************************************************************
-function importScripts(src)
-{
+function importScripts(src) {
 	var script = document.createElement("script");
 	script.setAttribute("src", src);
-	
+
 	document.head.appendChild(script);
 }
 //**************************************************************************************
-function linerBrowserInit(path)
-{
-	if(!(self.crypto || self.msCrypto))
+function linerBrowserInit(path) {
+	if (!(self.crypto || self.msCrypto))
 		importScripts("//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js");
 
 	importScripts(path + "webcrypto-liner.shim.min.js")
-	
-	switch(BrowserInfo().name)
-	{
+
+	switch (BrowserInfo().name) {
 		case Browser.IE:
 			importScripts(path + "promise.min.js");
 		case Browser.Edge:
