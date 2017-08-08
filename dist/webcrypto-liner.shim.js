@@ -3425,7 +3425,9 @@ var SubtleCrypto = (function (_super) {
             alg = webcrypto_core_2.PrepareAlgorithm(algorithm);
             dataAny = keyData;
             // Fix: Safari
-            if (format === "jwk" && (helper_1.BrowserInfo().name === helper_1.Browser.Safari || helper_1.BrowserInfo().name === helper_1.Browser.IE)) {
+            var browser = helper_1.BrowserInfo();
+            if (format === "jwk" && ((browser.name === helper_1.Browser.Safari && !/^11/.test(browser.version)) ||
+                browser.name === helper_1.Browser.IE)) {
                 // Converts JWK to ArrayBuffer
                 if (helper_1.BrowserInfo().name === helper_1.Browser.IE) {
                     keyData = helper_1.assign({}, keyData);

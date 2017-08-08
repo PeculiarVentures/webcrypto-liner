@@ -544,7 +544,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 dataAny = keyData;
 
                 // Fix: Safari
-                if (format === "jwk" && (BrowserInfo().name === Browser.Safari || BrowserInfo().name === Browser.IE)) {
+                const browser = BrowserInfo();
+                if (format === "jwk" && (
+                    (browser.name === Browser.Safari && !/^11/.test(browser.version)) ||
+                    browser.name === Browser.IE)) {
                     // Converts JWK to ArrayBuffer
                     if (BrowserInfo().name === Browser.IE) {
                         keyData = assign({}, keyData);
