@@ -70,9 +70,55 @@ export class SubtleCrypto extends core.SubtleCrypto {
             })
             .then((generatedKeys: CryptoKey | CryptoKeyPair) => {
                 if (generatedKeys) {
-                    FixCryptoKeyUsages(generatedKeys, keyUsages);
-                    SetHashAlgorithm(alg, generatedKeys);
-                    return generatedKeys;
+                    let promise = Promise.resolve(generatedKeys);
+
+                    /**
+                     * Safari issue
+                     * https://github.com/PeculiarVentures/webcrypto-liner/issues/39
+                     * if public key cannot be exported in correct JWK format, then run new generateKey
+                     */
+                    if (BrowserInfo().name === Browser.Safari &&
+                        (
+                            alg.name.toUpperCase() === AlgorithmNames.EcDH.toUpperCase() ||
+                            alg.name.toUpperCase() === AlgorithmNames.EcDSA.toUpperCase()
+                        )
+                    ) {
+                        const pubKey = (generatedKeys as CryptoKeyPair).publicKey;
+                        promise = promise.then(() => {
+                            return this.exportKey("jwk", pubKey)
+                                .then((jwk: any) => {
+                                    return this.exportKey("spki", pubKey)
+                                        .then((spki: ArrayBuffer) => {
+                                            const x = Base64Url.decode(jwk.x);
+                                            const y = Base64Url.decode(jwk.y);
+
+                                            const len = x.length + y.length;
+                                            const spkiBuf = new Uint8Array(spki);
+                                            for (let i = 0; i < len; i++) {
+                                                const spkiByte = spkiBuf[spkiBuf.length - i - 1];
+                                                let pointByte: number;
+                                                if (i < y.length) {
+                                                    pointByte = y[y.length - i - 1];
+                                                } else {
+                                                    pointByte = x[x.length + y.length - i - 1];
+                                                }
+                                                if (spkiByte !== pointByte) {
+                                                    // regenerate new key
+                                                    console.warn("WebCrypto: EC key has wrong public key JWK. Key pair will be recreated");
+                                                    return this.generateKey(algorithm, extractable, keyUsages);
+                                                }
+                                            }
+                                            return generatedKeys;
+                                        });
+                                });
+                        });
+                    }
+
+                    return promise.then((keys_: any) => {
+                        FixCryptoKeyUsages(keys_, keyUsages);
+                        SetHashAlgorithm(alg, keys_);
+                        return keys_;
+                    });
                 }
                 let Class: typeof BaseCrypto;
                 switch (alg.name.toLowerCase()) {
