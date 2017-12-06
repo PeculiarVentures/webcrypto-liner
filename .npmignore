@@ -8,3 +8,4 @@ index.js
 BrowserSupport.md
 ts*.json
 webpack*.js
+.travis.yml
