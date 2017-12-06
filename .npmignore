@@ -3,4 +3,8 @@
 /build
 /tmp
 /examples
+/src
 index.js
+BrowserSupport.md
+ts*.json
+webpack*.js

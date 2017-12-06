@@ -4,29 +4,29 @@
   "description": "A WebCrypto pollyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
   "scripts": {
+    "prepare": "npm run build:prod",
     "build": "npm run build:es5",
     "build:es5": "tsc",
     "build:es2015": "tsc -p tsconfig.es2015.json",
-    "build:rollup": "npm run build:es2015 && rollup -o=index.js -i=build/index.js",
     "build:webpack": "webpack",
-    "install": "npm run build",
-    "prepub": "webpack -p",
-    "pub": "npm version patch && npm publish && git push"
+    "build:prod": "webpack -p",
+    "pub": "npm run build:prod && npm version patch && npm publish && git push"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
   "dependencies": {
-    "@types/node": "^7.0.32",
     "asmcrypto.js": "*",
     "elliptic": "*",
-    "typescript": "2.3.4",
-    "webcrypto-core": "^0.1.16"
+    "webcrypto-core": "^0.1.17"
   },
   "devDependencies": {
-    "ts-loader": "^0.9.5",
-    "webpack": "^2.6.1"
+    "@types/node": "^8.0.55",
+    "tslib": "^1.8.0",
+    "ts-loader": "^3.2.0",
+    "typescript": "^2.6.2",
+    "webpack": "^3.10.0"
   },
   "author": "PeculiarVentures",
   "license": "MIT"

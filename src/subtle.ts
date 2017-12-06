@@ -7,7 +7,7 @@ import { PrepareAlgorithm, PrepareData } from "webcrypto-core";
 import { nativeSubtle } from "./init";
 import { Crypto } from "./crypto";
 import { LinerError } from "./error";
-import { string2buffer, buffer2string, concat, Browser, BrowserInfo, assign } from "./helper";
+import { string2buffer, buffer2string, concat, Browser, BrowserInfo, assign, warn } from "./helper";
 import { CryptoKey, CryptoKeyPair } from "./key";
 
 // Crypto
@@ -61,10 +61,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.generateKey.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native generateKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native generateKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native generateKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native generateKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -104,7 +104,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
                                                 }
                                                 if (spkiByte !== pointByte) {
                                                     // regenerate new key
-                                                    console.warn("WebCrypto: EC key has wrong public key JWK. Key pair will be recreated");
+                                                    warn("WebCrypto: EC key has wrong public key JWK. Key pair will be recreated");
                                                     return this.generateKey(algorithm, extractable, keyUsages);
                                                 }
                                             }
@@ -156,10 +156,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.digest.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native digest for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native digest for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native digest for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native digest for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -189,10 +189,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.sign.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native sign for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native sign for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native sign for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native sign for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -236,10 +236,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.verify.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native verify for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native verify for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native verify for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native verify for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -275,11 +275,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.deriveBits.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native deriveBits for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native deriveBits for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
                         // Edge throws error. Don't know Why.
-                        console.warn(`WebCrypto: native deriveBits for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native deriveBits for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
 
@@ -313,11 +313,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.deriveKey.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native deriveKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native deriveKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
                         // Edge doesn't go to catch of Promise
-                        console.warn(`WebCrypto: native deriveKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native deriveKey for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -351,10 +351,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.encrypt.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native 'encrypt' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native 'encrypt' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native 'encrypt' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native 'encrypt' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -442,10 +442,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.wrapKey.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native 'wrapKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native 'wrapKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native 'wrapKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native 'wrapKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -534,10 +534,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.exportKey.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native 'exportKey' for ${key.algorithm.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })
@@ -610,10 +610,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     try {
                         return nativeSubtle!.importKey.apply(nativeSubtle, args)
                             .catch((e: Error) => {
-                                console.warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                                warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                             });
                     } catch (e) {
-                        console.warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+                        warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
                     }
                 }
             })

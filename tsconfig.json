@@ -8,6 +8,7 @@
         "noImplicitAny": true,
         "strictNullChecks": true,
         "sourceMap": false,
-        "outDir": "build"
+        "outDir": "build",
+        "importHelpers": false
     }
 }
