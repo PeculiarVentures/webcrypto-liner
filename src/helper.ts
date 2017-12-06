@@ -86,6 +86,6 @@ export function assign(target: any, ...sources: any[]) {
 
 export function warn(message?: any, ...optionalParams: any[]) {
     if (typeof self !== "undefined" && (self as any).PV_WEBCRYPTO_LINER_LOG) {
-        console.warn(message, ...optionalParams);
+        console.warn.apply(console, arguments);
     }
 }
