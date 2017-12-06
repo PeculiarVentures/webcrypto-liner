@@ -8,6 +8,10 @@ interface AesCryptoKey extends CryptoKey {
     key: Uint8Array;
 }
 
+interface AesEcbParams extends Algorithm {
+    padding?: boolean;
+}
+
 export class AesCrypto extends BaseCrypto {
 
     public static generateKey(alg: AesKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKey> {
@@ -35,8 +39,8 @@ export class AesCrypto extends BaseCrypto {
                 let res: Uint8Array;
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesECB:
-                        const algECB = algorithm;
-                        res = asmCrypto.AES_ECB.encrypt(data, key.key, true) as Uint8Array;
+                        const algECB = algorithm as AesEcbParams;;
+                        res = asmCrypto.AES_ECB.encrypt(data, key.key, !!algECB.padding) as Uint8Array;
                         break;
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
@@ -65,8 +69,8 @@ export class AesCrypto extends BaseCrypto {
 
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesECB:
-                        const algECB = algorithm;
-                        res = asmCrypto.AES_ECB.decrypt(data, key.key, true) as Uint8Array;
+                        const algECB = algorithm as AesEcbParams;
+                        res = asmCrypto.AES_ECB.decrypt(data, key.key, !!algECB.padding) as Uint8Array;
                         break;
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
@@ -127,7 +131,7 @@ export class AesCrypto extends BaseCrypto {
     }
 
     public static alg2jwk(alg: Algorithm): string {
-        return `A${(alg as AesKeyAlgorithm).length}${/-(\w+)/i.exec(alg.name!.toUpperCase()) ![1]}`;
+        return `A${(alg as AesKeyAlgorithm).length}${/-(\w+)/i.exec(alg.name!.toUpperCase())![1]}`;
     }
 
     public static jwk2alg(alg: string): Algorithm {
