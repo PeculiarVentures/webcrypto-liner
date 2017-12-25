@@ -33,6 +33,10 @@ function BrowserInfo() {
 			res.name = Browser.Chrome;
 			res.version = /chrome\/([\d\.]+)/i.exec(userAgent)[1];
 			break;
+		case (/mobile/i.test(userAgent) && /firefox/i.test(userAgent)):
+		      	res.name = Browser.Mobile;
+		      	res.version = /firefox\/([\d\.]+)/i.exec(userAgent)[1];
+		      	break;
 		case (/mobile/i.test(userAgent)):
 			res.name = Browser.Mobile;
 			res.version = /mobile\/([\w]+)/i.exec(userAgent)[1];
