@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "prepare": "npm run build:prod",
-    "build": "npm run build:es5",
+    "build": "npm run build:prod",
     "build:es5": "tsc",
     "build:es2015": "tsc -p tsconfig.es2015.json",
     "build:webpack": "webpack",
@@ -19,10 +19,10 @@
   "dependencies": {
     "asmcrypto.js": "0.0.12",
     "elliptic": "*",
-    "webcrypto-core": "^0.1.17"
+    "webcrypto-core": "^0.1.18"
   },
   "devDependencies": {
-    "@types/node": "^8.0.55",
+    "@types/node": "^8.5.2",
     "ts-loader": "^3.2.0",
     "tslib": "^1.8.1",
     "typescript": "^2.6.2",
