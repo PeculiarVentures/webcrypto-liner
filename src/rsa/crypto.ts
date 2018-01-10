@@ -311,6 +311,7 @@ export class RsaCrypto extends BaseCrypto {
             .then(() => {
                 let jwk: JsonWebKey;
                 const key = new CryptoKey();
+                key.extractable = extractable;
                 key.algorithm = algorithm;
                 key.usages = keyUsages;
                 key.key = [];
