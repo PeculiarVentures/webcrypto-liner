@@ -14,21 +14,22 @@ interface AesEcbParams extends Algorithm {
 
 export class AesCrypto extends BaseCrypto {
 
-    public static generateKey(alg: AesKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKey> {
+    public static generateKey(algorithm: AesKeyGenParams, extractable: boolean, usages: string[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
                 this.checkModule();
 
                 // gat random bytes for key
-                const key = nativeCrypto.getRandomValues(new Uint8Array(alg.length / 8));
+                const key = nativeCrypto.getRandomValues(new Uint8Array(algorithm.length / 8));
 
                 // set key params
-                const aesKey: AesCryptoKey = new CryptoKey();
+                const aesKey: AesCryptoKey = new CryptoKey({
+                    type: "secret",
+                    algorithm,
+                    extractable,
+                    usages,
+                });
                 aesKey.key = key as Uint8Array;
-                aesKey.algorithm = alg;
-                aesKey.extractable = extractable;
-                aesKey.type = "secret";
-                aesKey.usages = keyUsage;
                 return aesKey;
             });
     }
@@ -157,7 +158,7 @@ export class AesCrypto extends BaseCrypto {
             });
     }
 
-    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, usages: string[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
                 let raw: Uint8Array;
@@ -167,10 +168,12 @@ export class AesCrypto extends BaseCrypto {
                 } else {
                     raw = new Uint8Array(keyData as Uint8Array);
                 }
-                const key = new CryptoKey();
-                key.algorithm = algorithm;
-                key.type = "secret";
-                key.usages = keyUsages;
+                const key = new CryptoKey({
+                    type: "secret",
+                    algorithm,
+                    extractable,
+                    usages,
+                });
                 key.key = raw;
                 return key;
             });

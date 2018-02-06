@@ -70,14 +70,19 @@ export class EcCrypto extends BaseCrypto {
                 const key = new elliptic.ec(alg.namedCurve.replace("-", "").toLowerCase()); // converts name to 'p192', ...
 
                 // set key params
-                const prvKey = new CryptoKey();
-                const pubKey = new CryptoKey();
+                const prvKey = new CryptoKey({
+                    type: "private",
+                    algorithm,
+                    extractable,
+                    usages: [],
+                });
+                const pubKey = new CryptoKey({
+                    type: "public",
+                    algorithm,
+                    extractable: true,
+                    usages: [],
+                });
                 prvKey.key = pubKey.key = key.genKeyPair();
-                prvKey.algorithm = pubKey.algorithm = alg;
-                prvKey.extractable = extractable;
-                pubKey.extractable = true;
-                prvKey.type = "private";
-                pubKey.type = "public";
                 if (algorithm.name === AlgorithmNames.EcDSA) {
                     prvKey.usages = ["sign"];
                     pubKey.usages = ["verify"];
@@ -194,11 +199,14 @@ export class EcCrypto extends BaseCrypto {
             });
     }
 
-    public static importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public static importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams, extractable: boolean, usages: string[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
-                const key: EcCryptoKey = new CryptoKey();
-                key.algorithm = algorithm as any;
+                const key: EcCryptoKey = new CryptoKey({
+                    algorithm,
+                    extractable,
+                    usages,
+                });
                 if (format.toLowerCase() === "jwk") {
                     const ecKey = new elliptic.ec((keyData as JsonWebKey).crv!.replace("-", "").toLowerCase());
                     if ((keyData as JsonWebKey).d) {
@@ -220,8 +228,6 @@ export class EcCrypto extends BaseCrypto {
                 } else {
                     throw new LinerError(`Format '${format}' is not implemented`);
                 }
-                key.extractable = extractable;
-                key.usages = keyUsages;
                 return key;
             });
     }

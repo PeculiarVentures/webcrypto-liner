@@ -21,22 +21,27 @@ function removeLeadingZero(buf: Uint8Array) {
 
 export class RsaCrypto extends BaseCrypto {
 
-    public static generateKey(alg: RsaKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKeyPair> {
+    public static generateKey(algorithm: RsaKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKeyPair> {
         return Promise.resolve()
             .then(() => {
                 this.checkModule();
 
-                const pubExp = alg.publicExponent[0] === 3 ? 3 : 65537;
-                const rsaKey = asmCrypto.RSA.generateKey(alg.modulusLength, pubExp);
-                const privateKey: RsaCryptoKey = new CryptoKey();
-                const publicKey: RsaCryptoKey = new CryptoKey();
+                const pubExp = algorithm.publicExponent[0] === 3 ? 3 : 65537;
+                const rsaKey = asmCrypto.RSA.generateKey(algorithm.modulusLength, pubExp);
+                const privateKey: RsaCryptoKey = new CryptoKey({
+                    type: "private",
+                    algorithm,
+                    extractable,
+                    usages: [],
+                });
+                const publicKey: RsaCryptoKey = new CryptoKey({
+                    type: "public",
+                    algorithm,
+                    extractable: true,
+                    usages: [],
+                });
                 privateKey.key = publicKey.key = rsaKey;
-                privateKey.algorithm = publicKey.algorithm = alg;
-                privateKey.extractable = extractable;
-                publicKey.extractable = true;
-                privateKey.type = "private";
-                publicKey.type = "public";
-                switch (alg.name.toLowerCase()) {
+                switch (algorithm.name.toLowerCase()) {
                     case AlgorithmNames.RsaOAEP.toLowerCase():
                         privateKey.usages = this.filterUsages(["decrypt", "unwrapKey"], keyUsage);
                         publicKey.usages = this.filterUsages(["encrypt", "wrapKey"], keyUsage);
@@ -47,7 +52,7 @@ export class RsaCrypto extends BaseCrypto {
                         publicKey.usages = this.filterUsages(["verify"], keyUsage);
                         break;
                     default:
-                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name);
+                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, algorithm.name);
                 }
                 return { privateKey, publicKey };
             });
@@ -306,14 +311,15 @@ export class RsaCrypto extends BaseCrypto {
             });
     }
 
-    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, usages: string[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
                 let jwk: JsonWebKey;
-                const key = new CryptoKey();
-                key.extractable = extractable;
-                key.algorithm = algorithm;
-                key.usages = keyUsages;
+                const key = new CryptoKey({
+                    algorithm,
+                    extractable,
+                    usages,
+                });
                 key.key = [];
                 if (format.toLowerCase() === "jwk") {
                     jwk = keyData as JsonWebKey;
