@@ -67,7 +67,7 @@ export class EcCrypto extends BaseCrypto {
             .then(() => {
                 this.checkModule();
                 const alg: EcKeyGenParams = algorithm as any;
-                const key = new elliptic.ec(alg.namedCurve.replace("-", "").toLowerCase()); // converts name to 'p192', ...
+                const key = new elliptic.ec(this.getNamedCurve((algorithm as EcKeyImportParams).namedCurve));
 
                 // set key params
                 const prvKey = new CryptoKey({
@@ -208,7 +208,9 @@ export class EcCrypto extends BaseCrypto {
                     usages,
                 });
                 if (format.toLowerCase() === "jwk") {
-                    const ecKey = new elliptic.ec((keyData as JsonWebKey).crv!.replace("-", "").toLowerCase());
+                    const namedCurve = this.getNamedCurve((algorithm as EcKeyImportParams).namedCurve);
+                    console.log(namedCurve);
+                    const ecKey = new elliptic.ec(namedCurve);
                     if ((keyData as JsonWebKey).d) {
                         // Private key
                         key.key = ecKey.keyFromPrivate(Base64Url.decode((keyData as JsonWebKey).d!));
@@ -236,6 +238,19 @@ export class EcCrypto extends BaseCrypto {
         if (typeof elliptic === "undefined") {
             throw new LinerError(LinerError.MODULE_NOT_FOUND, "elliptic", "https://github.com/indutny/elliptic");
         }
+    }
+
+    protected static getNamedCurve(wcNamedCurve: string) {
+        const crv = wcNamedCurve.toUpperCase();
+        let res = "";
+        if (["P-256", "P-384", "P-521"].indexOf(crv) > -1) {
+            res = crv.replace("-", "").toLowerCase();
+        } else if (crv === "K-256") {
+            res = "secp256k1";
+        } else {
+            throw new LinerError(`Unsupported named curve '${wcNamedCurve}'`);
+        }
+        return res;
     }
 }
 
