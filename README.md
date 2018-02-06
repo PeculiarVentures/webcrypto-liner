@@ -43,7 +43,7 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | Hash                      | SHA-1, and SHA-224                            |
 | Derive Key/Bits           | ECDH                                          |
 | Keywrap                   | AES-GCM, AES-CBC, AES-ECB <sub>2</sub>        |
-| ECC Curves                | P-256, P-384, P-512, and K-256<sub>3</sub> (secp256k1)    |
+| ECC Curves                | P-256, P-384, P-512, and [K-256](https://github.com/PeculiarVentures/webcrypto-core/blob/master/spec/EC_K_256.md)<sub>3</sub> (secp256k1)    |
 | RSA Key Lengths           | 1024, 2048, 3072, and 4096                    |
 | AES Key Lengths           | 128, 192 and 256                              |
 
