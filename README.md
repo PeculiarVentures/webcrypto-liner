@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/webcrypto-liner.svg)](https://badge.fury.io/js/webcrypto-liner)
 [![Build Status](https://travis-ci.org/PeculiarVentures/webcrypto-liner.svg?branch=master)](https://travis-ci.org/PeculiarVentures/webcrypto-liner)
 
-[![NPM](https://nodei.co/npm-dl/webcrypto-liner.png?months=2&height=2)](https://nodei.co/npm/webcrypto-liner/)
+[![NPM](https://nodei.co/npm/webcrypto-liner.png)](https://nodei.co/npm/webcrypto-liner/)
 
 
 A polyfill for WebCrypto that "smooths out" the rough-edges in existing User Agent implementations.
@@ -48,6 +48,7 @@ If you do not load any of the dependencies that provide cryptographic implementa
 | AES Key Lengths           | 128, 192 and 256                              |
 
 <sub>2 ECB support is not defined by the WebCrypto specifications. Use of EBC in a safe way is hard, it was added for the purpose of enabling interoperability with an existing system. We recommend against its use unless needed for interoperability.</sub>
+
 <sub>3 K-256 (secp256k1) curve is not defined by the WebCrypto specifications.</sub>
 
 You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](https://peculiarventures.github.io/pv-webcrypto-tests/).
