@@ -52,8 +52,14 @@ export class SubtleCrypto extends core.SubtleCrypto {
             .then((d: Uint8Array) => {
                 alg = PrepareAlgorithm(algorithm);
 
-                if (BrowserInfo().name === Browser.Edge && alg.name.toUpperCase() === AlgorithmNames.AesGCM) {
+                const browser = BrowserInfo();
+                if (
+                    (browser.name === Browser.Edge && alg.name.toUpperCase() === AlgorithmNames.AesGCM) ||
                     // Don't do AES-GCM key generation, because Edge throws errors on GCM encrypt, decrypt, wrapKey, unwrapKey
+                    CheckAppleRsaOAEP(alg.name)
+                    // Don't use native generateKey for RSA-OAEP on Safari before v11
+                    // https://github.com/PeculiarVentures/webcrypto-liner/issues/53
+                ) {
                     return;
                 }
 
@@ -114,10 +120,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         });
                     }
 
-                    return promise.then((keys_: any) => {
-                        FixCryptoKeyUsages(keys_, keyUsages);
-                        SetHashAlgorithm(alg, keys_);
-                        return keys_;
+                    return promise.then((keys2: any) => {
+                        FixCryptoKeyUsages(keys2, keyUsages);
+                        SetHashAlgorithm(alg, keys2);
+                        return keys2;
                     });
                 }
                 let Class: typeof BaseCrypto;
@@ -606,6 +612,12 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     dataAny = PrepareData(keyData, "keyData");
                 }
 
+                if (CheckAppleRsaOAEP(alg.name)) {
+                    // Don't use native importKey for RSA-OAEP on Safari before v11
+                    // https://github.com/PeculiarVentures/webcrypto-liner/issues/53
+                    return;
+                }
+
                 if (nativeSubtle) {
                     try {
                         return nativeSubtle!.importKey.apply(nativeSubtle, args)
@@ -778,4 +790,11 @@ function FixImportJwk(jwk: any) {
         delete jwk.key_ops;
         delete jwk.alg;
     }
+}
+
+function CheckAppleRsaOAEP(algName: string) {
+    const version = /AppleWebKit\/(\d+)/.exec(self.navigator.userAgent);
+    return (
+        algName.toUpperCase() === AlgorithmNames.RsaOAEP && version && parseInt(version[1], 10) < 604
+    );
 }
