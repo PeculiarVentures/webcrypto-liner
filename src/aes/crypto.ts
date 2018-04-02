@@ -109,7 +109,8 @@ export class AesCrypto extends BaseCrypto {
                     // ArrayBuffer
                     raw = new Uint8Array(data);
                 }
-                return crypto.subtle.encrypt(wrapAlgorithm, wrappingKey, raw);
+                const copyKey = wrappingKey.copy(["encrypt"]);
+                return crypto.subtle.encrypt(wrapAlgorithm, copyKey, raw);
             });
     }
 
@@ -118,7 +119,8 @@ export class AesCrypto extends BaseCrypto {
         return Promise.resolve()
             .then(() => {
                 crypto = new Crypto();
-                return crypto.subtle.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey);
+                const copyKey = unwrappingKey.copy(["decrypt"]);
+                return crypto.subtle.decrypt(unwrapAlgorithm, copyKey, wrappedKey);
             })
             .then((data: any) => {
                 let dataAny: any;

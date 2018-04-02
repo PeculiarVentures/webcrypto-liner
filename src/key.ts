@@ -25,4 +25,11 @@ export class CryptoKey implements NativeCryptoKey {
         this.extractable = options.extractable;
         this.usages = options.usages;
     }
+
+    public copy(usages: string[]) {
+        const { algorithm, type, extractable } = this;
+        const key = new CryptoKey({ algorithm, type, extractable, usages });
+        key.key = this.key;
+        return key;
+    }
 }
