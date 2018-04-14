@@ -45,7 +45,7 @@ export class AesCrypto extends BaseCrypto {
                         break;
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
-                        res = asmCrypto.AES_CBC.encrypt(data, key.key, undefined, PrepareData(algCBC.iv, "iv")) as Uint8Array;
+                        res = asmCrypto.AES_CBC.encrypt(data, key.key, undefined, PrepareData(algCBC.iv as Uint8Array, "iv")) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
                         const algGCM = algorithm as AesGcmParams;
@@ -54,7 +54,7 @@ export class AesCrypto extends BaseCrypto {
                         if (algGCM.additionalData) {
                             additionalData = PrepareData(algGCM.additionalData, "additionalData");
                         }
-                        res = asmCrypto.AES_GCM.encrypt(data, key.key, algGCM.iv, additionalData, algGCM.tagLength / 8) as Uint8Array;
+                        res = asmCrypto.AES_GCM.encrypt(data, key.key, algGCM.iv as Uint8Array, additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
                     default:
                         throw new LinerError(AlgorithmError.UNSUPPORTED_ALGORITHM, algorithm.name);
@@ -75,7 +75,7 @@ export class AesCrypto extends BaseCrypto {
                         break;
                     case AlgorithmNames.AesCBC:
                         const algCBC = algorithm as AesCbcParams;
-                        res = asmCrypto.AES_CBC.decrypt(data, key.key, undefined, PrepareData(algCBC.iv, "iv")) as Uint8Array;
+                        res = asmCrypto.AES_CBC.decrypt(data, key.key, undefined, PrepareData(algCBC.iv as Uint8Array, "iv")) as Uint8Array;
                         break;
                     case AlgorithmNames.AesGCM:
                         const algGCM = algorithm as AesGcmParams;
@@ -84,7 +84,7 @@ export class AesCrypto extends BaseCrypto {
                         if (algGCM.additionalData) {
                             additionalData = PrepareData(algGCM.additionalData, "additionalData");
                         }
-                        res = asmCrypto.AES_GCM.decrypt(data, key.key, algGCM.iv, additionalData, algGCM.tagLength / 8) as Uint8Array;
+                        res = asmCrypto.AES_GCM.decrypt(data, key.key, algGCM.iv as Uint8Array, additionalData, algGCM.tagLength / 8) as Uint8Array;
                         break;
                     default:
                         throw new LinerError(AlgorithmError.UNSUPPORTED_ALGORITHM, algorithm.name);
@@ -109,7 +109,8 @@ export class AesCrypto extends BaseCrypto {
                     // ArrayBuffer
                     raw = new Uint8Array(data);
                 }
-                return crypto.subtle.encrypt(wrapAlgorithm, wrappingKey, raw);
+                const copyKey = wrappingKey.copy(["encrypt"]);
+                return crypto.subtle.encrypt(wrapAlgorithm, copyKey, raw);
             });
     }
 
@@ -118,7 +119,8 @@ export class AesCrypto extends BaseCrypto {
         return Promise.resolve()
             .then(() => {
                 crypto = new Crypto();
-                return crypto.subtle.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey);
+                const copyKey = unwrappingKey.copy(["decrypt"]);
+                return crypto.subtle.decrypt(unwrapAlgorithm, copyKey, wrappedKey);
             })
             .then((data: any) => {
                 let dataAny: any;
