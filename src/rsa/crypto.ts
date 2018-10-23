@@ -2,6 +2,7 @@ import { AlgorithmError, AlgorithmNames, Base64Url, BaseCrypto, PrepareData } fr
 import { LinerError } from "../error";
 import { buffer2string, concat, string2buffer } from "../helper";
 import { CryptoKey, CryptoKeyPair } from "../key";
+import { Crypto } from "../crypto";
 
 interface RsaCryptoKey extends CryptoKey {
     key: asmCrypto.RsaKey;
@@ -21,7 +22,7 @@ function removeLeadingZero(buf: Uint8Array) {
 
 export class RsaCrypto extends BaseCrypto {
 
-    public static generateKey(algorithm: RsaKeyGenParams, extractable: boolean, keyUsage: string[]): PromiseLike<CryptoKeyPair> {
+    public static generateKey(algorithm: RsaKeyGenParams, extractable: boolean, keyUsage: KeyUsage[]): PromiseLike<CryptoKeyPair> {
         return Promise.resolve()
             .then(() => {
                 this.checkModule();
@@ -313,7 +314,7 @@ export class RsaCrypto extends BaseCrypto {
             });
     }
 
-    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, usages: string[]): PromiseLike<CryptoKey> {
+    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: AlgorithmIdentifier, extractable: boolean, usages: KeyUsage[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
                 let jwk: JsonWebKey;
@@ -351,9 +352,7 @@ export class RsaCrypto extends BaseCrypto {
         }
     }
 
-    protected static filterUsages(supported: string[], given: string[]): string[] {
+    protected static filterUsages(supported: KeyUsage[], given: KeyUsage[]): KeyUsage[] {
         return supported.filter((item1) => !!given.filter((item2) => item1 === item2).length);
     }
 }
-
-import { Crypto } from "../crypto";

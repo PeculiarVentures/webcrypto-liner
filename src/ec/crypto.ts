@@ -2,6 +2,8 @@ import { BaseCrypto, AlgorithmNames, AlgorithmError, Base64Url } from "webcrypto
 import { LinerError } from "../error";
 import { CryptoKey, CryptoKeyPair } from "../key";
 import { string2buffer, buffer2string, concat } from "../helper";
+import { Crypto } from "../crypto";
+import { nativeSubtle } from "..";
 // import * as elliptic from "elliptic";
 declare const elliptic: any;
 
@@ -89,6 +91,9 @@ export class EcCrypto extends BaseCrypto {
                 } else if (algorithm.name === AlgorithmNames.EcDH) {
                     prvKey.usages = ["deriveKey", "deriveBits"];
                     pubKey.usages = [];
+                } else if (algorithm.name === AlgorithmNames.EdDSA) {
+                    prvKey.usages = ["sign"];
+                    pubKey.usages = ["verify"];
                 }
                 return {
                     privateKey: prvKey,
@@ -97,21 +102,16 @@ export class EcCrypto extends BaseCrypto {
             });
     }
 
-    public static sign(algorithm: Algorithm, key: CryptoKey, data: Uint8Array): PromiseLike<ArrayBuffer> {
-        return Promise.resolve()
-            .then(() => {
-                const alg: EcdsaParams = algorithm as any;
+    public static async sign(algorithm: Algorithm, key: CryptoKey, data: Uint8Array): Promise<ArrayBuffer> {
+        const alg: EcdsaParams = algorithm as any;
 
-                // get digest
-                const crypto = new Crypto();
-                return crypto.subtle.digest(alg.hash, data);
-            })
-            .then((hash) => {
-                const array = b2a(hash);
-                const signature = key.key.sign(array);
-                const hexSignature = buffer2hex(signature.r.toArray(), true) + buffer2hex(signature.s.toArray(), true);
-                return hex2buffer(hexSignature).buffer;
-            });
+        // get digests
+        const crypto = new Crypto();
+        const hash = await crypto.subtle.digest(alg.hash, data);
+        const array = b2a(hash);
+        const signature = key.key.sign(array);
+        const hexSignature = buffer2hex(signature.r.toArray(), true) + buffer2hex(signature.s.toArray(), true);
+        return hex2buffer(hexSignature).buffer;
     }
 
     public static verify(algorithm: Algorithm, key: CryptoKey, signature: Uint8Array, data: Uint8Array): PromiseLike<boolean> {
@@ -199,7 +199,7 @@ export class EcCrypto extends BaseCrypto {
             });
     }
 
-    public static importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
+    public static importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): PromiseLike<CryptoKey> {
         return Promise.resolve()
             .then(() => {
                 const key: EcCryptoKey = new CryptoKey({
@@ -243,15 +243,15 @@ export class EcCrypto extends BaseCrypto {
     protected static getNamedCurve(wcNamedCurve: string) {
         const crv = wcNamedCurve.toUpperCase();
         let res = "";
-        if (["P-256", "P-384", "P-521"].indexOf(crv) > -1) {
+        if (["P-256", "P-384", "P-521", "ED25519"].indexOf(crv) > -1) {
             res = crv.replace("-", "").toLowerCase();
         } else if (crv === "K-256") {
             res = "secp256k1";
+        } else if ("X25519") {
+            res = "curve25519";
         } else {
             throw new LinerError(`Unsupported named curve '${wcNamedCurve}'`);
         }
         return res;
     }
 }
-
-import { Crypto } from "../crypto";import { nativeSubtle } from "..";

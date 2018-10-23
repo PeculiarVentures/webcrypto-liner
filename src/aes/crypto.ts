@@ -3,6 +3,7 @@ import { LinerError } from "../error";
 import { CryptoKey, CryptoKeyPair } from "../key";
 import { string2buffer, buffer2string, concat } from "../helper";
 import { nativeCrypto } from "../init";
+import { Crypto } from "../crypto";
 
 interface AesCryptoKey extends CryptoKey {
     key: Uint8Array;
@@ -14,7 +15,7 @@ interface AesEcbParams extends Algorithm {
 
 export class AesCrypto extends BaseCrypto {
 
-    public static generateKey(algorithm: AesKeyGenParams, extractable: boolean, usages: string[]): PromiseLike<CryptoKey> {
+    public static generateKey(algorithm: AesKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): PromiseLike<CryptoKey | CryptoKeyPair> {
         return Promise.resolve()
             .then(() => {
                 this.checkModule();
@@ -27,7 +28,7 @@ export class AesCrypto extends BaseCrypto {
                     type: "secret",
                     algorithm,
                     extractable,
-                    usages,
+                    usages: keyUsages,
                 });
                 aesKey.key = key as Uint8Array;
                 return aesKey;
@@ -40,7 +41,7 @@ export class AesCrypto extends BaseCrypto {
                 let res: Uint8Array;
                 switch (algorithm.name.toUpperCase()) {
                     case AlgorithmNames.AesECB:
-                        const algECB = algorithm as AesEcbParams;;
+                        const algECB = algorithm as AesEcbParams;
                         res = asmCrypto.AES_ECB.encrypt(data, key.key, !!algECB.padding) as Uint8Array;
                         break;
                     case AlgorithmNames.AesCBC:
@@ -160,25 +161,23 @@ export class AesCrypto extends BaseCrypto {
             });
     }
 
-    public static importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: Algorithm, extractable: boolean, usages: string[]): PromiseLike<CryptoKey> {
-        return Promise.resolve()
-            .then(() => {
-                let raw: Uint8Array;
-                if (format.toLowerCase() === "jwk") {
-                    const jwk = keyData as JsonWebKey;
-                    raw = Base64Url.decode(jwk.k!);
-                } else {
-                    raw = new Uint8Array(keyData as Uint8Array);
-                }
-                const key = new CryptoKey({
-                    type: "secret",
-                    algorithm,
-                    extractable,
-                    usages,
-                });
-                key.key = raw;
-                return key;
-            });
+    public static async importKey(format: string, keyData: JsonWebKey | Uint8Array, algorithm: AlgorithmIdentifier, extractable: boolean, usages: KeyUsage[]): Promise<CryptoKey> {
+        let raw: Uint8Array;
+        if (format.toLowerCase() === "jwk") {
+            const jwk = keyData as JsonWebKey;
+            raw = Base64Url.decode(jwk.k!);
+        } else {
+            raw = new Uint8Array(keyData as Uint8Array);
+        }
+
+        const key = new CryptoKey({
+            type: "secret",
+            algorithm,
+            extractable,
+            usages,
+        });
+        key.key = raw;
+        return key;
     }
 
     protected static checkModule() {
@@ -188,5 +187,3 @@ export class AesCrypto extends BaseCrypto {
     }
 
 }
-
-import { Crypto } from "../crypto";

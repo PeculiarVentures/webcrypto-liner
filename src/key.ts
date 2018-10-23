@@ -5,17 +5,17 @@ export interface CryptoKeyPair extends NativeCryptoKeyPair {
 
 export interface ICryptoKeyOptions {
     algorithm: any;
-    type?: string;
+    type?: KeyType;
     extractable: boolean;
-    usages: string[];
+    usages: KeyUsage[];
 }
 
 export class CryptoKey implements NativeCryptoKey {
     public key: any;
     public algorithm: KeyAlgorithm;
     public extractable: boolean;
-    public type: string;
-    public usages: string[];
+    public type: KeyType;
+    public usages: KeyUsage[];
 
     constructor(options: ICryptoKeyOptions) {
         this.algorithm = options.algorithm;
@@ -26,7 +26,7 @@ export class CryptoKey implements NativeCryptoKey {
         this.usages = options.usages;
     }
 
-    public copy(usages: string[]) {
+    public copy(usages: KeyUsage[]) {
         const { algorithm, type, extractable } = this;
         const key = new CryptoKey({ algorithm, type, extractable, usages });
         key.key = this.key;

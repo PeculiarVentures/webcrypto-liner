@@ -23,22 +23,21 @@ const keys: Array<{ key: CryptoKey, hash: Algorithm }> = [];
 function PrepareKey(key: CryptoKey, subtle: typeof BaseCrypto) {
     return Promise.resolve()
         .then(() => {
-            if (!key.key) {
-                if (!key.extractable) {
-                    throw new LinerError("'key' is Native CryptoKey. It can't be converted to JS CryptoKey");
-                } else {
-                    const crypto = new Crypto();
-                    return crypto.subtle.exportKey("jwk", key)
-                        .then((jwk: any) => {
-                            let alg = GetHashAlgorithm(key);
-                            if (alg) {
-                                alg = assign(alg, key.algorithm);
-                            }
-                            return subtle.importKey("jwk", jwk, alg as any, true, key.usages);
-                        });
-                }
-            } else {
+            if (key.key) {
                 return key;
+            }
+            if (!key.extractable) {
+                throw new LinerError("'key' is Native CryptoKey. It can't be converted to JS CryptoKey");
+            } else {
+                const crypto = new Crypto();
+                return crypto.subtle.exportKey("jwk", key)
+                    .then((jwk: any) => {
+                        let alg = GetHashAlgorithm(key);
+                        if (alg) {
+                            alg = assign(alg, key.algorithm);
+                        }
+                        return subtle.importKey("jwk", jwk, alg as any, true, key.usages);
+                    });
             }
         });
 }
@@ -586,76 +585,71 @@ export class SubtleCrypto extends core.SubtleCrypto {
             });
     }
 
-    public importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]) {
-        const args = arguments;
-        let alg: Algorithm;
+    public async importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]) {
+        const args = { format, keyData, algorithm, extractable, keyUsages };
         let dataAny: any;
-        return super.importKey.apply(this, args)
-            .then((bits: ArrayBuffer) => {
-                alg = PrepareAlgorithm(algorithm);
-                dataAny = keyData;
+        const bits = await super.importKey.apply(this, args);
 
-                // Fix: Safari
-                const browser = BrowserInfo();
-                if (format === "jwk" && (
-                    (browser.name === Browser.Safari && !/^11/.test(browser.version)) ||
-                    browser.name === Browser.IE)) {
-                    // Converts JWK to ArrayBuffer
-                    if (BrowserInfo().name === Browser.IE) {
-                        keyData = assign({}, keyData);
-                        FixImportJwk(keyData);
-                    }
-                    args[1] = string2buffer(JSON.stringify(keyData)).buffer;
-                }
-                // End: Fix
-                if (ArrayBuffer.isView(keyData)) {
-                    dataAny = PrepareData(keyData, "keyData");
-                }
+        const alg: Algorithm = PrepareAlgorithm(algorithm);
+        dataAny = keyData;
 
-                if (CheckAppleRsaOAEP(alg.name)) {
-                    // Don't use native importKey for RSA-OAEP on Safari before v11
-                    // https://github.com/PeculiarVentures/webcrypto-liner/issues/53
-                    return;
-                }
+        // Fix: Safari
+        const browser = BrowserInfo();
+        if (format === "jwk" && (
+            (browser.name === Browser.Safari && !/^11/.test(browser.version)) ||
+            browser.name === Browser.IE)) {
+            // Converts JWK to ArrayBuffer
+            if (BrowserInfo().name === Browser.IE) {
+                keyData = assign({}, keyData);
+                FixImportJwk(keyData);
+            }
+            args.keyData = string2buffer(JSON.stringify(keyData)).buffer;
+        }
+        // End: Fix
+        if (ArrayBuffer.isView(keyData)) {
+            dataAny = PrepareData(keyData, "keyData");
+        }
 
-                if (nativeSubtle) {
-                    try {
-                        return nativeSubtle!.importKey.apply(nativeSubtle, args)
-                            .catch((e: Error) => {
-                                warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
-                            });
-                    } catch (e) {
-                        warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
-                    }
-                }
-            })
-            .then((k: CryptoKey) => {
-                if (k) {
-                    SetHashAlgorithm(alg, k);
-                    FixCryptoKeyUsages(k, keyUsages);
-                    return Promise.resolve(k);
-                }
-                let Class: typeof BaseCrypto;
-                switch (alg.name.toLowerCase()) {
-                    case AlgorithmNames.AesECB.toLowerCase():
-                    case AlgorithmNames.AesCBC.toLowerCase():
-                    case AlgorithmNames.AesGCM.toLowerCase():
-                        Class = AesCrypto;
-                        break;
-                    case AlgorithmNames.EcDH.toLowerCase():
-                    case AlgorithmNames.EcDSA.toLowerCase():
-                        Class = EcCrypto;
-                        break;
-                    case AlgorithmNames.RsaSSA.toLowerCase():
-                    case AlgorithmNames.RsaPSS.toLowerCase():
-                    case AlgorithmNames.RsaOAEP.toLowerCase():
-                        Class = RsaCrypto;
-                        break;
-                    default:
-                        throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
-                }
-                return Class.importKey(format, dataAny, alg, extractable, keyUsages);
-            });
+        if (CheckAppleRsaOAEP(alg.name)) {
+            // Don't use native importKey for RSA-OAEP on Safari before v11
+            // https://github.com/PeculiarVentures/webcrypto-liner/issues/53
+            return;
+        }
+
+        let k: CryptoKey | undefined;
+        if (nativeSubtle) {
+            try {
+                k = await nativeSubtle!.importKey.apply(nativeSubtle, args);
+            } catch (e) {
+                warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
+            }
+        }
+        if (k) {
+            SetHashAlgorithm(alg, k);
+            FixCryptoKeyUsages(k, keyUsages);
+            return Promise.resolve(k);
+        }
+        let Class: typeof BaseCrypto;
+        switch (alg.name.toLowerCase()) {
+            case AlgorithmNames.AesECB.toLowerCase():
+            case AlgorithmNames.AesCBC.toLowerCase():
+            case AlgorithmNames.AesGCM.toLowerCase():
+                Class = AesCrypto;
+                break;
+            case AlgorithmNames.EcDH.toLowerCase():
+            case AlgorithmNames.EdDSA.toLowerCase():
+            case AlgorithmNames.EcDSA.toLowerCase():
+                Class = EcCrypto;
+                break;
+            case AlgorithmNames.RsaSSA.toLowerCase():
+            case AlgorithmNames.RsaPSS.toLowerCase():
+            case AlgorithmNames.RsaOAEP.toLowerCase():
+                Class = RsaCrypto;
+                break;
+            default:
+                throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
+        }
+        return Class.importKey(format, dataAny, alg, extractable, keyUsages);
     }
 }
 
@@ -704,7 +698,7 @@ if (!Uint8Array.prototype.slice) {
 if (!Uint8Array.prototype.filter) {
     // tslint:disable-next-line:only-arrow-functions
     // tslint:disable-next-line:space-before-function-paren
-    (Uint8Array as any).prototype.filter = function (cb: (value: number, index: number, array: Uint8Array) => void) {
+    (Uint8Array as any).prototype.filter = function (cb: (value: number, index: number, array: Uint8Array) => boolean) {
         const buf: number[] = [];
         for (let i = 0; i < this.length; i++) {
             if (cb(this[i], i, this)) {

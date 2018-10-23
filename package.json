@@ -19,7 +19,7 @@
   "dependencies": {
     "asmcrypto.js": "^0.22.0",
     "elliptic": "^6.4.0",
-    "webcrypto-core": "^0.1.21"
+    "webcrypto-core": "^0.1.24"
   },
   "devDependencies": {
     "@types/node": "^8.5.2",
