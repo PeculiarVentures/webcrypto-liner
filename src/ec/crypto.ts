@@ -107,30 +107,37 @@ export class EcCrypto extends BaseCrypto {
 
         // get digests
         const crypto = new Crypto();
-        const hash = await crypto.subtle.digest(alg.hash, data);
-        const array = b2a(hash);
-        const signature = key.key.sign(array);
-        const hexSignature = buffer2hex(signature.r.toArray(), true) + buffer2hex(signature.s.toArray(), true);
-        return hex2buffer(hexSignature).buffer;
+        let array;
+        if (algorithm.name.toUpperCase() === AlgorithmNames.EdDSA) {
+            array = data;
+            return await key.key.sign(array).toBytes();
+        } else {
+            const hash = await crypto.subtle.digest(alg.hash, data);
+            array = b2a(hash);
+            const signature = await key.key.sign(array);
+            const hexSignature = buffer2hex(signature.r.toArray(), true) + buffer2hex(signature.s.toArray(), true);
+            return hex2buffer(hexSignature).buffer;
+        }
     }
 
-    public static verify(algorithm: Algorithm, key: CryptoKey, signature: Uint8Array, data: Uint8Array): PromiseLike<boolean> {
-        let sig: { r: Uint8Array, s: Uint8Array };
-        return Promise.resolve()
-            .then(() => {
-                const alg: EcdsaParams = algorithm as any;
-                sig = {
-                    r: signature.slice(0, signature.byteLength / 2),
-                    s: signature.slice(signature.byteLength / 2),
-                };
-                // get digest
-                const crypto = new Crypto();
-                return crypto.subtle.digest(alg.hash, data);
-            })
-            .then((hash) => {
-                const array = b2a(hash);
-                return (key.key.verify(array, sig));
-            });
+    public static async verify(algorithm: Algorithm, key: CryptoKey, signature: Uint8Array, data: Uint8Array): Promise<boolean> {
+        const alg: EcdsaParams = algorithm as any;
+        let hashedData: ArrayBuffer;
+        let sig: { r: Uint8Array, s: Uint8Array } | number[];
+        if (algorithm.name.toUpperCase() === AlgorithmNames.EdDSA) {
+            sig = b2a(signature);
+            hashedData = data.buffer;
+        } else {
+            sig = {
+                r: signature.slice(0, signature.byteLength / 2),
+                s: signature.slice(signature.byteLength / 2),
+            };
+            // get digest
+            const crypto = new Crypto();
+            hashedData = await crypto.subtle.digest(alg.hash, data);
+        }
+        const array = b2a(hashedData);
+        return (key.key.verify(array, sig));
     }
 
     public static deriveKey(algorithm: EcdhKeyDeriveParams, baseKey: CryptoKey, derivedKeyType: AesKeyGenParams, extractable: boolean, keyUsages: string[]): PromiseLike<CryptoKey> {
@@ -210,18 +217,33 @@ export class EcCrypto extends BaseCrypto {
                 if (format.toLowerCase() === "jwk") {
                     const namedCurve = this.getNamedCurve((algorithm as EcKeyImportParams).namedCurve);
                     console.log(namedCurve);
-                    const ecKey = new elliptic.ec(namedCurve);
+                    let ecKey: any;
+                    if ((algorithm as EcKeyImportParams).name.toLowerCase() === "eddsa") {
+                        ecKey = new elliptic.eddsa(namedCurve);
+                    } else {
+                        ecKey = new elliptic.ec(namedCurve);
+                    }
+
                     if ((keyData as JsonWebKey).d) {
                         // Private key
-                        key.key = ecKey.keyFromPrivate(Base64Url.decode((keyData as JsonWebKey).d!));
+                        if ((algorithm as EcKeyImportParams).name.toLowerCase() === "eddsa") {
+                            key.key = ecKey.keyFromSecret(Base64Url.decode((keyData as JsonWebKey).d!));
+                        } else {
+                            key.key = ecKey.keyFromPrivate(Base64Url.decode((keyData as JsonWebKey).d!));
+                        }
+
                         key.type = "private";
                     } else {
-                        // Public key
-                        const bufferPubKey = concat(
-                            new Uint8Array([4]),
-                            Base64Url.decode((keyData as JsonWebKey).x!),
-                            Base64Url.decode((keyData as JsonWebKey).y!),
-                        );
+                        let bufferPubKey;
+                        if (namedCurve === "ed25519" || namedCurve === "curve25519") {
+                            bufferPubKey = Base64Url.decode((keyData as JsonWebKey).x!);
+                        } else {
+                            bufferPubKey = concat(
+                                new Uint8Array([4]),
+                                Base64Url.decode((keyData as JsonWebKey).x!),
+                                Base64Url.decode((keyData as JsonWebKey).y!),
+                            );
+                        }
                         const hexPubKey = buffer2hex(bufferPubKey);
 
                         key.key = ecKey.keyFromPublic(hexPubKey, "hex");

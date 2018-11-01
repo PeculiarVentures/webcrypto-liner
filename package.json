@@ -9,6 +9,7 @@
     "build:es5": "tsc",
     "build:es2015": "tsc -p tsconfig.es2015.json",
     "build:webpack": "webpack",
+    "build:webpack:dev": "webpack -d",
     "build:prod": "webpack -p",
     "pub": "npm run build:prod && npm version patch && npm publish && git push"
   },
@@ -19,7 +20,8 @@
   "dependencies": {
     "asmcrypto.js": "^0.22.0",
     "elliptic": "^6.4.0",
-    "webcrypto-core": "^0.1.24"
+    "ramda": "^0.25.0",
+    "webcrypto-core": "^0.1.25"
   },
   "devDependencies": {
     "@types/node": "^8.5.2",

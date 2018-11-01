@@ -210,6 +210,9 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     case AlgorithmNames.EcDSA.toLowerCase():
                         Class = EcCrypto;
                         break;
+                    case AlgorithmNames.EdDSA.toLowerCase():
+                        Class = EcCrypto;
+                        break;
                     case AlgorithmNames.RsaSSA.toLowerCase():
                     case AlgorithmNames.RsaPSS.toLowerCase():
                         Class = RsaCrypto;
@@ -255,6 +258,9 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 let Class: typeof BaseCrypto;
                 switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDSA.toLowerCase():
+                        Class = EcCrypto;
+                        break;
+                    case AlgorithmNames.EdDSA.toLowerCase():
                         Class = EcCrypto;
                         break;
                     case AlgorithmNames.RsaSSA.toLowerCase():
@@ -588,7 +594,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
     public async importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]) {
         const args = { format, keyData, algorithm, extractable, keyUsages };
         let dataAny: any;
-        const bits = await super.importKey.apply(this, args);
+        const bits = await super.importKey(format, keyData, algorithm, extractable, keyUsages);
 
         const alg: Algorithm = PrepareAlgorithm(algorithm);
         dataAny = keyData;
