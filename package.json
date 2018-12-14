@@ -20,7 +20,7 @@
     "asmcrypto.js": "^0.22.0",
     "des.js": "^1.0.0",
     "elliptic": "^6.4.1",
-    "webcrypto-core": "^0.1.25"
+    "webcrypto-core": "^0.1.26"
   },
   "devDependencies": {
     "@types/node": "^10.12.12",
