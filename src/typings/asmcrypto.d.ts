@@ -2,6 +2,8 @@
  * aescrypto definition https://github.com/vibornoff/asmcrypto.js
  */
 
+ // tslint:disable
+
 declare namespace asmCrypto {
 
     type RsaKey = { [key: number]: Uint8Array }
@@ -35,7 +37,6 @@ declare namespace asmCrypto {
         static decrypt(data: BufferSource, key: RsaKey, label?: BufferSource): ArrayBuffer;
     }
 
-
     class RSA_OAEP_SHA256 extends RSA_OAEP_SHA1 { }
     class RSA_OAEP_SHA512 extends RSA_OAEP_SHA1 { }
 
@@ -53,8 +54,19 @@ declare namespace asmCrypto {
 
     class RSA_PSS_SHA256 extends RSA_PSS_SHA1 { }
     class RSA_PSS_SHA512 extends RSA_PSS_SHA1 { }
+
+    class PBKDF2 {
+        static bytes(password: Uint8Array, salt: Uint8Array, iterations: number, dklen: number) : Uint8Array;
+        static hex(password: Uint8Array, salt: Uint8Array, iterations: number, dklen: number) : string;
+        static base64(password: Uint8Array, salt: Uint8Array, iterations: number, dklen: number) : string;
+    }
+
+    class PBKDF2_HMAC_SHA1 extends PBKDF2 {}
+    class PBKDF2_HMAC_SHA256 extends PBKDF2 {}
 }
 
 declare module "asmcrypto.js" {
     export = asmCrypto;
 }
+
+// tslint:enable

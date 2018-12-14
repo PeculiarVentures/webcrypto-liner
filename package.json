@@ -4,7 +4,6 @@
   "description": "A WebCrypto polyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
   "scripts": {
-    "prepare": "npm run build:prod",
     "build": "npm run build:prod",
     "build:es5": "tsc",
     "build:es2015": "tsc -p tsconfig.es2015.json",
@@ -19,16 +18,17 @@
   },
   "dependencies": {
     "asmcrypto.js": "^0.22.0",
-    "elliptic": "^6.4.0",
+    "des.js": "^1.0.0",
+    "elliptic": "^6.4.1",
     "webcrypto-core": "^0.1.25"
   },
   "devDependencies": {
-    "@types/node": "^8.5.2",
-    "ts-loader": "^4.1.0",
-    "tslib": "^1.9.0",
-    "typescript": "^2.8.1",
-    "webpack": "^4.4.1",
-    "webpack-cli": "^2.0.13"
+    "@types/node": "^10.12.12",
+    "ts-loader": "^5.3.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.2.2",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   },
   "keywords": [
     "crypto",

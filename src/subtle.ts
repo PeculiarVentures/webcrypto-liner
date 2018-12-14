@@ -15,6 +15,8 @@ import { AesCrypto } from "./aes/crypto";
 import { ShaCrypto } from "./sha/crypto";
 import { RsaCrypto } from "./rsa/crypto";
 import { EcCrypto } from "./ec/crypto";
+import { PbkdfCrypto } from "./pbkdf/crypto";
+import { DesCrypto } from "./des/crypto";
 
 declare type IE = any;
 
@@ -140,6 +142,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     case AlgorithmNames.RsaPSS.toLowerCase():
                     case AlgorithmNames.RsaSSA.toLowerCase():
                         Class = RsaCrypto;
+                        break;
+                    case AlgorithmNames.DesCBC.toLowerCase():
+                    case AlgorithmNames.DesEdeCBC.toLowerCase():
+                        Class = DesCrypto;
                         break;
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
@@ -304,6 +310,9 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     case AlgorithmNames.EcDH.toLowerCase():
                         Class = EcCrypto;
                         break;
+                    case AlgorithmNames.Pbkdf2.toLowerCase():
+                        Class = PbkdfCrypto;
+                        break;
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "deriveBits");
                 }
@@ -341,6 +350,9 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 switch (alg.name.toLowerCase()) {
                     case AlgorithmNames.EcDH.toLowerCase():
                         Class = EcCrypto;
+                        break;
+                    case AlgorithmNames.Pbkdf2.toLowerCase():
+                        Class = PbkdfCrypto;
                         break;
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "deriveBits");
@@ -393,6 +405,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     case AlgorithmNames.RsaOAEP.toLowerCase():
                         Class = RsaCrypto;
                         break;
+                    case AlgorithmNames.DesCBC.toLowerCase():
+                    case AlgorithmNames.DesEdeCBC.toLowerCase():
+                        Class = DesCrypto;
+                        break;
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "encrypt");
                 }
@@ -434,6 +450,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         case AlgorithmNames.RsaOAEP.toLowerCase():
                             Class = RsaCrypto;
                             break;
+                        case AlgorithmNames.DesCBC.toLowerCase():
+                        case AlgorithmNames.DesEdeCBC.toLowerCase():
+                            Class = DesCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "decrypt");
                     }
@@ -473,6 +493,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         break;
                     case AlgorithmNames.RsaOAEP.toLowerCase():
                         Class = RsaCrypto;
+                        break;
+                    case AlgorithmNames.DesCBC.toLowerCase():
+                    case AlgorithmNames.DesEdeCBC.toLowerCase():
+                        Class = DesCrypto;
                         break;
                     default:
                         throw new LinerError(LinerError.NOT_SUPPORTED, "wrapKey");
@@ -529,6 +553,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
                         case AlgorithmNames.RsaOAEP.toLowerCase():
                             Class = RsaCrypto;
                             break;
+                        case AlgorithmNames.DesCBC.toLowerCase():
+                        case AlgorithmNames.DesEdeCBC.toLowerCase():
+                            Class = DesCrypto;
+                            break;
                         default:
                             throw new LinerError(LinerError.NOT_SUPPORTED, "unwrapKey");
                     }
@@ -584,6 +612,13 @@ export class SubtleCrypto extends core.SubtleCrypto {
                     case AlgorithmNames.RsaOAEP.toLowerCase():
                         Class = RsaCrypto;
                         break;
+                    case AlgorithmNames.Pbkdf2.toLowerCase():
+                        Class = PbkdfCrypto;
+                        break;
+                    case AlgorithmNames.DesCBC.toLowerCase():
+                    case AlgorithmNames.DesEdeCBC.toLowerCase():
+                        Class = DesCrypto;
+                        break;
                     default:
                         throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, key.algorithm.name!.toLowerCase());
                 }
@@ -591,10 +626,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
             });
     }
 
-    public async importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]) {
+    public async importKey(format: string, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: string[]): Promise<CryptoKey> {
         const args = { format, keyData, algorithm, extractable, keyUsages };
         let dataAny: any;
-        const bits = await super.importKey(format, keyData, algorithm, extractable, keyUsages);
+        const bits = await super.importKey(format, keyData, algorithm as any, extractable, keyUsages);
 
         const alg: Algorithm = PrepareAlgorithm(algorithm);
         dataAny = keyData;
@@ -619,13 +654,21 @@ export class SubtleCrypto extends core.SubtleCrypto {
         if (CheckAppleRsaOAEP(alg.name)) {
             // Don't use native importKey for RSA-OAEP on Safari before v11
             // https://github.com/PeculiarVentures/webcrypto-liner/issues/53
+            // @ts-ignore
             return;
         }
 
         let k: CryptoKey | undefined;
         if (nativeSubtle) {
             try {
-                k = await nativeSubtle!.importKey.apply(nativeSubtle, args);
+                k = await nativeSubtle!.importKey.call(
+                    nativeSubtle,
+                    args.format,
+                    args.keyData,
+                    args.algorithm,
+                    args.extractable,
+                    args.keyUsages,
+                );
             } catch (e) {
                 warn(`WebCrypto: native 'importKey' for ${alg.name} doesn't work.`, e && e.message || "Unknown message");
             }
@@ -652,10 +695,19 @@ export class SubtleCrypto extends core.SubtleCrypto {
             case AlgorithmNames.RsaOAEP.toLowerCase():
                 Class = RsaCrypto;
                 break;
+            case AlgorithmNames.Pbkdf2.toLowerCase():
+                Class = PbkdfCrypto;
+                break;
+            case AlgorithmNames.DesCBC.toLowerCase():
+            case AlgorithmNames.DesEdeCBC.toLowerCase():
+                Class = DesCrypto;
+                break;
             default:
                 throw new LinerError(LinerError.UNSUPPORTED_ALGORITHM, alg.name.toLowerCase());
         }
-        return Class.importKey(format, dataAny, alg, extractable, keyUsages);
+
+        // @ts-ignore
+        return Class.importKey(format, dataAny, alg as any, extractable, keyUsages);
     }
 }
 

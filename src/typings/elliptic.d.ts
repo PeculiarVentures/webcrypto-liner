@@ -1,3 +1,5 @@
+// tslint:disable
+
 declare namespace EllipticJS {
     class EC {
         constructor(namedCurve: string);
@@ -73,3 +75,5 @@ declare module "elliptic" {
     const eddsa: any;
 
 }
+
+// tslint:enable
