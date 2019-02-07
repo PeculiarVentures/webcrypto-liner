@@ -65,7 +65,7 @@ describe("EC EdDSA", () => {
               hash: "SHA-512"
             };
             const jwkBase = {
-              kty: "EC",
+              kty: "EDDSA",
               crv: "ED25519"
             };
             const jwkPrv = Object.assign({}, jwkBase, {

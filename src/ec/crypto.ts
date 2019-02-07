@@ -265,12 +265,10 @@ export class EcCrypto extends BaseCrypto {
     protected static getNamedCurve(wcNamedCurve: string) {
         const crv = wcNamedCurve.toUpperCase();
         let res = "";
-        if (["P-256", "P-384", "P-521", "ED25519"].indexOf(crv) > -1) {
+        if (["P-256", "P-384", "P-521"].indexOf(crv) > -1) {
             res = crv.replace("-", "").toLowerCase();
         } else if (crv === "K-256") {
             res = "secp256k1";
-        } else if ("X25519") {
-            res = "curve25519";
         } else {
             throw new LinerError(`Unsupported named curve '${wcNamedCurve}'`);
         }

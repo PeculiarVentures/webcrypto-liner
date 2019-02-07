@@ -15,6 +15,7 @@ import { AesCrypto } from "./aes/crypto";
 import { ShaCrypto } from "./sha/crypto";
 import { RsaCrypto } from "./rsa/crypto";
 import { EcCrypto } from "./ec/crypto";
+import { EddsaCrypto } from "./eddsa/crypto";
 import { PbkdfCrypto } from "./pbkdf/crypto";
 import { DesCrypto } from "./des/crypto";
 
@@ -686,9 +687,11 @@ export class SubtleCrypto extends core.SubtleCrypto {
                 Class = AesCrypto;
                 break;
             case AlgorithmNames.EcDH.toLowerCase():
-            case AlgorithmNames.EdDSA.toLowerCase():
             case AlgorithmNames.EcDSA.toLowerCase():
                 Class = EcCrypto;
+                break;
+            case AlgorithmNames.EdDSA.toLowerCase():
+                Class = EddsaCrypto;
                 break;
             case AlgorithmNames.RsaSSA.toLowerCase():
             case AlgorithmNames.RsaPSS.toLowerCase():
