@@ -1,3 +1,4 @@
+import "./init";
 import { Crypto, nativeCrypto } from "./index";
 
 // Object.freeze(Math);

@@ -1,2 +1,2 @@
-export * from "./init";
+export * from "./native";
 export * from "./crypto";

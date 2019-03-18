@@ -1,4 +1,6 @@
-declare module "des.js" {
+// tslint:disable: no-namespace
+
+declare namespace des {
 
   type DesOperationType = "encrypt" | "decrypt" | string;
 

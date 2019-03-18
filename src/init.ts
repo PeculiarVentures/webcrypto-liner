@@ -1,33 +1,14 @@
 import { LinerError } from "./error";
+import { nativeSubtle } from "./native";
 
-let w: any;
-if (typeof self === "undefined") {
-    const crypto = require("crypto");
-    w = {
-        crypto: {
-            subtle: {},
-            getRandomValues: (array: ArrayBufferView) => {
-                const buf = array.buffer;
-                const uint8buf = new Uint8Array(buf);
-                const rnd = crypto.randomBytes(uint8buf.length);
-                rnd.forEach((octet: number, index: number) => uint8buf[index] = octet);
-                return array;
-            },
-        },
-    };
-} else {
-    w = self;
-}
+// tslint:disable:no-string-literal
 
-export const nativeCrypto: NativeCrypto = w.msCrypto || w.crypto || {};
-export let nativeSubtle: NativeSubtleCrypto | null = null;
-try {
-    nativeSubtle = nativeCrypto.subtle || (nativeCrypto as any).webkitSubtle;
-} catch (err) {
-    // Safari throws error on crypto.webkitSubtle in Worker
-}
+// Fix DES global
+// if (typeof self !== "undefined" && !self["global"]) {
+//     self["global"] = {};
+// }
 
-function WrapFunction(subtle: any, name: string) {
+export function WrapFunction(subtle: any, name: string) {
     const fn = subtle[name];
     // tslint:disable-next-line:only-arrow-functions
     subtle[name] = function() {
@@ -44,23 +25,23 @@ function WrapFunction(subtle: any, name: string) {
     };
 }
 
-if (w.msCrypto) {
-    if (!w.Promise) {
-        throw new LinerError(LinerError.MODULE_NOT_FOUND, "Promise", "https://www.promisejs.org");
-    }
-    WrapFunction(nativeSubtle, "generateKey");
-    WrapFunction(nativeSubtle, "digest");
-    WrapFunction(nativeSubtle, "sign");
-    WrapFunction(nativeSubtle, "verify");
-    WrapFunction(nativeSubtle, "encrypt");
-    WrapFunction(nativeSubtle, "decrypt");
-    WrapFunction(nativeSubtle, "importKey");
-    WrapFunction(nativeSubtle, "exportKey");
-    WrapFunction(nativeSubtle, "wrapKey");
-    WrapFunction(nativeSubtle, "unwrapKey");
-    WrapFunction(nativeSubtle, "deriveKey");
-    WrapFunction(nativeSubtle, "deriveBits");
-}
+// if (w.msCrypto) {
+    // if (!w.Promise) {
+    //     throw new Error(LinerError.MODULE_NOT_FOUND, "Promise", "https://www.promisejs.org");
+    // }
+//     WrapFunction(nativeSubtle, "generateKey");
+//     WrapFunction(nativeSubtle, "digest");
+//     WrapFunction(nativeSubtle, "sign");
+//     WrapFunction(nativeSubtle, "verify");
+//     WrapFunction(nativeSubtle, "encrypt");
+//     WrapFunction(nativeSubtle, "decrypt");
+//     WrapFunction(nativeSubtle, "importKey");
+//     WrapFunction(nativeSubtle, "exportKey");
+//     WrapFunction(nativeSubtle, "wrapKey");
+//     WrapFunction(nativeSubtle, "unwrapKey");
+//     WrapFunction(nativeSubtle, "deriveKey");
+//     WrapFunction(nativeSubtle, "deriveBits");
+// }
 
 // fix: Math.imul for IE
 if (!(Math as any).imul) {

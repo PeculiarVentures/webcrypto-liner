@@ -7,3 +7,4 @@
 /node_modules
 index.js
 *.log
+/test/tests.js

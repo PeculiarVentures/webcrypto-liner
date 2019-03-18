@@ -1,17 +1,20 @@
+import "./init";
 import { Crypto, nativeCrypto } from "./index";
+import { Debug } from "./debug";
 
-const w = self as any;
-
-// Object.freeze(Math);
-// Object.freeze(Math.random);
-// Object.freeze((Math as any).imul);
+const window = self as any;
 
 if (nativeCrypto) {
-    Object.freeze(nativeCrypto.getRandomValues);
+  Object.freeze(nativeCrypto.getRandomValues);
 }
 
-delete (self as any).crypto;
-w.crypto = new Crypto();
-Object.freeze(w.crypto);
+try {
+  // Replace original crypto by liner
+  delete (self as any).crypto;
+  window.crypto = new Crypto();
+  Object.freeze(window.crypto);
+} catch (e) {
+  Debug.error(e);
+}
 
-export const crypto = w.crypto;
+export const crypto = window.crypto;
