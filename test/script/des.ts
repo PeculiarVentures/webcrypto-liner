@@ -1,7 +1,7 @@
 import * as assert from "assert";
+import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { testCrypto } from "./helper";
-import { Convert } from "pvtsutils";
 
 context("DES", () => {
 

@@ -1,5 +1,5 @@
-import "./init";
 import { Crypto, nativeCrypto } from "./index";
+import "./init";
 
 // Object.freeze(Math);
 // Object.freeze(Math.random);

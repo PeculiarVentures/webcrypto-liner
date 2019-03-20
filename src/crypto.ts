@@ -1,6 +1,6 @@
 import * as core from "webcrypto-core";
-import { SubtleCrypto } from "./subtle";
 import { nativeCrypto } from "./native";
+import { SubtleCrypto } from "./subtle";
 
 export class Crypto extends core.Crypto {
 

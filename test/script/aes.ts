@@ -1,6 +1,6 @@
 import { Convert } from "pvtsutils";
-import { testCrypto, browser } from "./helper";
 import { Browser } from "../../src/helper";
+import { browser, testCrypto } from "./helper";
 
 context("AES", () => {
 

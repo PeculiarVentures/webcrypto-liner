@@ -1,9 +1,9 @@
 /// <reference path="../../typings/des.d.ts" />
 
-import * as core from "webcrypto-core";
-import { DesCryptoKey } from "./key";
 import { Convert } from "pvtsutils";
+import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";
+import { DesCryptoKey } from "./key";
 
 export class DesCrypto {
 

@@ -2,9 +2,9 @@ import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as core from "webcrypto-core";
 import * as asn from "../../asn";
-import { EcCryptoKey } from "./key";
-import { getOidByNamedCurve } from "./helper";
 import { concat } from "../../helper";
+import { getOidByNamedCurve } from "./helper";
+import { EcCryptoKey } from "./key";
 
 export class EcCrypto {
 

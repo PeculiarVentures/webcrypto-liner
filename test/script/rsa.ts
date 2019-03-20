@@ -1,6 +1,6 @@
-import { testCrypto, ITestGenerateKeyAction, ITestActions, browser } from "./helper";
 import { Convert } from "pvtsutils";
 import { Browser } from "../../src/helper";
+import { browser, ITestGenerateKeyAction, testCrypto } from "./helper";
 
 context("RSA", () => {
 

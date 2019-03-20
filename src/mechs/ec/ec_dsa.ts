@@ -1,7 +1,7 @@
 import * as core from "webcrypto-core";
+import { Crypto } from "../../crypto";
 import { EcCrypto } from "./crypto";
 import { EcCryptoKey } from "./key";
-import { Crypto } from "../../crypto";
 
 function b2a(buffer: ArrayBuffer | ArrayBufferView) {
   const buf = new Uint8Array(buffer as ArrayBuffer);

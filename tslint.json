@@ -9,9 +9,6 @@
         "prefer-const": true,
         "no-var-requires": false,
         "object-literal-sort-keys": false,
-        "ordered-imports": [
-            false
-        ],
         "no-bitwise": false,
         "forin": false,
         "max-line-length": [

@@ -1,6 +1,6 @@
 import { Convert } from "pvtsutils";
-import { testCrypto, ITestGenerateKeyAction, browser } from "./helper";
 import { Browser } from "../../src/helper";
+import { browser, ITestGenerateKeyAction, testCrypto } from "./helper";
 
 context("EC", () => {
 
