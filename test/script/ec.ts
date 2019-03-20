@@ -1,5 +1,6 @@
 import { Convert } from "pvtsutils";
-import { testCrypto, ITestGenerateKeyAction } from "./helper";
+import { testCrypto, ITestGenerateKeyAction, browser } from "./helper";
+import { Browser } from "../../src/helper";
 
 context("EC", () => {
 
@@ -75,6 +76,7 @@ context("EC", () => {
           },
           //#region SPKI
           {
+            skip: browser.name === Browser.Firefox, // Firefox uses 1.3.132.112 instead of 1.2.840.10045.2.1 for algorithm
             name: "SPKI P-256",
             format: "spki" as KeyFormat,
             data: Convert.FromBase64("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoZMMqyfA16N6bvloFHmalk/SGMisr3zSXFZdR8F9UkaY7hF13hHiQtwp2YO+1zd7jwYi1Y7SMA9iUrC+ap2OCw=="),
@@ -86,6 +88,7 @@ context("EC", () => {
             keyUsages: ["verify"],
           },
           {
+            skip: browser.name === Browser.Firefox, // Firefox uses 1.3.132.112 instead of 1.2.840.10045.2.1 for algorithm
             name: "SPKI P-384",
             format: "spki" as KeyFormat,
             data: Convert.FromBase64("MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8Kf5Wv21nksy0LuMlkMZv9sxTVAmzNWt81b6MVlYuzxl9D2/obwoVp86pTe4BM79gWWj8pfLc1XrjaIyMSrV8+05IejRLB3i4c0KTGA6QARGm3/AOm0MbTt6kMQF7drL"),
@@ -97,6 +100,7 @@ context("EC", () => {
             keyUsages: ["verify"],
           },
           {
+            skip: browser.name === Browser.Firefox, // Firefox uses 1.3.132.112 instead of 1.2.840.10045.2.1 for algorithm
             name: "SPKI P-521",
             format: "spki" as KeyFormat,
             data: Convert.FromBase64("MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB+/g37ii0T5iLHCAaXcYRRoNpT0LhfeAr88OwQY4cUpQm1S9lkR0EVUtyuYrYsMB8FarhAZYsLtOiyhjl/Y5f+lQAZ6veWILhbDcbrSNhTPSp3wamAm8QT3EjPUkJlYjHefuAUBIYS9pl5FWjK1pI9fkYe3bdAemkjP1ccHVzqZU9sjg="),

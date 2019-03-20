@@ -11,6 +11,8 @@ export class EcCrypto {
   public static privateUsages: KeyUsage[] = ["sign", "deriveKey", "deriveBits"];
   public static publicUsages: KeyUsage[] = ["verify"];
 
+  public static readonly ASN_ALGORITHM = "1.2.840.10045.2.1";
+
   public static checkLib() {
     if (typeof (elliptic) === "undefined") {
       throw new core.OperationError("Cannot implement DES mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
@@ -123,8 +125,6 @@ export class EcCrypto {
     }
     return res;
   }
-
-  private static readonly ASN_ALGORITHM = "1.2.840.10045.2.1";
 
   private static initEcKey(namedCurve: string) {
     return elliptic.ec(this.getNamedCurve(namedCurve));

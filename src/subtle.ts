@@ -1,16 +1,20 @@
+import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
+import { JsonSerializer, JsonParser } from "@peculiar/json-schema";
 import * as core from "webcrypto-core";
+import * as asn from "./asn";
 import {
   AesCbcProvider, AesEcbProvider, AesGcmProvider, AesCtrProvider, AesKwProvider,
   DesCbcProvider, DesEde3CbcProvider,
   EcdhProvider, EcdsaProvider,
   Pbkdf2Provider,
   RsaOaepProvider, RsaPssProvider, RsaSsaProvider,
-  Sha1Provider, Sha256Provider, Sha512Provider,
+  Sha1Provider, Sha256Provider, Sha512Provider, EcCrypto,
 } from "./mechs";
 import { nativeSubtle, nativeCryptoKey } from "./native";
 import { CryptoKey } from "./key";
 import { Debug } from "./debug";
 import { Browser, BrowserInfo } from "./helper";
+import { getOidByNamedCurve } from "./mechs/ec/helper";
 
 type SubtleMethods = keyof core.SubtleCrypto;
 
@@ -64,11 +68,13 @@ export class SubtleCrypto extends core.SubtleCrypto {
   }
 
   public async importKey(...args: any[]) {
+    this.fixFirefoxEcImportPkcs8(args);
     return this.wrapNative("importKey", ...args);
   }
 
   public async exportKey(...args: any[]) {
-    return this.wrapNative("exportKey", ...args);
+    return await this.fixFirefoxEcExportPkcs8(args) ||
+      await this.wrapNative("exportKey", ...args);
   }
 
   public async generateKey(...args: any[]) {
@@ -183,6 +189,64 @@ export class SubtleCrypto extends core.SubtleCrypto {
           }
         }
       }
+    }
+  }
+
+  /**
+   * Firefox doesn't support import PKCS8 key for ECDSA/ECDH
+   */
+  private fixFirefoxEcImportPkcs8(args: any[]) {
+    const preparedAlgorithm = this.prepareAlgorithm(args[2]) as EcKeyImportParams;
+    const algName = preparedAlgorithm.name.toUpperCase();
+    if (this.browserInfo.name === Browser.Firefox
+      && args[0] === "pkcs8"
+      && ~["ECDSA", "ECDH"].indexOf(algName)
+      && ~["P-256", "P-384", "P-521"].indexOf(preparedAlgorithm.namedCurve)) {
+      if (!core.BufferSourceConverter.isBufferSource(args[1])) {
+        throw new TypeError("data: Is not ArrayBuffer or ArrayBufferView");
+      }
+      const preparedData = core.BufferSourceConverter.toArrayBuffer(args[1]);
+
+      // Convert PKCS8 to JWK
+      const keyInfo = AsnParser.parse(preparedData, asn.PrivateKeyInfo);
+      const privateKey = AsnParser.parse(keyInfo.privateKey, asn.EcPrivateKey);
+      const jwk: JsonWebKey = JsonSerializer.toJSON(privateKey);
+      jwk.ext = true;
+      jwk.key_ops = args[4];
+      jwk.crv = preparedAlgorithm.namedCurve;
+      jwk.kty = "EC";
+
+      args[0] = "jwk";
+      args[1] = jwk;
+    }
+  }
+
+  /**
+   * Firefox doesn't support export PKCS8 key for ECDSA/ECDH
+   */
+  private async fixFirefoxEcExportPkcs8(args: any[]) {
+    try {
+      if (this.browserInfo.name === Browser.Firefox
+        && args[0] === "pkcs8"
+        && ~["ECDSA", "ECDH"].indexOf(args[1].algorithm.name)
+        && ~["P-256", "P-384", "P-521"].indexOf(args[1].algorithm.namedCurve)) {
+        const jwk = await this.exportKey("jwk", args[1]);
+
+        // Convert JWK to PKCS8
+        const ecKey = JsonParser.fromJSON(jwk, { targetSchema: asn.EcPrivateKey });
+
+        const keyInfo = new asn.PrivateKeyInfo();
+        keyInfo.privateKeyAlgorithm.algorithm = EcCrypto.ASN_ALGORITHM;
+        keyInfo.privateKeyAlgorithm.parameters = AsnSerializer.serialize(
+          new asn.ObjectIdentifier(getOidByNamedCurve(args[1].algorithm.namedCurve)),
+        );
+        keyInfo.privateKey = AsnSerializer.serialize(ecKey);
+
+        return AsnSerializer.serialize(keyInfo);
+      }
+    } catch (err) {
+      Debug.error(err);
+      return null;
     }
   }
 

@@ -12,6 +12,8 @@
     "build:webpack": "webpack",
     "build:webpack:dev": "webpack -d",
     "build:prod": "webpack -p",
+    "lint": "tslint -p .",
+    "lint:fix": "tslint --fix -p .",
     "pub": "npm run build:prod && npm version patch && npm publish && git push"
   },
   "repository": {
