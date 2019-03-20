@@ -1,18 +1,24 @@
-export let Browser = {
-    IE: "Internet Explorer",
-    Safari: "Safari",
-    Edge: "Edge",
-    Chrome: "Chrome",
-    Firefox: "Firefox Mozilla",
-    Mobile: "Mobile",
-};
+export enum Browser {
+    Unknown = "Unknown",
+    IE = "Internet Explorer",
+    Safari = "Safari",
+    Edge = "Edge",
+    Chrome = "Chrome",
+    Firefox = "Firefox Mozilla",
+    Mobile = "Mobile",
+}
+
+export interface IBrowserInfo {
+    name: Browser;
+    version: string;
+}
 
 /**
  * Returns info about browser
  */
 export function BrowserInfo() {
-    const res = {
-        name: "Unknown",
+    const res: IBrowserInfo = {
+        name: Browser.Unknown,
         version: "0",
     };
     const userAgent = self.navigator.userAgent;
