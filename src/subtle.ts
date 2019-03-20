@@ -1,6 +1,6 @@
 import * as core from "webcrypto-core";
 import {
-  AesCbcProvider, AesEcbProvider, AesGcmProvider, AesCtrProvider,
+  AesCbcProvider, AesEcbProvider, AesGcmProvider, AesCtrProvider, AesKwProvider,
   DesCbcProvider, DesEde3CbcProvider,
   EcdhProvider, EcdsaProvider,
   Pbkdf2Provider,
@@ -10,12 +10,15 @@ import {
 import { nativeSubtle, nativeCryptoKey } from "./native";
 import { CryptoKey } from "./key";
 import { Debug } from "./debug";
+import { Browser, BrowserInfo } from "./helper";
 
 type SubtleMethods = keyof core.SubtleCrypto;
 
 export class SubtleCrypto extends core.SubtleCrypto {
 
   private static readonly methods: SubtleMethods[] = ["digest", "importKey", "exportKey", "sign", "verify", "generateKey", "encrypt", "decrypt", "deriveBits", "deriveKey", "wrapKey", "unwrapKey"];
+
+  public readonly browserInfo = BrowserInfo();
 
   private constructor() {
     super();
@@ -25,6 +28,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
     this.providers.set(new AesCtrProvider());
     this.providers.set(new AesEcbProvider());
     this.providers.set(new AesGcmProvider());
+    this.providers.set(new AesKwProvider());
     //#endregion
 
     //#region DES
@@ -104,6 +108,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
   }
 
   private async wrapNative(method: string, ...args: any[]) {
+    if (~["generateKey", "unwrapKey", "deriveKey", "importKey"].indexOf(method)) {
+      this.fixAlgorithmName(args);
+    }
+
     try {
       if (method !== "digest" || !args.some((a) => a instanceof CryptoKey)) {
         Debug.info(`Call native '${method}' method`, args);
@@ -144,6 +152,38 @@ export class SubtleCrypto extends core.SubtleCrypto {
     const jwk = await this.exportKey("jwk", key);
 
     return provider.importKey("jwk", jwk, key.algorithm, true, key.usages);
+  }
+
+  /**
+   * Fixes name of the algorithms. Edge doesn't normilize algorithm names in keys
+   * @param args
+   */
+  private fixAlgorithmName(args: any[]) {
+    if (this.browserInfo.name === Browser.Edge) {
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[0];
+        if (typeof arg === "string") {
+          // algorithm
+          for (const algorithm of this.providers.algorithms) {
+            if (algorithm.toLowerCase() === arg.toLowerCase()) {
+              args[i] = algorithm;
+              break;
+            }
+          }
+        } else if (typeof arg === "object" && typeof arg.name === "string") {
+          // algorithm.name
+          for (const algorithm of this.providers.algorithms) {
+            if (algorithm.toLowerCase() === arg.name.toLowerCase()) {
+              arg.name = algorithm;
+            }
+            if ((typeof arg.hash === "string" && algorithm.toLowerCase() === arg.hash.toLowerCase())
+              || (typeof arg.hash === "object" && typeof arg.hash.name === "string" && algorithm.toLowerCase() === arg.hash.name.toLowerCase())) {
+              arg.hash = { name: algorithm };
+            }
+          }
+        }
+      }
+    }
   }
 
 }
