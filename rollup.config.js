@@ -11,7 +11,7 @@ const dependencies = Object.keys(pkg.dependencies)
 let banner = []
 
 export default [
-  // ESNEXT bundled file for webcrypto-socket
+  // ESNEXT bundled file
   {
     input: "src/shim.ts",
     plugins: [
@@ -53,7 +53,7 @@ export default [
             {
               targets: {
                 // ie: "11",
-                chrome: "72"
+                chrome: "60",
               },
               useBuiltIns: "entry"
             }
@@ -95,18 +95,12 @@ export default [
       babel({
         babelrc: false,
         runtimeHelpers: true,
-        // exclude: 'node_modules/**',
-        // include: [
-        //   "build/**",
-        //   "src/**",
-        // ],
-        // include: dependencies.map(item => `node_modules/${item}/**`).concat(["src/**"]),
         presets: [
           [
             "@babel/env",
             {
               targets: {
-                google: "72"
+                chrome: "60",
                 // ie: "11",
               },
               useBuiltIns: "entry"
