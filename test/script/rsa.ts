@@ -1,5 +1,6 @@
-import { testCrypto, ITestGenerateKeyAction, ITestActions } from "./helper";
+import { testCrypto, ITestGenerateKeyAction, ITestActions, browser } from "./helper";
 import { Convert } from "pvtsutils";
+import { Browser } from "../../src/helper";
 
 context("RSA", () => {
 
@@ -10,15 +11,15 @@ context("RSA", () => {
       actions: {
         generateKey: (() => {
           const res: ITestGenerateKeyAction[] = [];
-          // ["SHA-1"].forEach((hash) =>
-          ["SHA-1", "SHA-256", "SHA-512"].forEach((hash) =>
+          ["SHA-1", "SHA-256"].forEach((hash) =>
+            // ["SHA-1", "SHA-256", "SHA-512"].forEach((hash) =>
             // [new Uint8Array([3])].forEach((publicExponent) =>
             [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach((publicExponent) =>
-              // [1024].forEach((modulusLength) => {
-              [1024, 2048].forEach((modulusLength) => {
+              [1024].forEach((modulusLength) => {
+                // [1024, 2048].forEach((modulusLength) => {
                 res.push({
                   name: `h:${hash} e:${Convert.ToHex(publicExponent)} n:${modulusLength}`,
-                  skip: true,
+                  skip: false,
                   algorithm: {
                     name: "RSASSA-PKCS1-v1_5",
                     hash,
@@ -35,6 +36,7 @@ context("RSA", () => {
         })(),
         sign: [
           {
+            name: "SHA-256, e:010001, n:2048",
             algorithm: {
               name: "RSASSA-PKCS1-v1_5",
             },
@@ -72,6 +74,30 @@ context("RSA", () => {
                   q: "0GttDMl1kIzSV2rNzGXpOS8tUqr5Lz0EtVZwIb9GJPMmJ0P3gZ801zEgZZ4-esU7cLUf-BSZEAmfnKA80G2jIw",
                   qi: "FByTxX4G2eXkk1xe0IuiEv7I5NS-CnFyp8iB4XLG0rabnfcIZFKpf__X0sNyVOAVo5-jJMuUYjCRTdaXNAWhkg",
                 },
+                extractable: true,
+                keyUsages: ["sign"],
+              },
+            },
+          },
+          {
+            name: "SHA-1 e:03 n:1024",
+            algorithm: {
+              name: "RSASSA-PKCS1-v1_5",
+            },
+            data: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]),
+            signature: Convert.FromHex("2f4cab4f67ca544934e462fd324ea0b52f9040f1453c8c425e818411bf54c3c0cd1d7f2a1d04a820ce28fec996b94a0971d481ec8adee2ee0d8b003c2cb75862d7699a73b798d7fab788956ae17388fed764e7a1a944abf9799534b66e830a5c5f4ea7253b937af6b4fcbd11310da3daebf1f3181041bdd550cbe4ea8ff2e1ed"),
+            key: {
+              publicKey: {
+                format: "spki",
+                algorithm: { name: "RSASSA-PKCS1-v1_5", hash: "SHA-1" } as Algorithm,
+                data: Convert.FromBase64("MIGdMA0GCSqGSIb3DQEBAQUAA4GLADCBhwKBgQDL51DUp2Jxqjr18k5mpAvFBzTLtzK4qL6Pq8H4nXU+8gheGYP2+Vi3J+PSLVTIKk7jPNJ2gQtgnA27TNZxYA0QplEyxq0WQwTMp8vz/PAJYjsLNx8O4g433Ve60dUzZWjjbawX8JeggET37m2EoCsgHXJPe3puloMfD0qRR3BoZwIBAw=="),
+                extractable: true,
+                keyUsages: ["verify"],
+              },
+              privateKey: {
+                format: "pkcs8",
+                algorithm: { name: "RSASSA-PKCS1-v1_5", hash: "SHA-1" } as Algorithm,
+                data: Convert.FromBase64("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAMvnUNSnYnGqOvXyTmakC8UHNMu3Mriovo+rwfiddT7yCF4Zg/b5WLcn49ItVMgqTuM80naBC2CcDbtM1nFgDRCmUTLGrRZDBMyny/P88AliOws3Hw7iDjfdV7rR1TNlaONtrBfwl6CARPfubYSgKyAdck97em6Wgx8PSpFHcGhnAgEDAoGAIfvizhvlvZxfKP23u8YB9iveIfPdyXF1F/H1qW+Tin2sD67rU9Q5c9v7TbI4zAcNJd94aRWB5W9Xnzd5EuVXgnnU/wz54Bk6zXMLq/L6oouSLzcRVwz0riaXBa007OTejfS+jVhCAlMM4hqYnCxrRr4BBIEi+WidyHKSs8ynSE8CQQD9BRizPsw8eZXDcJz1TVrNYVk4ZGgWfmgGkdyeSh2A5Smdcmvzcm32dNVH9fqL9P33qoJUw+CoSRKuEB/szIjjAkEAzk4fxZMJbypmMhVPVcLfT2yWtFKcfdO67zu8JE2Ih0xmE8Jb65kkl4LWBuPhCbJ5scGyH+S1eodZsco6jrgtrQJBAKiuEHd/MtL7uSz1vfjePIjrkNBC8A7+8ARhPb7cE6tDcROhnUz28/mjONqj/F1N/qUcVuMtQHAwtx61ap3dsJcCQQCJiWqDt1ufcZl2uN+Ogeo08w8i4b2pN9H00n1tiQWviEQNLD1Hu226VzlZ7UCxIaZ2gSFqmHj8WjvL3CcJ0B5zAkEAlmRgnALghAcJ/WfTMphPKJXhY+H+CgkeE3si2ZgPW1YaDAyhp/xdQabkgbFy70Nq32fuJyxDDS4WhF0aOYz6pw=="),
                 extractable: true,
                 keyUsages: ["sign"],
               },
@@ -124,6 +150,7 @@ context("RSA", () => {
             keyUsages: ["sign"],
           },
           {
+            skip: browser.name === Browser.Edge, // Edge returns PKCS8 with KeyUsages extension
             name: "private key pkcs8",
             format: "pkcs8" as KeyFormat,
             algorithm: { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" } as Algorithm,
@@ -133,6 +160,7 @@ context("RSA", () => {
           },
           {
             name: "pkcs8 e:03 n:1024",
+            skip: browser.name === Browser.Edge,
             format: "pkcs8",
             algorithm: { name: "RSASSA-PKCS1-v1_5", hash: "SHA-1" } as Algorithm,
             data: Convert.FromBase64("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAMvnUNSnYnGqOvXyTmakC8UHNMu3Mriovo+rwfiddT7yCF4Zg/b5WLcn49ItVMgqTuM80naBC2CcDbtM1nFgDRCmUTLGrRZDBMyny/P88AliOws3Hw7iDjfdV7rR1TNlaONtrBfwl6CARPfubYSgKyAdck97em6Wgx8PSpFHcGhnAgEDAoGAIfvizhvlvZxfKP23u8YB9iveIfPdyXF1F/H1qW+Tin2sD67rU9Q5c9v7TbI4zAcNJd94aRWB5W9Xnzd5EuVXgnnU/wz54Bk6zXMLq/L6oouSLzcRVwz0riaXBa007OTejfS+jVhCAlMM4hqYnCxrRr4BBIEi+WidyHKSs8ynSE8CQQD9BRizPsw8eZXDcJz1TVrNYVk4ZGgWfmgGkdyeSh2A5Smdcmvzcm32dNVH9fqL9P33qoJUw+CoSRKuEB/szIjjAkEAzk4fxZMJbypmMhVPVcLfT2yWtFKcfdO67zu8JE2Ih0xmE8Jb65kkl4LWBuPhCbJ5scGyH+S1eodZsco6jrgtrQJBAKiuEHd/MtL7uSz1vfjePIjrkNBC8A7+8ARhPb7cE6tDcROhnUz28/mjONqj/F1N/qUcVuMtQHAwtx61ap3dsJcCQQCJiWqDt1ufcZl2uN+Ogeo08w8i4b2pN9H00n1tiQWviEQNLD1Hu226VzlZ7UCxIaZ2gSFqmHj8WjvL3CcJ0B5zAkEAlmRgnALghAcJ/WfTMphPKJXhY+H+CgkeE3si2ZgPW1YaDAyhp/xdQabkgbFy70Nq32fuJyxDDS4WhF0aOYz6pw=="),

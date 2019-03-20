@@ -1,13 +1,19 @@
 import * as assert from "assert";
 import { Convert } from "pvtsutils";
+import { BrowserInfo } from "../../src/helper";
 
 // fix type errors
 type Crypto = any;
 
-export interface ITestAction {
-  name?: string;
-  only?: boolean;
+export const browser = BrowserInfo();
+
+export interface ITestMochaFunction {
   skip?: boolean;
+  only?: boolean;
+}
+
+export interface ITestAction extends ITestMochaFunction {
+  name?: string;
   error?: any;
 }
 
@@ -87,9 +93,8 @@ export interface ITestActions {
   digest?: ITestDigestAction[];
 }
 
-export interface ITestParams {
+export interface ITestParams extends ITestMochaFunction {
   name: string;
-  only?: boolean;
   actions: ITestActions;
 }
 
@@ -120,14 +125,18 @@ async function getKeys(crypto: Crypto, key: IImportKeyParams | IImportKeyPairPar
   return keys;
 }
 
-async function wrapTest(promise: () => Promise<void>, action: ITestAction, index: number) {
-  const test = action.skip
-    ? it.skip
-    : action.only
-      ? it.only
-      : it;
+function wrapSkipOnly(item: Mocha.TestFunction, params: ITestMochaFunction): Mocha.PendingTestFunction;
+function wrapSkipOnly(item: Mocha.SuiteFunction, params: ITestMochaFunction): Mocha.PendingSuiteFunction;
+function wrapSkipOnly(item: Mocha.TestFunction | Mocha.SuiteFunction, params: ITestMochaFunction) {
+  return params.skip
+    ? item.skip
+    : params.only
+      ? item.only
+      : item;
+}
 
-  test(action.name || `#${index + 1}`, async () => {
+async function wrapTest(promise: () => Promise<void>, action: ITestAction, index: number) {
+  wrapSkipOnly(it, action)(action.name || `#${index + 1}`, async () => {
     if (action.error) {
       if (typeof(action.error) === "boolean") {
         await assert.rejects(promise());
@@ -142,7 +151,7 @@ async function wrapTest(promise: () => Promise<void>, action: ITestAction, index
 
 export function testCrypto(crypto: Crypto, params: ITestParams[]) {
   params.forEach((param) => {
-    context(param.name, () => {
+    wrapSkipOnly(context, param)(param.name, () => {
       //#region Generate key
       if (param.actions.generateKey) {
         context("Generate Key", () => {
@@ -193,7 +202,6 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
 
               // encrypt
               const enc = await crypto.subtle.encrypt(algorithm, encKey, action.data);
-              console.log("Encrypted:", Convert.ToHex(enc));
               // decrypt
               let dec = await crypto.subtle.decrypt(algorithm, decKey, enc);
               assert.equal(Convert.ToHex(dec), Convert.ToHex(action.data));

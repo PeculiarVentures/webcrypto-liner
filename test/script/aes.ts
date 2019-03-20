@@ -1,6 +1,6 @@
 import { Convert } from "pvtsutils";
-import * as core from "webcrypto-core";
-import { testCrypto } from "./helper";
+import { testCrypto, browser } from "./helper";
+import { Browser } from "../../src/helper";
 
 context("AES", () => {
 
@@ -201,6 +201,7 @@ context("AES", () => {
 
     //#region AES-CTR
     {
+      skip: browser.name === Browser.Edge,
       name: "AES-128-CTR",
       actions: {
         generateKey: [
@@ -256,6 +257,8 @@ context("AES", () => {
     },
     {
       name: "AES-192-CTR",
+      skip: browser.name === Browser.Chrome // Chrome doesn't implement this alg
+       || browser.name === Browser.Edge,
       actions: {
         generateKey: [
           {
@@ -310,6 +313,7 @@ context("AES", () => {
     },
     {
       name: "AES-256-CTR",
+      skip: browser.name === Browser.Edge,
       actions: {
         generateKey: [
           {
@@ -539,6 +543,7 @@ context("AES", () => {
         ],
         wrapKey: [
           {
+            skip: browser.name === Browser.Firefox, // Firefox: Operation is not supported on unwrapKey
             key: {
               format: "raw",
               algorithm: "AES-KW",
@@ -587,6 +592,7 @@ context("AES", () => {
     },
     {
       name: "AES-192-KW",
+      skip: browser.name === Browser.Chrome, // Chrome doesn't support AES-192-KW
       actions: {
         generateKey: [
           {
@@ -597,6 +603,7 @@ context("AES", () => {
         ],
         wrapKey: [
           {
+            skip: browser.name === Browser.Firefox, // Firefox: Operation is not supported on unwrapKey
             key: {
               format: "raw",
               algorithm: "AES-KW",
@@ -655,6 +662,7 @@ context("AES", () => {
         ],
         wrapKey: [
           {
+            skip: browser.name === Browser.Firefox, // Firefox: Operation is not supported on unwrapKey
             key: {
               format: "raw",
               algorithm: "AES-KW",
