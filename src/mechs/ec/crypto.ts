@@ -24,6 +24,7 @@ export class EcCrypto {
 
     const key = this.initEcKey(algorithm.namedCurve);
     const ecKey = key.genKeyPair();
+    ecKey.getPublic(); // Fills internal `pub` field
     // set key params
     const prvKey = new EcCryptoKey(
       { ...algorithm },
