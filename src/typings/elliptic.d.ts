@@ -2,15 +2,35 @@
 
 declare namespace EllipticJS {
     class EC {
-        constructor(namedCurve: string);
+        constructor();
         genKeyPair(): EllipticKeyPair;
         keyFromPrivate(hexString: string | number[] | ArrayBuffer): EllipticKeyPair;
         keyFromPublic(hexString: string | number[] | ArrayBuffer, enc?: string): EllipticKeyPair;
     }
 
+    class BN {
+        toArray(): number[];
+        toBytes(): ArrayBuffer;
+    }
+
+    class Point {
+        x: BN;
+        y: BN;
+    }
+
+    type EncodeFormat = "hex" | "der";
+
     class EllipticKeyPair {
         getPrivate(enc?: string): any;
-        getPublic(enc?: string): any;
+        getPublic(enc: "der"): number[];
+        getPublic(enc: "hex"): string;
+        getPublic(): Point;
+        getPublic(enc?: EncodeFormat): string | number[] | Point;
+        priv?: any;
+        pub?: Point;
+        sign(data: number[]): any;
+        verify(data: number[], signature: object): boolean;
+        derive(point: any): BN;
     }
 
     class EllipticModule {
@@ -42,6 +62,10 @@ declare namespace EllipticJS {
         ec: typeof EC;
         eddsa: any;
     }
+}
+
+declare const elliptic: {
+    ec: (namedCurve: string) => EllipticJS.EC;
 }
 
 declare module "elliptic" {

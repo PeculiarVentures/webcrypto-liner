@@ -6,19 +6,19 @@
 
 declare namespace asmCrypto {
 
-    type RsaKey = { [key: number]: Uint8Array }
+    type RsaKey = Uint8Array[]
 
     class AES_ECB {
-        static encrypt(data: BufferSource, key: BufferSource, padding: boolean): BufferSource;
-        static decrypt(data: BufferSource, key: BufferSource, padding: boolean): BufferSource;
+        static encrypt(data: BufferSource, key: BufferSource, padding: boolean): Uint8Array;
+        static decrypt(data: BufferSource, key: BufferSource, padding: boolean): Uint8Array;
     }
     class AES_CBC {
-        static encrypt(data: BufferSource, key: BufferSource, padding: BufferSource | undefined, iv: BufferSource): BufferSource;
-        static decrypt(data: BufferSource, key: BufferSource, padding: BufferSource | undefined, iv: BufferSource): BufferSource;
+        static encrypt(data: BufferSource, key: BufferSource, padding: BufferSource | undefined, iv: BufferSource): Uint8Array;
+        static decrypt(data: BufferSource, key: BufferSource, padding: BufferSource | undefined, iv: BufferSource): Uint8Array;
     }
     class AES_GCM {
-        static encrypt(data: BufferSource, key: BufferSource, iv: BufferSource, add: BufferSource | undefined, tagLength: number): BufferSource;
-        static decrypt(data: BufferSource, key: BufferSource, iv: BufferSource, add: BufferSource | undefined, tagLength: number): BufferSource;
+        static encrypt(data: BufferSource, key: BufferSource, iv: BufferSource, add: BufferSource | undefined, tagLength: number): Uint8Array;
+        static decrypt(data: BufferSource, key: BufferSource, iv: BufferSource, add: BufferSource | undefined, tagLength: number): Uint8Array;
     }
 
     class SHA1 {
@@ -33,8 +33,8 @@ declare namespace asmCrypto {
     }
 
     class RSA_OAEP_SHA1 {
-        static encrypt(data: BufferSource, key: RsaKey, label?: BufferSource): ArrayBuffer;
-        static decrypt(data: BufferSource, key: RsaKey, label?: BufferSource): ArrayBuffer;
+        static encrypt(data: BufferSource, key: RsaKey, label?: BufferSource): Uint8Array;
+        static decrypt(data: BufferSource, key: RsaKey, label?: BufferSource): Uint8Array;
     }
 
     class RSA_OAEP_SHA256 extends RSA_OAEP_SHA1 { }

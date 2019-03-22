@@ -1,18 +1,24 @@
-export let Browser = {
-    IE: "Internet Explorer",
-    Safari: "Safari",
-    Edge: "Edge",
-    Chrome: "Chrome",
-    Firefox: "Firefox Mozilla",
-    Mobile: "Mobile",
-};
+export enum Browser {
+    Unknown = "Unknown",
+    IE = "Internet Explorer",
+    Safari = "Safari",
+    Edge = "Edge",
+    Chrome = "Chrome",
+    Firefox = "Firefox Mozilla",
+    Mobile = "Mobile",
+}
+
+export interface IBrowserInfo {
+    name: Browser;
+    version: string;
+}
 
 /**
  * Returns info about browser
  */
 export function BrowserInfo() {
-    const res = {
-        name: "Unknown",
+    const res: IBrowserInfo = {
+        name: Browser.Unknown,
         version: "0",
     };
     const userAgent = self.navigator.userAgent;
@@ -82,10 +88,4 @@ export function assign(target: any, ...sources: any[]) {
         }
     }
     return res;
-}
-
-export function warn(message?: any, ...optionalParams: any[]) {
-    if (typeof self !== "undefined" && (self as any).PV_WEBCRYPTO_LINER_LOG) {
-        console.warn.apply(console, arguments);
-    }
 }

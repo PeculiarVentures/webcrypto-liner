@@ -463,6 +463,43 @@
         _throws.apply(this, [true].concat(pSlice.call(arguments)));
     };
 
+    function _rejects(shouldThrow, block, expected, message) {
+        var actual;
+        return block
+            .catch(function (e) {
+                actual = e;
+            })
+            .then(function () {
+                if (util.isString(expected)) {
+                    message = expected;
+                    expected = null;
+                }
+
+                message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
+                    (message ? ' ' + message : '.');
+
+                if (shouldThrow && !actual) {
+                    fail(actual, expected, 'Missing expected exception' + message);
+                }
+
+                if (!shouldThrow && expectedException(actual, expected)) {
+                    fail(actual, expected, 'Got unwanted exception' + message);
+                }
+
+                if ((shouldThrow && actual && expected &&
+                    !expectedException(actual, expected)) || (!shouldThrow && actual)) {
+                    throw actual;
+                }
+            });
+    }
+
+    // 11. Expected to throw an error:
+    // assert.throws(block, Error_opt, message_opt);
+
+    assert.rejects = function (block, /*optional*/error, /*optional*/message) {
+        return _rejects.apply(this, [true].concat(pSlice.call(arguments)));
+    };
+
     // EXTENSION! This is annoying to write outside this module.
     assert.doesNotThrow = function (block, /*optional*/message) {
         _throws.apply(this, [false].concat(pSlice.call(arguments)));

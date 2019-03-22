@@ -1,40 +1,57 @@
 {
   "name": "webcrypto-liner",
-  "version": "0.1.38",
+  "version": "1.0.0",
   "description": "A WebCrypto polyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
+  "module": "build/webcrypto-liner.es.js",
+  "browser": "build/webcrypto-liner.shim.js",
   "scripts": {
-    "build": "npm run build:prod",
-    "build:es5": "tsc",
-    "build:es2015": "tsc -p tsconfig.es2015.json",
-    "build:webpack": "webpack",
-    "build:webpack:dev": "webpack -d",
-    "build:prod": "webpack -p",
-    "pub": "npm run build:prod && npm version patch && npm publish && git push"
+    "prepare": "npm run build",
+    "build": "rollup -c",
+    "lint": "tslint -p .",
+    "lint:fix": "tslint --fix -p .",
+    "prepub": "npm run lint & npm run build",
+    "pub": "npm version patch && npm publish && git push"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
   "dependencies": {
+    "@peculiar/asn1-schema": "^1.0.3",
+    "@peculiar/json-schema": "^1.1.5",
     "asmcrypto.js": "^0.22.0",
+    "asn1js": "^2.0.22",
     "des.js": "^1.0.0",
     "elliptic": "^6.4.1",
-    "webcrypto-core": "^0.1.26"
+    "pvtsutils": "^1.0.4",
+    "webcrypto-core": "^1.0.10"
   },
   "devDependencies": {
+    "@babel/core": "^7.3.3",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/preset-env": "^7.3.1",
+    "@types/mocha": "^5.2.6",
     "@types/node": "^10.12.12",
-    "ts-loader": "^5.3.1",
+    "mocha": "^6.0.2",
+    "rollup": "^1.2.2",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-typescript": "^1.0.0",
     "tslib": "^1.9.3",
-    "typescript": "^3.2.2",
-    "webpack": "^4.27.1",
-    "webpack-cli": "^3.1.2"
+    "typescript": "^3.3.3"
   },
   "keywords": [
     "crypto",
     "webcrypto",
     "rsa",
     "aes",
+    "des",
     "ec",
     "secp256k1",
     "sha"
