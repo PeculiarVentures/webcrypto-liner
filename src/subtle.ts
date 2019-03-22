@@ -1,5 +1,6 @@
 import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
+import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import * as asn from "./asn";
 import { Debug } from "./debug";
@@ -14,7 +15,7 @@ import {
   RsaSsaProvider, Sha1Provider, Sha256Provider, Sha512Provider,
 } from "./mechs";
 import { getOidByNamedCurve } from "./mechs/ec/helper";
-import { nativeCryptoKey, nativeSubtle } from "./native";
+import { nativeSubtle } from "./native";
 
 type SubtleMethods = keyof core.SubtleCrypto;
 
@@ -22,9 +23,24 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
   private static readonly methods: SubtleMethods[] = ["digest", "importKey", "exportKey", "sign", "verify", "generateKey", "encrypt", "decrypt", "deriveBits", "deriveKey", "wrapKey", "unwrapKey"];
 
+  /**
+   * Returns true if key is CryptoKey and is not liner key
+   * > WARN Some browsers doesn't have CryptKey class in `self`.
+   * @param key
+   */
+  private static isAnotherKey(key: any): key is core.NativeCryptoKey {
+    if (typeof key === "object"
+      && typeof key.type === "string"
+      && typeof key.extractable === "boolean"
+      && typeof key.algorithm === "object") {
+      return !(key instanceof CryptoKey);
+    }
+    return false;
+  }
+
   public readonly browserInfo = BrowserInfo();
 
-  private constructor() {
+  public constructor() {
     super();
 
     //#region AES
@@ -113,7 +129,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
     return this.wrapNative("deriveKey", ...args);
   }
 
-  private async wrapNative(method: string, ...args: any[]) {
+  private async wrapNative(method: SubtleMethods, ...args: any[]) {
     if (~["generateKey", "unwrapKey", "deriveKey", "importKey"].indexOf(method)) {
       this.fixAlgorithmName(args);
     }
@@ -128,10 +144,49 @@ export class SubtleCrypto extends core.SubtleCrypto {
       Debug.warn(`Error on native '${method}' calling. ${e.message}`, e);
     }
 
+    if (method === "wrapKey") {
+      try {
+        Debug.info(`Trying to wrap key by using native functions`, args);
+        // wrapKey(format, key, wrappingKey, wrapAlgorithm);
+        // indexes    0     1        2             3
+        const data = await this.exportKey(args[0], args[1]);
+        const keyData = (args[0] === "jwk") ? Convert.FromUtf8String(JSON.stringify(data)) : data;
+        const res = await this.encrypt(args[3], args[2], keyData);
+        return res;
+      } catch (e) {
+        Debug.warn(`Cannot wrap key by native functions. ${e.message}`, e);
+      }
+    }
+
+    if (method === "unwrapKey") {
+      try {
+        Debug.info(`Trying to unwrap key by using native functions`, args);
+        // unwrapKey(format, wrappedKey, unwrappingKey, unwrapAlgorithm, unwrappedKeyAlgorithm, extractable, keyUsages);
+        // indexes     0          1            2               3                   4                 5           6
+        const data = await this.decrypt(args[3], args[2], args[1]);
+        const keyData = (args[0] === "jwk") ? JSON.parse(Convert.ToUtf8String(data)) : data;
+        const res = await this.importKey(args[0], keyData, args[4], args[5], args[6]);
+        return res;
+      } catch (e) {
+        Debug.warn(`Cannot unwrap key by native functions. ${e.message}`, e);
+      }
+    }
+
+    if (method === "deriveKey") {
+      try {
+        Debug.info(`Trying to derive key by using native functions`, args);
+        const data = await this.deriveBits(args[0], args[1], args[2].length);
+        const res = await this.importKey("raw", data, args[2], args[3], args[4]);
+        return res;
+      } catch (e) {
+        Debug.warn(`Cannot derive key by native functions. ${e.message}`, e);
+      }
+    }
+
     if (method === "deriveBits" || method === "deriveKey") {
       // Cast public keys from algorithm
       for (const arg of args) {
-        if (typeof arg === "object" && arg.public && arg.public instanceof nativeCryptoKey) {
+        if (typeof arg === "object" && arg.public && SubtleCrypto.isAnotherKey(arg.public)) {
           arg.public = await this.castKey(arg.public);
         }
       }
@@ -140,7 +195,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
     // Cast native keys to liner keys
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
-      if (arg instanceof nativeCryptoKey) {
+      if (SubtleCrypto.isAnotherKey(arg)) {
         args[i] = await this.castKey(arg);
       }
     }
