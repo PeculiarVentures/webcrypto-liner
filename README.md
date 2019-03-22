@@ -12,6 +12,14 @@ Though WebCrypto is well [supported across browsers](http://caniuse.com/cryptogr
 
 **NOTE**: If you are not familiar with how to use the various capabilities of WebCrypto see [this great example  page](https://github.com/diafygi/webcrypto-examples).
 
+## Browsers support
+
+| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br> Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
+| --------- | --------- | --------- | --------- |
+| last 2 versions| last 2 versions| last 2 versions| last 2 versions| last 2 versions| last 2 versions| last 2 versions
+
+## Information
+
 `webcrypto-liner` is a wrapper for WebCrypto designed to address these issues, at the same time it was designed to be modular so that it can also be used for testing the addition of new algorithms to WebCrypto in the future.
 
 Intentionally `webcrypto-liner` does not implement any cryptography though it does consume libraries that do. We strongly recommend you read "[What’s wrong with in-browser cryptography?](https://tonyarcieri.com/whats-wrong-with-webcrypto)" before using this library.
@@ -59,7 +67,7 @@ You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](http
 <head>
   <!-- Crypto -->
   <script src="webcrypto-liner.shim.js"></script>
-  <!-- Crypto providers ares optional -->
+  <!-- Crypto providers are optional -->
   <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/asmcrypto.js"></script>
   <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js"></script>
   <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/des.js"></script>
