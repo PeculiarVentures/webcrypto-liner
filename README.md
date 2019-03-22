@@ -22,9 +22,9 @@ The libraries `webcrypto-liner` relies on include:
 |------------------------------------------------------------|----------------------------------------------------------------------------------------|--------|-------------|
 | [asmcrypto.js](https://github.com/vibornoff/asmcrypto.js/) | A [performant](https://medium.com/@encryb/comparing-performance-of-javascript-cryptography-libraries-42fb138116f3) JavaScript implementation of popular cryptographic utilities with performance in mind. | 131&#160;KB | Yes |
 | [elliptic](https://github.com/indutny/elliptic)            | Fast Elliptic Curve Cryptography in plain javascript                                   | 130&#160;KB | Yes  |
-| [webcrypto-core](https://github.com/PeculiarVentures/webcrypto-core)            | A input validation layer for WebCrypto polyfills <sub>1</sub>    | 25&#160;KB | No  |
+| [webcrypto-core](https://github.com/PeculiarVentures/webcrypto-core)            | A input validation layer for WebCrypto polyfills <sup>1</sup>    | 25&#160;KB | No  |
 
-<sub>1 This library is compiled into webcrypto-liner.</sub>
+<sup>1 This library is compiled into webcrypto-liner.</sup>
 
 `webcrypto-liner` will always try to use a native implementation of webcrypto, or a prefixed version of webcrypto, before it falls back to a Javascript implementation of a given algorithm. We have no control over the corresponding implementation and what it does, for example, it may not use `window.crypto.getRandomValues` even if it is available and the mechanism it uses to gather randomness may be both insecure and weak.
 
@@ -38,18 +38,18 @@ If you do not load any of the dependencies that provide cryptographic implementa
 
 | Capability                | Details                                       |
 |---------------------------|-----------------------------------------------|
-| Encryption/Decryption     | RSA-OAEP, AES-CBC, and AES-GCM                |
+| Encryption/Decryption     | RSA-OAEP, [DES-CBC](https://github.com/PeculiarVentures/webcrypto-docs/blob/master/DES_CBC.md)<sup>1</sup>, [DES-EDE3-CBC](https://github.com/PeculiarVentures/webcrypto-docs/blob/master/DES_EDE3_CBC.md)<sup>1</sup>, AES-ECB <sup>1</sup>, AES-CBC, AES-ECB and AES-GCM |
 | Sign/Verify               | RSA-PSS, RSASSA_PKCS1-v1_5 and ECDSA          |
-| Hash                      | SHA-1, and SHA-224                            |
-| Derive Key/Bits           | ECDH                                          |
-| Keywrap                   | AES-GCM, AES-CBC, AES-ECB <sub>2</sub>        |
-| ECC Curves                | P-256, P-384, P-512, and [K-256](https://github.com/PeculiarVentures/webcrypto-core/blob/master/spec/EC_K_256.md)<sub>3</sub> (secp256k1)    |
+| Hash                      | SHA-1, and SHA-256, SHA-512                   |
+| Derive Key/Bits           | ECDH, PBKDF2                                  |
+| Keywrap                   | AES-GCM, AES-CBC, AES-ECB <sup>1</sup>, [DES-CBC](https://github.com/PeculiarVentures/webcrypto-docs/blob/master/DES_CBC.md)<sup>1</sup>, [DES-EDE3-CBC](https://github.com/PeculiarVentures/webcrypto-docs/blob/master/DES_EDE3_CBC.md)<sup>1</sup>        |
+| ECC Curves                | P-256, P-384, P-521, and [K-256](https://github.com/PeculiarVentures/webcrypto-core/blob/master/spec/EC_K_256.md)<sup>2</sup> (secp256k1)    |
 | RSA Key Lengths           | 1024, 2048, 3072, and 4096                    |
 | AES Key Lengths           | 128, 192 and 256                              |
 
-<sub>2 ECB support is not defined by the WebCrypto specifications. Use of EBC in a safe way is hard, it was added for the purpose of enabling interoperability with an existing system. We recommend against its use unless needed for interoperability.</sub>
+<sup>1</sup> Mechanism is not defined by the WebCrypto specifications. Use of mechanism in a safe way is hard, it was added for the purpose of enabling interoperability with an existing system. We recommend against its use unless needed for interoperability.
 
-<sub>3 K-256 (secp256k1) curve is not defined by the WebCrypto specifications.</sub>
+<sup>2</sup> K-256 (secp256k1) curve is not defined by the WebCrypto specifications.
 
 You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](https://peculiarventures.github.io/pv-webcrypto-tests/).
 
@@ -57,29 +57,30 @@ You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](http
 
 ```html
 <head>
-    <!-- ... -->
-    <!-- ... -->
-    <!-- promise.js is needed for IE Promise implementation -->
-    <script src="https://www.promisejs.org/polyfills/promise-7.0.4.min.js"></script>
-    <script src="src/webcrypto-liner.js"></script>
+  <!-- Crypto -->
+  <script src="webcrypto-liner.shim.js"></script>
+  <!-- Crypto providers ares optional -->
+  <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/asmcrypto.js"></script>
+  <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js"></script>
+  <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/des.js"></script>
 </head>
 <body>
-    <script> 
-        crypto.subtle.generateKey({name: "AES-GCM", length: 192}, true, ["encrypt", "decrypt"])
-            .then(function(key){
-                return crypto.subtle.encrypt({
-                        name: "AES-GCM", 
-                        iv: new Uint8Array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]),
-                        tagLength: 128
-                    }, key, new Uint8Array([1,2,3,4,5]))
-            })
-            .then(function(enc){
-                console.log(new Uint8Array(enc));
-            })
-            .catch(function(err){
-                console.log(err.message); // Chrome throws: 192-bit AES keys are not supported
-            })
-    </script>
+  <script> 
+    crypto.subtle.generateKey({name: "AES-GCM", length: 192}, true, ["encrypt", "decrypt"])
+      .then(function(key){
+        return crypto.subtle.encrypt({
+            name: "AES-GCM", 
+            iv: new Uint8Array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]),
+            tagLength: 128
+          }, key, new Uint8Array([1,2,3,4,5]))
+      })
+      .then(function(enc){
+        console.log(new Uint8Array(enc));
+      })
+      .catch(function(err){
+        console.log(err.message); // Chrome throws: 192-bit AES keys are not supported
+      })
+  </script>
 </body>
 ```
 
@@ -97,20 +98,6 @@ The module has been designed to be useful in ES6 and ES5 projects. The default i
 npm install
 npm run build
 ```
-
-The package also supports rollup and webpack, if you want a ES5 build with Webpack you would use the following commands:
-
-```
-npm install
-npm run build:webpack
-```
-
-If you want a ES2015 build for rollup you would use the following commands:
-```
-npm install
-npm run build:es2015
-```
-
 
 ## FAQ
 - **Do I need to use a promise library?** - No, not if your browser supports promises.
