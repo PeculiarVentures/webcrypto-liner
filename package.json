@@ -1,15 +1,17 @@
 {
   "name": "webcrypto-liner",
-  "version": "0.1.38",
+  "version": "1.0.0",
   "description": "A WebCrypto polyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
   "module": "build/webcrypto-liner.es.js",
   "browser": "build/webcrypto-liner.shim.js",
   "scripts": {
+    "prepare": "npm run build",
     "build": "rollup -c",
     "lint": "tslint -p .",
     "lint:fix": "tslint --fix -p .",
-    "pub": "npm run build:prod && npm version patch && npm publish && git push"
+    "prepub": "npm run lint & npm run build",
+    "pub": "npm version patch && npm publish && git push"
   },
   "repository": {
     "type": "git",
