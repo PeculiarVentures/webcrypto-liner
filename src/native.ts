@@ -32,4 +32,3 @@ try {
   console.warn("Cannot get subtle from crypto", err);
   // Safari throws error on crypto.webkitSubtle in Worker
 }
-export const nativeCryptoKey = CryptoKey;
