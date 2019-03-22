@@ -1,11 +1,11 @@
 /.vscode
 /node_modules
-/build
 /tmp
 /examples
 /src
+/test
 index.js
 BrowserSupport.md
 ts*.json
-webpack*.js
+rollup*.js
 .travis.yml
