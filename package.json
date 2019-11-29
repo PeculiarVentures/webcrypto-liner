@@ -23,7 +23,7 @@
     "asmcrypto.js": "^0.22.0",
     "asn1js": "^2.0.22",
     "des.js": "^1.0.0",
-    "elliptic": "^6.4.1",
+    "elliptic": "^6.5.2",
     "pvtsutils": "^1.0.4",
     "webcrypto-core": "^1.0.10"
   },
