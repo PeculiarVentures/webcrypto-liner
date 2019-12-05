@@ -26,7 +26,7 @@ export class RsaCrypto {
     }
   }
 
-  public static async generateKey(algorithm: RsaHashedKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
+  public static async generateKey(algorithm: RsaHashedKeyGenParams | RsaKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
     this.checkLib();
 
     // prepare data
@@ -36,16 +36,21 @@ export class RsaCrypto {
     const rsaKey = asmCrypto.RSA.generateKey(algorithm.modulusLength, pubExp);
 
     // assign keys
-    const hashAlgorithm = (algorithm.hash as Algorithm).name.toUpperCase();
+    const keyAlg = { ...algorithm } as RsaHashedKeyAlgorithm;
+    if ((algorithm as RsaHashedKeyAlgorithm).hash) {
+      const hashAlgorithm = ((algorithm as RsaHashedKeyAlgorithm).hash as Algorithm).name.toUpperCase();
+      keyAlg.hash = { name: hashAlgorithm };
+    }
+
     const privateKey: RsaCryptoKey = new RsaCryptoKey(
-      { ...algorithm, hash: { name: hashAlgorithm } },
+      keyAlg,
       extractable,
       "private",
       keyUsages.filter((usage) => ~this.privateUsages.indexOf(usage)),
       rsaKey,
     );
     const publicKey: RsaCryptoKey = new RsaCryptoKey(
-      { ...algorithm, hash: { name: hashAlgorithm } },
+      keyAlg,
       true,
       "public",
       keyUsages.filter((usage) => ~this.publicUsages.indexOf(usage)),
@@ -172,6 +177,8 @@ export class RsaCrypto {
         return `RS${/(\d+)$/.exec(algorithm.hash.name)![1]}`;
       case "RSA-PSS":
         return `PS${/(\d+)$/.exec(algorithm.hash.name)![1]}`;
+      case "RSA-PKCS1":
+        return `PS1`;
       default:
         throw new core.OperationError("algorithm: Is not recognized");
     }

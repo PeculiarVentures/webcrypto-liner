@@ -29,7 +29,10 @@ declare namespace asmCrypto {
     class SHA512 extends SHA1 { }
 
     class RSA {
+        constructor(key: RsaKey);
         static generateKey(modulusBits: number, publicExponent: number): RsaKey;
+        encrypt(data: Uint8Array): Uint8Array;
+        decrypt(encData: Uint8Array): Uint8Array;
     }
 
     class RSA_OAEP_SHA1 {
