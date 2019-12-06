@@ -244,6 +244,7 @@ context("EC", () => {
         ],
         sign: [
           {
+            name: "P-256",
             key: {
               privateKey: {
                 format: "pkcs8" as KeyFormat,
@@ -274,6 +275,7 @@ context("EC", () => {
             } as EcdsaParams,
           },
           {
+            name: "K-256",
             key: {
               privateKey: {
                 format: "pkcs8" as KeyFormat,

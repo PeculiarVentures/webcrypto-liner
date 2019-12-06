@@ -1,5 +1,5 @@
 /**
- * aescrypto definition https://github.com/vibornoff/asmcrypto.js
+ * asmcrypto definition https://github.com/vibornoff/asmcrypto.js
  */
 
  // tslint:disable
