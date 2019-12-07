@@ -101,7 +101,7 @@ export default [
             {
               targets: {
                 chrome: "60",
-                // ie: "11",
+                ie: "11",
               },
               useBuiltIns: "entry"
             }

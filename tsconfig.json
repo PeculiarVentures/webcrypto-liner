@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "esnext",
+        "target": "es2015",
         "sourceMap": false,
         "outDir": "build",
         "importHelpers": false,
