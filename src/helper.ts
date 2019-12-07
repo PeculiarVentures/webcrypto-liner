@@ -21,6 +21,9 @@ export function BrowserInfo() {
         name: Browser.Unknown,
         version: "0",
     };
+    if (typeof self === "undefined") {
+        return res;
+    }
     const userAgent = self.navigator.userAgent;
 
     let reg: string[] | null;

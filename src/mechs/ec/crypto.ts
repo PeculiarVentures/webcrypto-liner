@@ -6,6 +6,7 @@ import { concat } from "../../helper";
 import { getOidByNamedCurve } from "./helper";
 import { EcCryptoKey } from "./key";
 
+declare const asmCrypto: any;
 export class EcCrypto {
 
   public static privateUsages: KeyUsage[] = ["sign", "deriveKey", "deriveBits"];

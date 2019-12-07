@@ -1,3 +1,5 @@
+/// <reference path="../../typings/asmcrypto.d.ts" />
+
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";

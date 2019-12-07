@@ -1,3 +1,5 @@
+/// <reference path="../../typings/asmcrypto.d.ts" />
+
 import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as core from "webcrypto-core";
