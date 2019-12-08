@@ -1,9 +1,9 @@
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as asmCrypto from "asmcrypto.js";
+import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";
 import { HmacCryptoKey } from "./key";
-import { Convert } from "pvtsutils";
 
 export class HmacProvider extends core.HmacProvider {
 

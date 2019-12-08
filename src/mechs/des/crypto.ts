@@ -1,5 +1,6 @@
 /// <reference path="../../typings/des.d.ts" />
 
+import * as des from "des.js";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";

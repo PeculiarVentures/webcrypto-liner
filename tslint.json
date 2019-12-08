@@ -20,6 +20,7 @@
         ],
         "no-shadowed-variable": false,
         "no-reference": false,
-        "space-before-function-paren": false
+        "space-before-function-paren": false,
+        "no-string-literal": false
     }
 }

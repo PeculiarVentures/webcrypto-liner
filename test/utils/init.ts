@@ -1,8 +1,7 @@
-// tslint:disable: no-string-literal
-
 import { Crypto } from "@peculiar/webcrypto";
-import * as des from "des.js";
-import * as elliptic from "elliptic";
+// import * as des from "des.js";
+// import * as elliptic from "elliptic";
+import { Crypto as WebCrypto, setCrypto } from "../../src";
 
 const crypto = new Crypto();
 const nativeGenerateKey = crypto.subtle.generateKey;
@@ -28,6 +27,7 @@ crypto.subtle.exportKey = async function () {
   return nativeExportKey.apply(this, arguments);
 };
 
+// break crypto functions
 [
   "decrypt", "encrypt",
   "wrapKey", "unwrapKey",
@@ -41,16 +41,7 @@ crypto.subtle.exportKey = async function () {
   };
 });
 
-global["self"] = {
-  crypto,
-  navigator: {
-    userAgent: "NodeJS",
-  },
-  elliptic,
-  des,
-};
-global["window"] = global["self"];
+// set native crypto
+setCrypto(crypto);
 
-import "../../src/shim";
-
-Object.assign(global, global["self"]);
+global["crypto"] = new WebCrypto();
