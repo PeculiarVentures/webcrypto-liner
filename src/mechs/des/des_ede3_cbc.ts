@@ -30,4 +30,9 @@ export class DesEde3CbcProvider extends core.DesProvider {
     return DesCrypto.decrypt(algorithm, key, data);
   }
 
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is DesCryptoKey {
+    super.checkCryptoKey(key, keyUsage);
+    DesCrypto.checkCryptoKey(key);
+  }
+
 }

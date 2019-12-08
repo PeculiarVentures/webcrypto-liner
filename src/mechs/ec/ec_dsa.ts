@@ -98,7 +98,7 @@ export class EcdsaProvider extends core.EcdsaProvider {
     return key.data.verify(array, sig);
   }
 
-  public async checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is EcCryptoKey {
     super.checkCryptoKey(key, keyUsage);
     EcCrypto.checkCryptoKey(key);
   }

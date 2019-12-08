@@ -1,21 +1,11 @@
 import * as core from "webcrypto-core";
 
-let window: Window;
+let window: any;
 if (typeof self === "undefined") {
   // NodeJS implementation
-  const crypto = require("crypto");
+  const { Crypto } = require("@peculiar/webcrypto");
   window = {
-    crypto: {
-      subtle: {} as any,
-      // @ts-ignore
-      getRandomValues: (array: ArrayBufferView) => {
-        const buf = array.buffer;
-        const uint8buf = new Uint8Array(buf);
-        const rnd = crypto.randomBytes(uint8buf.length);
-        rnd.forEach((octet: number, index: number) => uint8buf[index] = octet);
-        return array;
-      },
-    },
+    crypto: new Crypto(),
   };
 } else {
   window = self;

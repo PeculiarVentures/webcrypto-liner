@@ -1,5 +1,7 @@
+import * as asmCrypto from "asmcrypto.js";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
+import { Crypto } from "../../crypto";
 import { RsaCrypto } from "./crypto";
 import { RsaCryptoKey } from "./key";
 
@@ -16,15 +18,7 @@ export class RsaEsProvider extends core.ProviderCrypto {
   public hashAlgorithms = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 
   public async onGenerateKey(algorithm: RsaKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
-    const key = await RsaCrypto.generateKey(
-      {
-        ...algorithm,
-        name: this.name,
-      },
-      extractable,
-      keyUsages);
-
-    return key;
+    return RsaCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 
   public checkGenerateKeyParams(algorithm: RsaKeyGenParams) {
@@ -51,9 +45,56 @@ export class RsaEsProvider extends core.ProviderCrypto {
   }
 
   public async onDecrypt(algorithm: RsaPkcs1Params, key: RsaCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    // const options = this.toCryptoOptions(key);
-    const dec = key.data;
-    throw new Error("Method not implemented");
+    // EM = 0x00 || 0x02 || PS || 0x00 || M
+    const EM = new asmCrypto.RSA(key.data).decrypt(new asmCrypto.BigNumber(core.BufferSourceConverter.toUint8Array(data))).result;
+    const k = key.algorithm.modulusLength >> 3;
+    if (data.byteLength !== k) {
+      throw new core.CryptoError("Decryption error. Encrypted message size doesn't match to key length");
+    }
+    // If the first octet of EM does not have hexadecimal value 0x00, if
+    // the second octet of EM does not have hexadecimal value 0x02, if
+    // there is no octet with hexadecimal value 0x00 to separate PS from
+    // M, or if the length of PS is less than 8 octets, output
+    // "decryption error" and stop.
+    let offset = 0;
+    if (EM[offset++] || EM[offset++] !== 2) {
+      throw new core.CryptoError("Decryption error");
+    }
+    do {
+      if (EM[offset++] === 0) {
+        break;
+      }
+    } while (offset < EM.length);
+
+    if (offset < 11) {
+      throw new core.CryptoError("Decryption error. PS is less than 8 octets.");
+    }
+
+    if (offset === EM.length) {
+      throw new core.CryptoError("Decryption error. There is no octet with hexadecimal value 0x00 to separate PS from M");
+    }
+
+    return EM.buffer.slice(offset);
+  }
+
+  public async onEncrypt(algorithm: RsaPkcs1Params, key: RsaCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
+    const k = key.algorithm.modulusLength >> 3;
+    if (data.byteLength > k - 11) {
+      throw new core.CryptoError("Message too long");
+    }
+
+    // EM = 0x00 || 0x02 || PS || 0x00 || M
+    const psLen = k - data.byteLength - 3;
+    const PS = RsaCrypto.randomNonZeroValues(new Uint8Array(psLen));
+    const EM = new Uint8Array(k);
+    EM[0] = 0;
+    EM[1] = 2;
+    EM.set(PS, 2); // PS
+    EM[2 + psLen] = 0;
+    EM.set(new Uint8Array(data), 3 + psLen);
+
+    const result = new asmCrypto.RSA(key.data).encrypt(new asmCrypto.BigNumber(EM)).result;
+    return core.BufferSourceConverter.toArrayBuffer(result);
   }
 
   public async onExportKey(format: KeyFormat, key: RsaCryptoKey): Promise<JsonWebKey | ArrayBuffer> {
@@ -65,28 +106,13 @@ export class RsaEsProvider extends core.ProviderCrypto {
     return key;
   }
 
-  // public checkCryptoKey(key: CryptoKey, keyUsage?: KeyUsage) {
-  //   super.checkCryptoKey(key, keyUsage);
-  //   if (!(key instanceof RsaPrivateKey || key instanceof RsaPublicKey)) {
-  //     throw new TypeError("key: Is not RSA CryptoKey");
-  //   }
-  // }
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is RsaCryptoKey {
+    super.checkCryptoKey(key, keyUsage);
+    RsaCrypto.checkCryptoKey(key);
+  }
 
-  // private toCryptoOptions(key: RsaPrivateKey): crypto.RsaPrivateKey;
-  // private toCryptoOptions(key: RsaPublicKey): crypto.RsaPublicKey;
-  // private toCryptoOptions(key: RsaPrivateKey | RsaPublicKey) {
-  //   const type = key.type.toUpperCase();
-  //   return {
-  //     key: `-----BEGIN ${type} KEY-----\n${key.data.toString("base64")}\n-----END ${type} KEY-----`,
-  //     // @ts-ignore
-  //     padding: crypto.constants.RSA_PKCS1_PADDING,
-  //   };
-  // }
-
-  // private prepareSignData(algorithm: RsaPkcs1SignParams, data: ArrayBuffer) {
-  //   return crypto
-  //     .createHash((algorithm.hash as Algorithm).name.replace("-", ""))
-  //     .update(Buffer.from(data))
-  //     .digest();
-  // }
+  private async prepareSignData(algorithm: RsaPkcs1SignParams, data: ArrayBuffer) {
+    const crypto = new Crypto();
+    return crypto.subtle.digest(algorithm.hash, data);
+  }
 }

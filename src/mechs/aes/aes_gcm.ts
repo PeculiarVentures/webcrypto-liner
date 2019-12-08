@@ -24,7 +24,7 @@ export class AesGcmProvider extends core.AesGcmProvider {
     return AesCrypto.importKey(format, keyData, algorithm, extractable, keyUsages);
   }
 
-  public async checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is AesCryptoKey {
     super.checkCryptoKey(key, keyUsage);
     AesCrypto.checkCryptoKey(key);
   }

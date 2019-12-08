@@ -1,11 +1,14 @@
-/// <reference path="../../typings/asmcrypto.d.ts" />
-
 import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
+import * as asmCrypto from "asmcrypto.js";
 import * as core from "webcrypto-core";
 import * as asn from "../../asn";
+import { Crypto } from "../../crypto";
 import { concat } from "../../helper";
+import { nativeSubtle, nativeCrypto } from "../../native";
 import { RsaCryptoKey } from "./key";
+
+export type AsmCryptoRsaKey = Uint8Array[];
 
 export class RsaCrypto {
 
@@ -16,55 +19,39 @@ export class RsaCrypto {
   public static privateUsages: KeyUsage[] = ["sign", "decrypt", "unwrapKey"];
   public static publicUsages: KeyUsage[] = ["verify", "encrypt", "wrapKey"];
 
-  public static checkLib() {
-    if (typeof (asmCrypto) === "undefined") {
-      throw new core.OperationError("Cannot implement DES mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/asmcrypto.js' script to your project");
-    }
-  }
-
-  public static checkCryptoKey(key: any) {
+  /**
+   * Tests whether the specified object is RsaCryptoKey and throws a TypeError if it is not
+   * @param key The object the test expects to be RsaCryptoKey
+   */
+  public static checkCryptoKey(key: any): asserts key is RsaCryptoKey {
     if (!(key instanceof RsaCryptoKey)) {
       throw new TypeError("key: Is not RsaCryptoKey");
     }
   }
 
   public static async generateKey(algorithm: RsaHashedKeyGenParams | RsaKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
-    this.checkLib();
+    const alg: RsaHashedKeyGenParams = {
+      name: "RSA-PSS",
+      hash: "SHA-256",
+      publicExponent: algorithm.publicExponent,
+      modulusLength: algorithm.modulusLength,
+    };
+    // generate keys using native crypto
+    const keys = await nativeSubtle.generateKey(alg, true, ["sign", "verify"]);
+    const crypto = new Crypto();
 
-    // prepare data
-    const pubExp = algorithm.publicExponent[0] === 3 ? 3 : 65537;
+    // create private key
+    const pkcs8 = await crypto.subtle.exportKey("pkcs8", keys.privateKey);
+    const privateKey = await crypto.subtle.importKey("pkcs8", pkcs8, algorithm, extractable, keyUsages.filter((o) => this.privateUsages.includes(o)));
 
-    // generate key
-    const rsaKey = asmCrypto.RSA.generateKey(algorithm.modulusLength, pubExp);
-
-    // assign keys
-    const keyAlg = { ...algorithm } as RsaHashedKeyAlgorithm;
-    if ((algorithm as RsaHashedKeyAlgorithm).hash) {
-      const hashAlgorithm = ((algorithm as RsaHashedKeyAlgorithm).hash as Algorithm).name.toUpperCase();
-      keyAlg.hash = { name: hashAlgorithm };
-    }
-
-    const privateKey: RsaCryptoKey = new RsaCryptoKey(
-      keyAlg,
-      extractable,
-      "private",
-      keyUsages.filter((usage) => ~this.privateUsages.indexOf(usage)),
-      rsaKey,
-    );
-    const publicKey: RsaCryptoKey = new RsaCryptoKey(
-      keyAlg,
-      true,
-      "public",
-      keyUsages.filter((usage) => ~this.publicUsages.indexOf(usage)),
-      rsaKey,
-    );
+    // create public key
+    const spki = await crypto.subtle.exportKey("spki", keys.publicKey);
+    const publicKey = await crypto.subtle.importKey("spki", spki, algorithm, true, keyUsages.filter((o) => this.publicUsages.includes(o)));
 
     return { privateKey, publicKey };
   }
 
   public static async exportKey(format: KeyFormat, key: RsaCryptoKey): Promise<JsonWebKey | ArrayBuffer> {
-    this.checkLib();
-
     switch (format) {
       case "pkcs8":
         return this.exportPkcs8Key(key);
@@ -78,9 +65,7 @@ export class RsaCrypto {
   }
 
   public static async importKey(format: KeyFormat, keyData: JsonWebKey | ArrayBuffer, algorithm: RsaHashedImportParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
-    this.checkLib();
-
-    let asmKey: asmCrypto.RsaKey;
+    let asmKey: AsmCryptoRsaKey;
     switch (format) {
       case "pkcs8":
         asmKey = this.importPkcs8Key(keyData as ArrayBuffer);
@@ -108,6 +93,16 @@ export class RsaCrypto {
       asmKey,
     );
     return key;
+  }
+
+  public static randomNonZeroValues(data: Uint8Array) {
+    data = nativeCrypto.getRandomValues(data);
+    return data.map((n) => {
+      while (!n) {
+        n = nativeCrypto.getRandomValues(new Uint8Array(1))[0];
+      }
+      return n;
+    });
   }
 
   private static exportPkcs8Key(key: RsaCryptoKey) {
@@ -186,7 +181,7 @@ export class RsaCrypto {
     }
   }
 
-  private static exportAsmKey(asmKey: asmCrypto.RsaKey): asn.RsaPrivateKey | asn.RsaPublicKey {
+  private static exportAsmKey(asmKey: AsmCryptoRsaKey): asn.RsaPrivateKey | asn.RsaPublicKey {
     let key: asn.RsaPrivateKey | asn.RsaPublicKey;
     if (asmKey.length > 2) {
       // private
@@ -212,7 +207,7 @@ export class RsaCrypto {
 
   private static importAsmKey(key: asn.RsaPrivateKey | asn.RsaPublicKey) {
     const expPadding = new Uint8Array(4 - key.publicExponent.byteLength);
-    const asmKey: asmCrypto.RsaKey = [
+    const asmKey: AsmCryptoRsaKey = [
       new Uint8Array(key.modulus),
       concat(expPadding, new Uint8Array(key.publicExponent)),
     ];

@@ -13,6 +13,12 @@ export class DesCrypto {
     }
   }
 
+  public static checkCryptoKey(key: any) {
+    if (!(key instanceof DesCryptoKey)) {
+      throw new TypeError("key: Is not DesCryptoKey");
+    }
+  }
+
   public static async generateKey(algorithm: core.DesKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
     this.checkLib();
 

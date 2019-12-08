@@ -1,4 +1,6 @@
 import * as core from "webcrypto-core";
+import { AesCrypto } from "./crypto";
+import { AesCryptoKey } from "./key";
 
 export class AesCtrProvider extends core.AesCtrProvider {
   public async onEncrypt(algorithm: AesCtrParams, key: CryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
@@ -15,5 +17,10 @@ export class AesCtrProvider extends core.AesCtrProvider {
   }
   public async onImportKey(format: KeyFormat, keyData: ArrayBuffer | JsonWebKey, algorithm: Algorithm, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
     throw new Error("Method not implemented.");
+  }
+
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is AesCryptoKey {
+    super.checkCryptoKey(key, keyUsage);
+    AesCrypto.checkCryptoKey(key);
   }
 }

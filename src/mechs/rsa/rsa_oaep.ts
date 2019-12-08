@@ -1,4 +1,6 @@
+import * as asmCrypto from "asmcrypto.js";
 import * as core from "webcrypto-core";
+import { ShaCrypto } from "../sha/crypto";
 import { RsaCrypto } from "./crypto";
 import { RsaCryptoKey } from "./key";
 
@@ -17,41 +19,33 @@ export class RsaOaepProvider extends core.RsaOaepProvider {
   }
 
   public async onEncrypt(algorithm: RsaOaepParams, key: RsaCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    RsaCrypto.checkLib();
-
-    return this.cipher(algorithm, key, data, true);
+    return this.cipher(algorithm, key, data);
   }
 
   public async onDecrypt(algorithm: RsaOaepParams, key: RsaCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    RsaCrypto.checkLib();
-
-    return this.cipher(algorithm, key, data, false);
+    return this.cipher(algorithm, key, data);
   }
 
-  private cipher(algorithm: RsaOaepParams, key: RsaCryptoKey, data: ArrayBuffer, encrypt: boolean) {
-    const fn = this.getOperation(key.algorithm, encrypt);
-    let label: ArrayBuffer;
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is RsaCryptoKey {
+    super.checkCryptoKey(key, keyUsage);
+    RsaCrypto.checkCryptoKey(key);
+  }
+
+  private cipher(algorithm: RsaOaepParams, key: RsaCryptoKey, data: ArrayBuffer) {
+    const digest = ShaCrypto.getDigest(key.algorithm.hash.name);
+    let label: Uint8Array | undefined;
     if (algorithm.label) {
-      label = core.BufferSourceConverter.toArrayBuffer(algorithm.label);
+      label = core.BufferSourceConverter.toUint8Array(algorithm.label);
     }
-    return fn(data, key.data, label).slice(0).buffer;
-  }
-
-  private getOperation(keyAlgorithm: RsaHashedKeyAlgorithm, encrypt: true): typeof asmCrypto.RSA_OAEP_SHA1.encrypt;
-  private getOperation(keyAlgorithm: RsaHashedKeyAlgorithm, encrypt: false): typeof asmCrypto.RSA_OAEP_SHA1.decrypt;
-  private getOperation(keyAlgorithm: RsaHashedKeyAlgorithm, encrypt: boolean): typeof asmCrypto.RSA_OAEP_SHA1.encrypt | typeof asmCrypto.RSA_OAEP_SHA1.decrypt;
-  private getOperation(keyAlgorithm: RsaHashedKeyAlgorithm, encrypt: boolean) {
-    const action = encrypt ? "encrypt" : "decrypt";
-    switch (keyAlgorithm.hash.name) {
-      case "SHA-1":
-        return asmCrypto.RSA_OAEP_SHA1[action];
-      case "SHA-256":
-        return asmCrypto.RSA_OAEP_SHA256[action];
-      case "SHA-512":
-        return asmCrypto.RSA_OAEP_SHA512[action];
-      default:
-        throw new core.AlgorithmError("keyAlgorithm.hash: Is not recognized");
+    const cipher = new asmCrypto.RSA_OAEP(key.data, digest, label);
+    let res: Uint8Array;
+    const u8Data = core.BufferSourceConverter.toUint8Array(data);
+    if (key.type === "public") {
+      res = cipher.encrypt(u8Data);
+    } else {
+      res = cipher.decrypt(u8Data);
     }
+    return core.BufferSourceConverter.toArrayBuffer(res);
   }
 
 }
