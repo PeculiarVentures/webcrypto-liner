@@ -65,7 +65,7 @@ export default [
         ],
       }),
     ],
-    external: ["crypto"],
+    external: ["@peculiar/webcrypto"],
     output: [
       {
         file: pkg.browser,
