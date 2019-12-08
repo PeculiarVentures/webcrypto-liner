@@ -1,15 +1,27 @@
-import { JsonProp } from "@peculiar/json-schema";
+import { JsonProp, JsonPropTypes } from "@peculiar/json-schema";
 import * as core from "webcrypto-core";
 import { JsonBase64UrlArrayBufferConverter } from "../../converters";
 import { CryptoKey } from "../../key";
 
 export class HmacCryptoKey extends CryptoKey {
 
+  @JsonProp({ name: "ext", type: JsonPropTypes.Boolean, optional: true })
+  public extractable: boolean;
+
+  public readonly type: KeyType;
+
+  @JsonProp({ name: "key_ops", type: JsonPropTypes.String, repeated: true, optional: true })
+  public usages: KeyUsage[];
+
   @JsonProp({ name: "k", converter: JsonBase64UrlArrayBufferConverter })
   public data: Uint8Array;
 
-  public algorithm!: HmacKeyAlgorithm;
+  public algorithm: HmacKeyAlgorithm;
 
+  @JsonProp({ type: JsonPropTypes.String })
+  protected readonly kty: string = "oct";
+
+  @JsonProp({ type: JsonPropTypes.String })
   protected get alg() {
     const hash = this.algorithm.hash.name.toUpperCase();
     return `HS${hash.replace("SHA-", "")}`;

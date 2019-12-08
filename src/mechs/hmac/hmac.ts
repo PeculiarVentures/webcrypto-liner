@@ -3,12 +3,15 @@ import * as asmCrypto from "asmcrypto.js";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";
 import { HmacCryptoKey } from "./key";
+import { Convert } from "pvtsutils";
 
 export class HmacProvider extends core.HmacProvider {
 
   public async onGenerateKey(algorithm: HmacKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
-    // gat random bytes for key
-    const raw = nativeCrypto.getRandomValues(new Uint8Array(algorithm.length / 8));
+    const length = algorithm.length || this.getDefaultLength((algorithm.hash as Algorithm).name);
+
+    // get random bytes for key
+    const raw = nativeCrypto.getRandomValues(new Uint8Array(length >> 3));
 
     const key = new HmacCryptoKey(algorithm, extractable, keyUsages, raw);
 
@@ -16,26 +19,6 @@ export class HmacProvider extends core.HmacProvider {
   }
 
   public async onSign(algorithm: Algorithm, key: HmacCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    let result: Uint8Array;
-    switch (key.algorithm.hash.name.toUpperCase()) {
-      case "SHA-1":
-        result = new asmCrypto.HmacSha1(key.data).result;
-        break;
-      case "SHA-256":
-        result = new asmCrypto.HmacSha256(key.data).result;
-        break;
-      case "SHA-512":
-        result = new asmCrypto.HmacSha512(key.data).result;
-        break;
-      default:
-        throw new core.OperationError("key.algorithm.hash.: Is not recognized");
-    }
-
-    return core.BufferSourceConverter.toArrayBuffer(result);
-  }
-
-  public async onVerify(algorithm: Algorithm, key: HmacCryptoKey, signature: ArrayBuffer, data: ArrayBuffer): Promise<boolean> {
-    const message = core.BufferSourceConverter.toUint8Array(data);
     let fn: typeof asmCrypto.HmacSha1 | typeof asmCrypto.HmacSha256 | typeof asmCrypto.HmacSha512;
     switch (key.algorithm.hash.name.toUpperCase()) {
       case "SHA-1":
@@ -48,15 +31,19 @@ export class HmacProvider extends core.HmacProvider {
         fn = asmCrypto.HmacSha512;
         break;
       default:
-        throw new core.OperationError("key.algorithm.hash.: Is not recognized");
+        throw new core.OperationError("key.algorithm.hash: Is not recognized");
     }
-    try {
-      // tslint:disable-next-line: no-unused-expression
-      new fn(key.data, message);
-      return true;
-    } catch {
-      return false;
-    }
+
+    const result = new fn(key.data)
+      .process(core.BufferSourceConverter.toUint8Array(data))
+      .finish().result;
+
+    return core.BufferSourceConverter.toArrayBuffer(result);
+  }
+
+  public async onVerify(algorithm: Algorithm, key: HmacCryptoKey, signature: ArrayBuffer, data: ArrayBuffer): Promise<boolean> {
+    const signature2 = await this.onSign(algorithm, key, data);
+    return Convert.ToHex(signature2) === Convert.ToHex(signature);
   }
 
   public async onImportKey(format: KeyFormat, keyData: JsonWebKey | ArrayBuffer, algorithm: HmacImportParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
@@ -90,7 +77,8 @@ export class HmacProvider extends core.HmacProvider {
   public async onExportKey(format: KeyFormat, key: HmacCryptoKey): Promise<JsonWebKey | ArrayBuffer> {
     switch (format.toLowerCase()) {
       case "jwk":
-        return JsonSerializer.toJSON(key);
+        const jwk = JsonSerializer.toJSON(key) as JsonWebKey;
+        return jwk;
       case "raw":
         return new Uint8Array(key.data).buffer;
       default:

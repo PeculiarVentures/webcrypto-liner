@@ -19,13 +19,13 @@ export class RsaPssProvider extends core.RsaPssProvider {
   }
 
   public async onSign(algorithm: RsaPssParams, key: RsaCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    const rsa = new asmCrypto.RSA_PSS(key.data, ShaCrypto.getDigest(key.algorithm.name), algorithm.saltLength);
+    const rsa = new asmCrypto.RSA_PSS(key.data, ShaCrypto.getDigest(key.algorithm.hash.name), algorithm.saltLength);
     const result = rsa.sign(core.BufferSourceConverter.toUint8Array(data));
     return core.BufferSourceConverter.toArrayBuffer(result);
   }
 
   public async onVerify(algorithm: RsaPssParams, key: RsaCryptoKey, signature: ArrayBuffer, data: ArrayBuffer): Promise<boolean> {
-    const rsa = new asmCrypto.RSA_PSS(key.data, ShaCrypto.getDigest(key.algorithm.name), algorithm.saltLength);
+    const rsa = new asmCrypto.RSA_PSS(key.data, ShaCrypto.getDigest(key.algorithm.hash.name), algorithm.saltLength);
     try {
       rsa.verify(core.BufferSourceConverter.toUint8Array(signature), core.BufferSourceConverter.toUint8Array(data));
     } catch {

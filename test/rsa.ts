@@ -1,6 +1,6 @@
 import { Convert } from "pvtsutils";
-import { Browser } from "../../src/helper";
-import { browser, ITestGenerateKeyAction, testCrypto } from "./helper";
+import { Browser } from "../src/helper";
+import { browser, ITestGenerateKeyAction, testCrypto } from "./utils";
 
 context("RSA", () => {
 
@@ -12,24 +12,23 @@ context("RSA", () => {
         generateKey: (() => {
           const res: ITestGenerateKeyAction[] = [];
           ["SHA-1", "SHA-256"].forEach((hash) =>
-            // ["SHA-1", "SHA-256", "SHA-512"].forEach((hash) =>
-            // [new Uint8Array([3])].forEach((publicExponent) =>
-            [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach((publicExponent) =>
-              [1024].forEach((modulusLength) => {
-                // [1024, 2048].forEach((modulusLength) => {
-                res.push({
-                  name: `h:${hash} e:${Convert.ToHex(publicExponent)} n:${modulusLength}`,
-                  skip: false,
-                  algorithm: {
-                    name: "RSASSA-PKCS1-v1_5",
-                    hash,
-                    publicExponent,
-                    modulusLength,
-                  } as RsaHashedKeyGenParams,
-                  extractable: false,
-                  keyUsages: ["sign", "verify"],
-                } as ITestGenerateKeyAction);
-              }),
+            ["SHA-1", "SHA-256", "SHA-512"].forEach((hash) =>
+              [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach((publicExponent) =>
+                [1024, 2048].forEach((modulusLength) => {
+                  res.push({
+                    name: `h:${hash} e:${Convert.ToHex(publicExponent)} n:${modulusLength}`,
+                    skip: false,
+                    algorithm: {
+                      name: "RSASSA-PKCS1-v1_5",
+                      hash,
+                      publicExponent,
+                      modulusLength,
+                    } as RsaHashedKeyGenParams,
+                    extractable: false,
+                    keyUsages: ["sign", "verify"],
+                  } as ITestGenerateKeyAction);
+                }),
+              ),
             ),
           );
           return res;

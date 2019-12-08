@@ -19,6 +19,7 @@
             false
         ],
         "no-shadowed-variable": false,
-        "no-reference": false
+        "no-reference": false,
+        "space-before-function-paren": false
     }
 }

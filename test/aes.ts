@@ -1,6 +1,6 @@
 import { Convert } from "pvtsutils";
-import { Browser } from "../../src/helper";
-import { browser, testCrypto } from "./helper";
+import { Browser } from "../src/helper";
+import { browser, testCrypto } from "./utils";
 
 context("AES", () => {
 
@@ -201,7 +201,7 @@ context("AES", () => {
 
     //#region AES-CTR
     {
-      skip: browser.name === Browser.Edge,
+      // skip: browser.name === Browser.Edge,
       name: "AES-128-CTR",
       actions: {
         generateKey: [
@@ -258,7 +258,7 @@ context("AES", () => {
     {
       name: "AES-192-CTR",
       skip: browser.name === Browser.Chrome // Chrome doesn't implement this alg
-       || browser.name === Browser.Edge,
+        || browser.name === Browser.Edge,
       actions: {
         generateKey: [
           {
@@ -533,6 +533,7 @@ context("AES", () => {
     //#region AES-KW
     {
       name: "AES-128-KW",
+      skip: typeof module !== "undefined", // skip for nodejs
       actions: {
         generateKey: [
           {
@@ -592,7 +593,8 @@ context("AES", () => {
     },
     {
       name: "AES-192-KW",
-      skip: browser.name === Browser.Chrome, // Chrome doesn't support AES-192-KW
+      skip: typeof module !== "undefined" // skip for nodejs
+        || browser.name === Browser.Chrome, // Chrome doesn't support AES-192-KW
       actions: {
         generateKey: [
           {
@@ -652,6 +654,7 @@ context("AES", () => {
     },
     {
       name: "AES-256-KW",
+      skip: typeof module !== "undefined", // skip for nodejs
       actions: {
         generateKey: [
           {

@@ -1,5 +1,5 @@
 import { Convert } from "pvtsutils";
-import { ITestGenerateKeyAction, testCrypto } from "./helper";
+import { ITestGenerateKeyAction, testCrypto } from "./utils";
 
 context("HMAC", () => {
 

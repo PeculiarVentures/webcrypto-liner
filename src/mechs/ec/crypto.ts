@@ -6,7 +6,6 @@ import { concat } from "../../helper";
 import { getOidByNamedCurve } from "./helper";
 import { EcCryptoKey } from "./key";
 
-declare const asmCrypto: any;
 export class EcCrypto {
 
   public static privateUsages: KeyUsage[] = ["sign", "deriveKey", "deriveBits"];
@@ -16,7 +15,7 @@ export class EcCrypto {
 
   public static checkLib() {
     if (typeof (elliptic) === "undefined") {
-      throw new core.OperationError("Cannot implement DES mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
+      throw new core.OperationError("Cannot implement EC mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
     }
   }
 

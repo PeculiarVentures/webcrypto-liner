@@ -1,5 +1,5 @@
+import { Crypto, nativeCrypto } from ".";
 import { Debug } from "./debug";
-import { Crypto, nativeCrypto } from "./index";
 import "./init";
 
 const window = self as any;
