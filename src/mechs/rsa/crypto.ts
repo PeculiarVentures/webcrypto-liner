@@ -1,11 +1,10 @@
 import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
-import * as asmCrypto from "asmcrypto.js";
 import * as core from "webcrypto-core";
 import * as asn from "../../asn";
 import { Crypto } from "../../crypto";
 import { concat } from "../../helper";
-import { nativeSubtle, nativeCrypto } from "../../native";
+import { nativeCrypto, nativeSubtle } from "../../native";
 import { RsaCryptoKey } from "./key";
 
 export type AsmCryptoRsaKey = Uint8Array[];

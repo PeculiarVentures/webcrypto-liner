@@ -11,6 +11,7 @@ import {
   DesCbcProvider, DesEde3CbcProvider,
   EcCrypto, EcdhProvider,
   EcdsaProvider,
+  HmacProvider,
   Pbkdf2Provider,
   RsaEsProvider, RsaOaepProvider, RsaPssProvider, RsaSsaProvider,
   Sha1Provider, Sha256Provider, Sha512Provider,
@@ -77,6 +78,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
     //#region PBKDF
     this.providers.set(new Pbkdf2Provider());
+    //#endregion
+
+    //#region HMAC
+    this.providers.set(new HmacProvider());
     //#endregion
 
   }
