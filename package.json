@@ -10,11 +10,17 @@
     "prepare": "npm run build",
     "lint": "tslint -p .",
     "lint:fix": "tslint --fix -p .",
-    "prepub": "npm run lint & npm run build",
-    "pub": "npm version patch && npm publish && git push",
     "build": "rollup -c",
     "clear": "rimraf build/*",
-    "rebuild": "npm run clear && npm run build"
+    "rebuild": "npm run clear && npm run build",
+    "prepub": "npm run lint && npm run build",
+    "pub": "npm version patch && npm publish",
+    "postpub": "git push && git push --tags origin master",
+    "prepub:next": "npm run lint && npm run build",
+    "pub:next": "npm version prerelease --preid=next && npm publish --tag next",
+    "postpub:next": "git push",
+    "coverage": "nyc npm test",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",

@@ -109,18 +109,12 @@ const browser = [
         name: "liner",
         intro: "var global = self;"
       },
-      // {
-      //   file: pkg.browserMin,
-      //   format: "iife",
-      //   name: "liner",
-      //   compact: true,
-      // },
     ],
   },
 ];
 //#endregion
 
 export default [
-  // main,
+  main,
   ...browser,
 ]
