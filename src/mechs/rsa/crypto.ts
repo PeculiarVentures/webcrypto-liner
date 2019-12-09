@@ -173,7 +173,7 @@ export class RsaCrypto {
         return `RS${/(\d+)$/.exec(algorithm.hash.name)![1]}`;
       case "RSA-PSS":
         return `PS${/(\d+)$/.exec(algorithm.hash.name)![1]}`;
-      case "RSA-PKCS1":
+      case "RSAES-PKCS1-V_5":
         return `PS1`;
       default:
         throw new core.OperationError("algorithm: Is not recognized");
