@@ -1,17 +1,20 @@
 {
   "name": "webcrypto-liner",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A WebCrypto polyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
-  "module": "build/webcrypto-liner.es.js",
+  "module": "build/index.mjs",
   "browser": "build/webcrypto-liner.shim.js",
+  "browserMin": "build/webcrypto-liner.shim.min.js",
   "scripts": {
     "prepare": "npm run build",
-    "build": "rollup -c",
     "lint": "tslint -p .",
     "lint:fix": "tslint --fix -p .",
     "prepub": "npm run lint & npm run build",
-    "pub": "npm version patch && npm publish && git push"
+    "pub": "npm version patch && npm publish && git push",
+    "build": "rollup -c",
+    "clear": "rimraf build/*",
+    "rebuild": "npm run clear && npm run build"
   },
   "repository": {
     "type": "git",
@@ -20,12 +23,12 @@
   "dependencies": {
     "@peculiar/asn1-schema": "^1.0.3",
     "@peculiar/json-schema": "^1.1.6",
-    "@peculiar/webcrypto": "^1.0.21",
     "asmcrypto.js": "^2.3.2",
     "asn1js": "^2.0.26",
     "des.js": "^1.0.1",
     "elliptic": "^6.5.2",
     "pvtsutils": "^1.0.6",
+    "tslib": "^1.10.0",
     "webcrypto-core": "^1.0.15"
   },
   "devDependencies": {
@@ -34,18 +37,22 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
     "@babel/polyfill": "^7.7.0",
     "@babel/preset-env": "^7.7.5",
+    "@peculiar/webcrypto": "^1.0.21",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.17.6",
+    "babel-preset-minify": "^0.5.1",
+    "core-js": "^3.4.7",
     "mocha": "^6.2.2",
+    "rimraf": "^3.0.0",
     "rollup": "^1.27.9",
     "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-typescript": "^1.0.1",
+    "rollup-plugin-typescript2": "^0.25.3",
     "ts-node": "^8.5.4",
-    "tslib": "^1.10.0",
     "typescript": "^3.7.3"
   },
   "keywords": [

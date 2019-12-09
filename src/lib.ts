@@ -6,3 +6,4 @@ if (nativeCrypto) {
 }
 
 export const crypto = new Crypto();
+export * from ".";

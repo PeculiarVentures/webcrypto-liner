@@ -1,6 +1,4 @@
 import { Crypto } from "@peculiar/webcrypto";
-// import * as des from "des.js";
-// import * as elliptic from "elliptic";
 import { Crypto as WebCrypto, setCrypto } from "../../src";
 
 const crypto = new Crypto();

@@ -4,7 +4,7 @@
         "target": "es2015",
         "sourceMap": false,
         "outDir": "build",
-        "importHelpers": false,
+        "importHelpers": true,
         "experimentalDecorators": true
     }
 }

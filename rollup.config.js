@@ -1,52 +1,89 @@
 import resolve from "rollup-plugin-node-resolve";
 import babel from "rollup-plugin-babel";
 import builtins from "rollup-plugin-node-builtins";
-import globals from "rollup-plugin-node-globals";
-import typescript from "rollup-plugin-typescript";
+import typescript from "rollup-plugin-typescript2";
 import commonjs from "rollup-plugin-commonjs";
+import cleanup from "rollup-plugin-cleanup";
+import json from "rollup-plugin-json";
 import pkg from "./package.json";
 
-const dependencies = Object.keys(pkg.dependencies)
+const external = Object.keys(pkg.dependencies)
   .concat(["crypto"]);
 let banner = []
 
-export default [
-  // ESNEXT bundled file
+const main = {
+  input: "src/lib.ts",
+  plugins: [
+    typescript({
+      check: true,
+      clean: true,
+      tsconfigOverride: {
+        compilerOptions: {
+          module: "es6",
+          removeComments: true,
+        }
+      }
+    }),
+  ],
+  external,
+  output: [
+    {
+      banner,
+      file: pkg.main,
+      format: "cjs",
+    },
+    {
+      banner,
+      file: pkg.module,
+      format: "es",
+    },
+  ],
+};
+
+
+//#region Browser
+const browserExternals = {
+  // "des.js": "des",
+  // "elliptic": "elliptic",
+};
+
+const browser = [
   {
     input: "src/shim.ts",
     plugins: [
-      typescript({ typescript: require("typescript"), target: "esnext", removeComments: true }),
-      resolve(),
+      resolve({
+        preferBuiltins: true,
+      }),
+      json(),
       commonjs(),
       builtins(),
+      typescript({
+        check: true,
+        clean: true,
+        tsconfigOverride: {
+          compilerOptions: {
+            module: "es6",
+            removeComments: true,
+          }
+        }
+      }),
+      cleanup(),
     ],
-    // Specify here external modules which you don"t want to include in your bundle (for instance: "lodash", "moment" etc.)
-    // https://rollupjs.org/guide/en#external-e-external
-    // external: ["protobufjs"],
-    // external: dependencies,
+    external: Object.keys(browserExternals),
     output: [
       {
-        file: pkg.module,
+        file: pkg.browser,
         format: "es",
-        globals: {
-          "crypto": "require('crypto')"
-        }
+        globals: browserExternals,
       }
     ]
   },
-  // ES5 bundled file for webcrypto-liner
   {
-    input: pkg.module,
+    input: pkg.browser,
     plugins: [
       babel({
         babelrc: false,
         runtimeHelpers: true,
-        // exclude: 'node_modules/**',
-        // include: [
-        //   "build/**",
-        //   "src/**",
-        // ],
-        // include: dependencies.map(item => `node_modules/${item}/**`).concat(["src/**"]),
         presets: [
           [
             "@babel/env",
@@ -65,66 +102,25 @@ export default [
         ],
       }),
     ],
-    external: ["@peculiar/webcrypto"],
     output: [
       {
         file: pkg.browser,
         format: "iife",
         name: "liner",
-        globals: {
-          "crypto": "require('crypto')",
-        },
+        intro: "var global = self;"
       },
-    ],
-  },
-  // ES5 bundled tests
-  {
-    input: "test/script/index.ts",
-    plugins: [
-      typescript({ typescript: require("typescript"), target: "esnext", removeComments: true }),
-      // builtins(),
-      resolve(),
-      commonjs(),
-      globals({
-        buffer: false,
-        global: true,
-        process: false,
-        dirname: false,
-        filename: false,
-      }),
-      babel({
-        babelrc: false,
-        runtimeHelpers: true,
-        presets: [
-          [
-            "@babel/env",
-            {
-              targets: {
-                chrome: "60",
-                ie: "11",
-              },
-              useBuiltIns: "entry"
-            }
-          ]
-        ],
-        plugins: [
-          "@babel/proposal-class-properties",
-          "@babel/proposal-object-rest-spread",
-        ],
-      }),
-    ],
-    external: [
-      "assert",
-    ],
-    output: [
-      {
-        file: "test/tests.js",
-        format: "iife",
-        name: "liner",
-        globals: {
-          "assert": "assert",
-        },
-      },
+      // {
+      //   file: pkg.browserMin,
+      //   format: "iife",
+      //   name: "liner",
+      //   compact: true,
+      // },
     ],
   },
 ];
+//#endregion
+
+export default [
+  // main,
+  ...browser,
+]
