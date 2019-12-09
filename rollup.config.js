@@ -44,7 +44,7 @@ const main = {
 //#region Browser
 const browserExternals = {
   // "des.js": "des",
-  // "elliptic": "elliptic",
+  "elliptic": "elliptic",
 };
 
 const browser = [
