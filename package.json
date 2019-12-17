@@ -8,6 +8,7 @@
   "browserMin": "build/webcrypto-liner.shim.min.js",
   "types": "index.d.ts",
   "scripts": {
+    "test": "mocha",
     "prepare": "npm run build",
     "lint": "tslint -p .",
     "lint:fix": "tslint --fix -p .",
@@ -48,7 +49,9 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.17.10",
     "babel-preset-minify": "^0.5.1",
+    "coveralls": "^3.0.9",
     "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
     "rimraf": "^3.0.0",
     "rollup": "^1.27.13",
     "rollup-plugin-babel": "^4.3.3",
@@ -71,5 +74,21 @@
     "sha"
   ],
   "author": "PeculiarVentures",
-  "license": "MIT"
+  "license": "MIT",
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ]
+  }
 }
