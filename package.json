@@ -6,6 +6,7 @@
   "module": "build/index.es.js",
   "browser": "build/webcrypto-liner.shim.js",
   "browserMin": "build/webcrypto-liner.shim.min.js",
+  "types": "index.d.ts",
   "scripts": {
     "prepare": "npm run build",
     "lint": "tslint -p .",

@@ -18,3 +18,4 @@ try {
 }
 
 export const crypto = window.crypto;
+export * from ".";

@@ -5,6 +5,10 @@
         "sourceMap": false,
         "outDir": "build",
         "importHelpers": true,
+        "removeComments": true,
         "experimentalDecorators": true
-    }
+    },
+    "exclude": [
+        "index.d.ts"
+    ]
 }

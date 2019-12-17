@@ -23,8 +23,7 @@ const main = {
       clean: true,
       tsconfigOverride: {
         compilerOptions: {
-          module: "es6",
-          removeComments: true,
+          module: "es2015",
         }
       }
     }),
@@ -66,8 +65,7 @@ const browser = [
         clean: true,
         tsconfigOverride: {
           compilerOptions: {
-            module: "es6",
-            removeComments: true,
+            module: "es2015",
           }
         }
       }),
