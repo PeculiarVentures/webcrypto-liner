@@ -1,15 +1,19 @@
 import resolve from "rollup-plugin-node-resolve";
 import babel from "rollup-plugin-babel";
 import builtins from "rollup-plugin-node-builtins";
+import { terser } from "rollup-plugin-terser";
 import typescript from "rollup-plugin-typescript2";
 import commonjs from "rollup-plugin-commonjs";
-import cleanup from "rollup-plugin-cleanup";
-import json from "rollup-plugin-json";
 import pkg from "./package.json";
 
 const external = Object.keys(pkg.dependencies)
   .concat(["crypto"]);
-let banner = []
+let banner = [
+  "/**",
+  ` * Copyright (c) ${new Date().getFullYear()}, Peculiar Ventures, All rights reserved.`,
+  " */",
+  "",
+].join("\n");
 
 const main = {
   input: "src/lib.ts",
@@ -44,7 +48,8 @@ const main = {
 //#region Browser
 const browserExternals = {
   // "des.js": "des",
-  "elliptic": "elliptic",
+  "elliptic": "self.elliptic",
+  "asmcrypto.js": "self.asmCrypto",
 };
 
 const browser = [
@@ -54,7 +59,6 @@ const browser = [
       resolve({
         preferBuiltins: true,
       }),
-      json(),
       commonjs(),
       builtins(),
       typescript({
@@ -67,7 +71,6 @@ const browser = [
           }
         }
       }),
-      cleanup(),
     ],
     external: Object.keys(browserExternals),
     output: [
@@ -80,34 +83,46 @@ const browser = [
   },
   {
     input: pkg.browser,
+    external: Object.keys(browserExternals),
     plugins: [
       babel({
         babelrc: false,
         runtimeHelpers: true,
+        compact: false,
+        comments: false,
         presets: [
-          [
-            "@babel/env",
-            {
-              targets: {
-                ie: "11",
-                chrome: "60",
-              },
-              useBuiltIns: "entry"
-            }
-          ]
+          ["@babel/env", {
+            targets: {
+              ie: "11",
+              chrome: "60",
+            },
+            useBuiltIns: "entry",
+            corejs: 3,
+          }],
         ],
         plugins: [
-          "@babel/proposal-class-properties",
-          "@babel/proposal-object-rest-spread",
-        ],
+          ["@babel/plugin-proposal-class-properties"],
+          ["@babel/proposal-object-rest-spread"],
+        ]
       }),
     ],
     output: [
       {
+        banner,
         file: pkg.browser,
+        globals: browserExternals,
         format: "iife",
         name: "liner",
-        intro: "var global = self;"
+      },
+      {
+        banner,
+        file: pkg.browserMin,
+        globals: browserExternals,
+        format: "iife",
+        name: "liner",
+        plugins: [
+          terser(),
+        ]
       },
     ],
   },
