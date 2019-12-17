@@ -1,5 +1,5 @@
 import { Convert } from "pvtsutils";
-import { testCrypto } from "./helper";
+import { testCrypto } from "./utils";
 
 context("PBKDF", () => {
 

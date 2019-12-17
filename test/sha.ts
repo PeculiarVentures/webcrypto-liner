@@ -1,6 +1,5 @@
-import * as assert from "assert";
 import { Convert } from "pvtsutils";
-import { testCrypto } from "./helper";
+import { testCrypto } from "./utils";
 
 context("SHA", () => {
 
@@ -25,6 +24,7 @@ context("SHA", () => {
           },
           {
             name: "SHA-384",
+            skip: typeof module !== "undefined", // skip for nodejs
             algorithm: "SHA-384",
             data,
             hash: Convert.FromBase64("E9WqubQC9JnxffIniWwf0soI91o5z0Kbvk+s/32Fi3z28kAh+Fcne7Hgy1nnW4rR"),

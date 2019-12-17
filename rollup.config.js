@@ -1,130 +1,133 @@
 import resolve from "rollup-plugin-node-resolve";
 import babel from "rollup-plugin-babel";
 import builtins from "rollup-plugin-node-builtins";
-import globals from "rollup-plugin-node-globals";
-import typescript from "rollup-plugin-typescript";
+import { terser } from "rollup-plugin-terser";
+import typescript from "rollup-plugin-typescript2";
 import commonjs from "rollup-plugin-commonjs";
 import pkg from "./package.json";
 
-const dependencies = Object.keys(pkg.dependencies)
+const external = Object.keys(pkg.dependencies)
   .concat(["crypto"]);
-let banner = []
+let banner = [
+  "/**",
+  ` * Copyright (c) ${new Date().getFullYear()}, Peculiar Ventures, All rights reserved.`,
+  " */",
+  "",
+].join("\n");
 
-export default [
-  // ESNEXT bundled file
+const main = {
+  input: "src/lib.ts",
+  plugins: [
+    typescript({
+      check: true,
+      clean: true,
+      tsconfigOverride: {
+        compilerOptions: {
+          module: "es2015",
+        }
+      }
+    }),
+  ],
+  external,
+  output: [
+    {
+      banner,
+      file: pkg.main,
+      format: "cjs",
+    },
+    {
+      banner,
+      file: pkg.module,
+      format: "es",
+    },
+  ],
+};
+
+
+//#region Browser
+const browserExternals = {
+  // "des.js": "des",
+  "elliptic": "self.elliptic",
+  "asmcrypto.js": "self.asmCrypto",
+};
+
+const browser = [
   {
     input: "src/shim.ts",
     plugins: [
-      typescript({ typescript: require("typescript"), target: "esnext", removeComments: true }),
-      resolve(),
+      resolve({
+        preferBuiltins: true,
+      }),
       commonjs(),
       builtins(),
-    ],
-    // Specify here external modules which you don"t want to include in your bundle (for instance: "lodash", "moment" etc.)
-    // https://rollupjs.org/guide/en#external-e-external
-    // external: ["protobufjs"],
-    // external: dependencies,
-    output: [
-      {
-        file: pkg.module,
-        format: "es",
-        globals: {
-          "crypto": "require('crypto')"
+      typescript({
+        check: true,
+        clean: true,
+        tsconfigOverride: {
+          compilerOptions: {
+            module: "es2015",
+          }
         }
-      }
-    ]
-  },
-  // ES5 bundled file for webcrypto-liner
-  {
-    input: pkg.module,
-    plugins: [
-      babel({
-        babelrc: false,
-        runtimeHelpers: true,
-        // exclude: 'node_modules/**',
-        // include: [
-        //   "build/**",
-        //   "src/**",
-        // ],
-        // include: dependencies.map(item => `node_modules/${item}/**`).concat(["src/**"]),
-        presets: [
-          [
-            "@babel/env",
-            {
-              targets: {
-                // ie: "11",
-                chrome: "60",
-              },
-              useBuiltIns: "entry"
-            }
-          ]
-        ],
-        plugins: [
-          "@babel/proposal-class-properties",
-          "@babel/proposal-object-rest-spread",
-        ],
       }),
     ],
-    external: ["crypto"],
+    external: Object.keys(browserExternals),
     output: [
       {
         file: pkg.browser,
-        format: "iife",
-        name: "liner",
-        globals: {
-          "crypto": "require('crypto')",
-        },
-      },
-    ],
+        format: "es",
+        globals: browserExternals,
+      }
+    ]
   },
-  // ES5 bundled tests
   {
-    input: "test/script/index.ts",
+    input: pkg.browser,
+    external: Object.keys(browserExternals),
     plugins: [
-      typescript({ typescript: require("typescript"), target: "esnext", removeComments: true }),
-      // builtins(),
-      resolve(),
-      commonjs(),
-      globals({
-        buffer: false,
-        global: true,
-        process: false,
-        dirname: false,
-        filename: false,
-      }),
       babel({
         babelrc: false,
         runtimeHelpers: true,
+        compact: false,
+        comments: false,
         presets: [
-          [
-            "@babel/env",
-            {
-              targets: {
-                chrome: "60",
-                ie: "11",
-              },
-              useBuiltIns: "entry"
-            }
-          ]
+          ["@babel/env", {
+            targets: {
+              ie: "11",
+              chrome: "60",
+            },
+            useBuiltIns: "entry",
+            corejs: 3,
+          }],
         ],
         plugins: [
-          "@babel/proposal-class-properties",
-          "@babel/proposal-object-rest-spread",
-        ],
+          ["@babel/plugin-proposal-class-properties"],
+          ["@babel/proposal-object-rest-spread"],
+        ]
       }),
-    ],
-    external: [
-      "assert",
     ],
     output: [
       {
-        file: "test/tests.js",
+        banner,
+        file: pkg.browser,
+        globals: browserExternals,
         format: "iife",
         name: "liner",
-        globals: {
-          "assert": "assert",
-        },
+      },
+      {
+        banner,
+        file: pkg.browserMin,
+        globals: browserExternals,
+        format: "iife",
+        name: "liner",
+        plugins: [
+          terser(),
+        ]
       },
     ],
   },
 ];
+//#endregion
+
+export default [
+  main,
+  ...browser,
+]

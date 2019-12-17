@@ -24,7 +24,7 @@ export class AesEcbProvider extends core.AesEcbProvider {
     return AesCrypto.importKey(format, keyData, algorithm, extractable, keyUsages);
   }
 
-  public async checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
     super.checkCryptoKey(key, keyUsage);
     AesCrypto.checkCryptoKey(key);
   }

@@ -1,5 +1,6 @@
 import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
+import * as elliptic from "elliptic";
 import * as core from "webcrypto-core";
 import * as asn from "../../asn";
 import { concat } from "../../helper";
@@ -15,7 +16,7 @@ export class EcCrypto {
 
   public static checkLib() {
     if (typeof (elliptic) === "undefined") {
-      throw new core.OperationError("Cannot implement DES mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
+      throw new core.OperationError("Cannot implement EC mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
     }
   }
 

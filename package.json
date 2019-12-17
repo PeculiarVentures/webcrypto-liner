@@ -1,17 +1,28 @@
 {
   "name": "webcrypto-liner",
-  "version": "1.0.2",
+  "version": "1.1.1-next.4",
   "description": "A WebCrypto polyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
-  "module": "build/webcrypto-liner.es.js",
+  "module": "build/index.es.js",
   "browser": "build/webcrypto-liner.shim.js",
+  "browserMin": "build/webcrypto-liner.shim.min.js",
+  "types": "index.d.ts",
   "scripts": {
+    "test": "mocha",
     "prepare": "npm run build",
-    "build": "rollup -c",
     "lint": "tslint -p .",
     "lint:fix": "tslint --fix -p .",
-    "prepub": "npm run lint & npm run build",
-    "pub": "npm version patch && npm publish && git push"
+    "build": "rollup -c",
+    "clear": "rimraf build/*",
+    "rebuild": "npm run clear && npm run build",
+    "prepub": "npm run lint && npm run build",
+    "pub": "npm version patch && npm publish",
+    "postpub": "git push && git push --tags origin master",
+    "prepub:next": "npm run lint && npm run build",
+    "pub:next": "npm version prerelease --preid=next && npm publish --tag next",
+    "postpub:next": "git push",
+    "coverage": "nyc npm test",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
@@ -19,31 +30,37 @@
   },
   "dependencies": {
     "@peculiar/asn1-schema": "^1.0.3",
-    "@peculiar/json-schema": "^1.1.6",
-    "asmcrypto.js": "^0.22.0",
+    "@peculiar/json-schema": "^1.1.9",
+    "asmcrypto.js": "^2.3.2",
     "asn1js": "^2.0.26",
+    "core-js": "^3.5.0",
     "des.js": "^1.0.1",
     "elliptic": "^6.5.2",
-    "pvtsutils": "^1.0.6",
-    "webcrypto-core": "^1.0.15"
+    "pvtsutils": "^1.0.9",
+    "tslib": "^1.10.0",
+    "webcrypto-core": "^1.0.17"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.4",
+    "@babel/core": "^7.7.5",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
-    "@babel/polyfill": "^7.7.0",
-    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-env": "^7.7.6",
+    "@peculiar/webcrypto": "^1.0.22",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^10.17.6",
+    "@types/node": "^10.17.10",
+    "babel-preset-minify": "^0.5.1",
+    "coveralls": "^3.0.9",
     "mocha": "^6.2.2",
-    "rollup": "^1.27.8",
+    "nyc": "^14.1.1",
+    "rimraf": "^3.0.0",
+    "rollup": "^1.27.13",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-typescript": "^1.0.1",
-    "tslib": "^1.10.0",
+    "rollup-plugin-terser": "^5.1.3",
+    "rollup-plugin-typescript2": "^0.25.3",
+    "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
   },
   "keywords": [
@@ -57,5 +74,21 @@
     "sha"
   ],
   "author": "PeculiarVentures",
-  "license": "MIT"
+  "license": "MIT",
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ]
+  }
 }

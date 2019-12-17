@@ -4,7 +4,11 @@
         "target": "es2015",
         "sourceMap": false,
         "outDir": "build",
-        "importHelpers": false,
+        "importHelpers": true,
+        "removeComments": true,
         "experimentalDecorators": true
-    }
+    },
+    "exclude": [
+        "index.d.ts"
+    ]
 }

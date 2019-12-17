@@ -1,17 +1,27 @@
+import * as asmCrypto from "asmcrypto.js";
 import * as core from "webcrypto-core";
 
 export class ShaCrypto {
 
-  public static checkLib() {
-    if (typeof (asmCrypto) === "undefined") {
-      throw new core.OperationError("Cannot implement DES mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/asmcrypto.js' script to your project");
+  public static getDigest(name: string) {
+    switch (name) {
+      case "SHA-1":
+        return new asmCrypto.Sha1();
+      case "SHA-256":
+        return new asmCrypto.Sha256();
+      case "SHA-512":
+        return new asmCrypto.Sha512();
+      default:
+        throw new core.AlgorithmError("keyAlgorithm.hash: Is not recognized");
     }
   }
 
   public static async digest(algorithm: Algorithm, data: ArrayBuffer): Promise<ArrayBuffer> {
-    this.checkLib();
+    const mech = this.getDigest(algorithm.name);
 
-    const mech = asmCrypto[algorithm.name.replace("-", "")] as typeof asmCrypto.SHA1;
-    return mech.bytes(data).buffer;
+    const result = mech
+      .process(core.BufferSourceConverter.toUint8Array(data))
+      .finish().result;
+    return core.BufferSourceConverter.toArrayBuffer(result);
   }
 }

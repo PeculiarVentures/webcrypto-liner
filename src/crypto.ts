@@ -4,6 +4,10 @@ import { SubtleCrypto } from "./subtle";
 
 export class Crypto extends core.Crypto {
 
+    public get nativeCrypto() {
+        return nativeCrypto;
+    }
+
     public subtle = new SubtleCrypto();
 
     public getRandomValues<T extends ArrayBufferView>(array: T): T {

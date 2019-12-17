@@ -11,8 +11,10 @@ import {
   DesCbcProvider, DesEde3CbcProvider,
   EcCrypto, EcdhProvider,
   EcdsaProvider,
-  Pbkdf2Provider, RsaOaepProvider, RsaPssProvider,
-  RsaSsaProvider, Sha1Provider, Sha256Provider, Sha512Provider,
+  HmacProvider,
+  Pbkdf2Provider,
+  RsaEsProvider, RsaOaepProvider, RsaPssProvider, RsaSsaProvider,
+  Sha1Provider, Sha256Provider, Sha512Provider,
 } from "./mechs";
 import { getOidByNamedCurve } from "./mechs/ec/helper";
 import { nativeSubtle } from "./native";
@@ -60,6 +62,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
     this.providers.set(new RsaSsaProvider());
     this.providers.set(new RsaPssProvider());
     this.providers.set(new RsaOaepProvider());
+    this.providers.set(new RsaEsProvider());
     //#endregion
 
     //#region EC
@@ -75,6 +78,10 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
     //#region PBKDF
     this.providers.set(new Pbkdf2Provider());
+    //#endregion
+
+    //#region HMAC
+    this.providers.set(new HmacProvider());
     //#endregion
 
   }

@@ -65,12 +65,12 @@ You can see the `webcrypto-liner` in use in the [`pv-webcrypto-tests` page](http
 
 ```html
 <head>
+  <!-- Crypto providers are optional -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.7.0/polyfill.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/asmCrypto/2.3.2/asmcrypto.all.es5.min.js"></script>
+  <script src="https://cdn.rawgit.com/indutny/elliptic/master/dist/elliptic.min.js"></script>
   <!-- Crypto -->
   <script src="webcrypto-liner.shim.js"></script>
-  <!-- Crypto providers are optional -->
-  <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/asmcrypto.js"></script>
-  <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js"></script>
-  <script src="https://peculiarventures.github.io/pv-webcrypto-tests/src/des.js"></script>
 </head>
 <body>
   <script> 
@@ -116,6 +116,7 @@ npm run build
 - **Will it work in Node?** No. It is compiles to pure Javascript but uses the `window` object so it wont work in Node at this time. With some minor changes it should also be able to work in Node also but you really should be using [node-webcrypto-ossl](https://github.com/PeculiarVentures/node-webcrypto-ossl) on Node instead.
 
 ## Related
+ - [@peculiar/webcrypto](https://github.com/PeculiarVentures/webcrypto)
  - [node-webcrypto-p11](https://github.com/PeculiarVentures/node-webcrypto-p11)
  - [node-webcrypto-ossl](https://github.com/PeculiarVentures/node-webcrypto-ossl)
  - [pv-webcrypto-tests](https://peculiarventures.github.io/pv-webcrypto-tests)

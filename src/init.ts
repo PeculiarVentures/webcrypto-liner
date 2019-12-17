@@ -1,17 +1,9 @@
-import { LinerError } from "./error";
 import { nativeSubtle } from "./native";
 
-// tslint:disable:no-string-literal
-
-// Fix DES global
-// if (typeof self !== "undefined" && !self["global"]) {
-//     self["global"] = {};
-// }
-
-export function WrapFunction(subtle: any, name: string) {
+function WrapFunction(subtle: any, name: string) {
     const fn = subtle[name];
     // tslint:disable-next-line:only-arrow-functions
-    subtle[name] = function() {
+    subtle[name] = function () {
         const args = arguments;
         return new Promise((resolve, reject) => {
             const op: any = fn.apply(subtle, args);
@@ -25,23 +17,20 @@ export function WrapFunction(subtle: any, name: string) {
     };
 }
 
-// if (w.msCrypto) {
-    // if (!w.Promise) {
-    //     throw new Error(LinerError.MODULE_NOT_FOUND, "Promise", "https://www.promisejs.org");
-    // }
-//     WrapFunction(nativeSubtle, "generateKey");
-//     WrapFunction(nativeSubtle, "digest");
-//     WrapFunction(nativeSubtle, "sign");
-//     WrapFunction(nativeSubtle, "verify");
-//     WrapFunction(nativeSubtle, "encrypt");
-//     WrapFunction(nativeSubtle, "decrypt");
-//     WrapFunction(nativeSubtle, "importKey");
-//     WrapFunction(nativeSubtle, "exportKey");
-//     WrapFunction(nativeSubtle, "wrapKey");
-//     WrapFunction(nativeSubtle, "unwrapKey");
-//     WrapFunction(nativeSubtle, "deriveKey");
-//     WrapFunction(nativeSubtle, "deriveBits");
-// }
+if (typeof self !== "undefined" && self["msCrypto"]) {
+    WrapFunction(nativeSubtle, "generateKey");
+    WrapFunction(nativeSubtle, "digest");
+    WrapFunction(nativeSubtle, "sign");
+    WrapFunction(nativeSubtle, "verify");
+    WrapFunction(nativeSubtle, "encrypt");
+    WrapFunction(nativeSubtle, "decrypt");
+    WrapFunction(nativeSubtle, "importKey");
+    WrapFunction(nativeSubtle, "exportKey");
+    WrapFunction(nativeSubtle, "wrapKey");
+    WrapFunction(nativeSubtle, "unwrapKey");
+    WrapFunction(nativeSubtle, "deriveKey");
+    WrapFunction(nativeSubtle, "deriveBits");
+}
 
 // fix: Math.imul for IE
 if (!(Math as any).imul) {

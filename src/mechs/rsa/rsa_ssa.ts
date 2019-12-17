@@ -1,4 +1,6 @@
+import * as asmCrypto from "asmcrypto.js";
 import * as core from "webcrypto-core";
+import { ShaCrypto } from "../sha/crypto";
 import { RsaCrypto } from "./crypto";
 import { RsaCryptoKey } from "./key";
 
@@ -17,38 +19,24 @@ export class RsaSsaProvider extends core.RsaSsaProvider {
   }
 
   public async onSign(algorithm: Algorithm, key: RsaCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    RsaCrypto.checkLib();
-
-    const fn = this.getOperation(key.algorithm, true);
-    return fn(data, key.data).buffer;
+    const rsa = new asmCrypto.RSA_PKCS1_v1_5(key.data, ShaCrypto.getDigest(key.algorithm.hash.name));
+    const result = rsa.sign(core.BufferSourceConverter.toUint8Array(data));
+    return core.BufferSourceConverter.toArrayBuffer(result);
   }
 
   public async onVerify(algorithm: Algorithm, key: RsaCryptoKey, signature: ArrayBuffer, data: ArrayBuffer): Promise<boolean> {
-    RsaCrypto.checkLib();
-
-    const fn = this.getOperation(key.algorithm, false);
-    return fn(signature, data, key.data);
+    const rsa = new asmCrypto.RSA_PKCS1_v1_5(key.data, ShaCrypto.getDigest(key.algorithm.hash.name));
+    try {
+      rsa.verify(core.BufferSourceConverter.toUint8Array(signature), core.BufferSourceConverter.toUint8Array(data));
+    } catch {
+      return false;
+    }
+    return true;
   }
 
-  public async checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
+  public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is RsaCryptoKey {
     super.checkCryptoKey(key, keyUsage);
     RsaCrypto.checkCryptoKey(key);
-  }
-
-  private getOperation(keyAlgorithm: RsaHashedKeyAlgorithm, sign: true): typeof asmCrypto.RSA_PKCS1_v1_5_SHA1.sign;
-  private getOperation(keyAlgorithm: RsaHashedKeyAlgorithm, sign: false): typeof asmCrypto.RSA_PKCS1_v1_5_SHA1.verify;
-  private getOperation(keyAlgorithm: RsaHashedKeyAlgorithm, sign: boolean) {
-    const action = sign ? "sign" : "verify";
-    switch (keyAlgorithm.hash.name) {
-      case "SHA-1":
-        return asmCrypto.RSA_PKCS1_v1_5_SHA1[action];
-      case "SHA-256":
-        return asmCrypto.RSA_PKCS1_v1_5_SHA256[action];
-      case "SHA-512":
-        return asmCrypto.RSA_PKCS1_v1_5_SHA512[action];
-      default:
-        throw new core.AlgorithmError("keyAlgorithm.hash: Is not recognized");
-    }
   }
 
 }

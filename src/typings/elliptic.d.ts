@@ -95,7 +95,7 @@ declare module "elliptic" {
         ed25519: any;
         secp256k1: any;
     }
-    const ec: typeof EllipticJS.EC;
+    function ec(namedCurve: string): EllipticJS.EC;
     const eddsa: any;
 
 }
