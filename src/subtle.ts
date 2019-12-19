@@ -1,6 +1,6 @@
 import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
-import { Convert } from "pvtsutils";
+import { BufferSourceConverter, Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import * as asn from "./asn";
 import { Debug } from "./debug";
@@ -18,6 +18,7 @@ import {
 } from "./mechs";
 import { getOidByNamedCurve } from "./mechs/ec/helper";
 import { nativeSubtle } from "./native";
+import { WrappedNativeCryptoKey } from "./wrapped_native_key";
 
 type SubtleMethods = keyof core.SubtleCrypto;
 
@@ -143,9 +144,12 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
     try {
       if (method !== "digest" || !args.some((a) => a instanceof CryptoKey)) {
-        Debug.info(`Call native '${method}' method`, args);
-        const res = await nativeSubtle[method].apply(nativeSubtle, args);
-        return res;
+        const nativeArgs = this.fixNativeArguments(method, args);
+
+        Debug.info(`Call native '${method}' method`, nativeArgs);
+        const res = await nativeSubtle[method].apply(nativeSubtle, nativeArgs);
+
+        return this.fixNativeResult(method, args, res);
       }
     } catch (e) {
       Debug.warn(`Error on native '${method}' calling. ${e.message}`, e);
@@ -208,6 +212,86 @@ export class SubtleCrypto extends core.SubtleCrypto {
     }
 
     return super[method].apply(this, args);
+  }
+
+  private fixNativeArguments(method: SubtleMethods, args: any[]) {
+    const res = [...args];
+    if (method === "importKey") {
+      if (res[0]?.toLowerCase?.() === "jwk" && !BufferSourceConverter.isBufferSource(res[1])) {
+        // IE11 uses ArrayBuffer instead of JSON object
+        res[1] = Convert.FromUtf8String(JSON.stringify(res[1]));
+      }
+    }
+
+    if (this.browserInfo.name === Browser.IE && args[1] instanceof WrappedNativeCryptoKey) {
+      // Fix algs for IE11
+      switch (method) {
+        case "sign":
+        case "verify":
+        case "encrypt":
+        case "decrypt":
+          res[0] = { ...this.prepareAlgorithm(res[0]), hash: (res[1]?.algorithm as RsaHashedKeyAlgorithm)?.hash?.name };
+          break;
+        case "wrapKey":
+        case "unwrapKey":
+          res[4] = { ...this.prepareAlgorithm(res[4]), hash: (res[3]?.algorithm as RsaHashedKeyAlgorithm)?.hash?.name };
+          break;
+      }
+    }
+
+    for (let i = 0; i < res.length; i++) {
+      const arg = res[i];
+      if (arg instanceof WrappedNativeCryptoKey) {
+        // Convert wrapped key to Native CryptoKey
+        res[i] = arg.nativeKey;
+      }
+    }
+
+    return res;
+  }
+
+  private fixNativeResult(method: SubtleMethods, args: any[], res: any): any {
+    if (method === "exportKey") {
+      if (args[0]?.toLowerCase?.() === "jwk" && res instanceof ArrayBuffer) {
+        // IE11 uses ArrayBuffer instead of JSON object
+        return JSON.parse(Convert.ToUtf8String(res));
+      }
+    }
+
+    if (this.browserInfo.name === Browser.IE) {
+      // wrap IE11 native key
+      if ("privateKey" in res) {
+        const privateKeyUsages = ["sign", "decrypt", "unwrapKey", "deriveKey", "deriveBits"];
+        const publicKeyUsages = ["verify", "encrypt", "wrapKey"];
+        return {
+          privateKey: this.wrapNativeKey(res.privateKey, args[0], args[1], args[2].filter((o: string) => privateKeyUsages.includes(o))),
+          publicKey: this.wrapNativeKey(res.publicKey, args[0], args[1], args[2].filter((o: string) => publicKeyUsages.includes(o))),
+        };
+      } else if ("extractable" in res) {
+        return this.wrapNativeKey(res, method === "importKey" ? args[2] : args[4], res.extractable, method === "importKey" ? args[4] : args[6]);
+      }
+    }
+
+    return res;
+  }
+
+  private wrapNativeKey(key: core.NativeCryptoKey, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): core.NativeCryptoKey {
+    if (this.browserInfo.name === Browser.IE) {
+      const algs = ["RSASSA-PKCS1-v1_5", "RSA-PSS", "RSA-OAEP"];
+      const index = algs.map((o) => o.toLowerCase()).indexOf(key.algorithm.name.toLowerCase());
+      if (index !== -1) {
+        const alg = this.prepareAlgorithm(algorithm);
+        if (core.SubtleCrypto.isHashedAlgorithm(alg)) {
+          const newAlg = {
+            ...key.algorithm,
+            ...alg,
+            name: algs[index],
+          };
+          return new WrappedNativeCryptoKey(newAlg, extractable, key.type, keyUsages, key);
+        }
+      }
+    }
+    return key;
   }
 
   private async castKey(key: core.NativeCryptoKey) {
