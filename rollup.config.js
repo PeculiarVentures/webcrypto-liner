@@ -1,6 +1,6 @@
-import resolve from "rollup-plugin-node-resolve";
+import resolve from "@rollup/plugin-node-resolve";
 import babel from "rollup-plugin-babel";
-import builtins from "rollup-plugin-node-builtins";
+import builtins from "@erquhart/rollup-plugin-node-builtins";
 import { terser } from "rollup-plugin-terser";
 import typescript from "rollup-plugin-typescript2";
 import commonjs from "rollup-plugin-commonjs";
@@ -56,10 +56,11 @@ const browser = [
     input: "src/shim.ts",
     plugins: [
       resolve({
+        mainFields: ["jsnext", "module", "main"],
         preferBuiltins: true,
       }),
-      commonjs(),
       builtins(),
+      commonjs(),
       typescript({
         check: true,
         clean: true,
