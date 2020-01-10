@@ -217,7 +217,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
   private fixNativeArguments(method: SubtleMethods, args: any[]) {
     const res = [...args];
     if (method === "importKey") {
-      if (res[0]?.toLowerCase?.() === "jwk" && !BufferSourceConverter.isBufferSource(res[1])) {
+      if (this.browserInfo.name === Browser.IE && res[0]?.toLowerCase?.() === "jwk" && !BufferSourceConverter.isBufferSource(res[1])) {
         // IE11 uses ArrayBuffer instead of JSON object
         res[1] = Convert.FromUtf8String(JSON.stringify(res[1]));
       }
