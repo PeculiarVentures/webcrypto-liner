@@ -36,7 +36,7 @@ export class RsaCrypto {
       modulusLength: algorithm.modulusLength,
     };
     // generate keys using native crypto
-    const keys = await nativeSubtle.generateKey(alg, true, ["sign", "verify"]);
+    const keys = (await nativeSubtle.generateKey(alg, true, ["sign", "verify"])) as CryptoKeyPair;
     const crypto = new Crypto();
 
     // create private key
