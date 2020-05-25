@@ -243,7 +243,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
       const arg = res[i];
       if (arg instanceof WrappedNativeCryptoKey) {
         // Convert wrapped key to Native CryptoKey
-        res[i] = arg.nativeKey;
+        res[i] = arg.getNative();
       }
     }
 
@@ -251,14 +251,13 @@ export class SubtleCrypto extends core.SubtleCrypto {
   }
 
   private fixNativeResult(method: SubtleMethods, args: any[], res: any): any {
-    if (method === "exportKey") {
-      if (args[0]?.toLowerCase?.() === "jwk" && res instanceof ArrayBuffer) {
-        // IE11 uses ArrayBuffer instead of JSON object
-        return JSON.parse(Convert.ToUtf8String(res));
-      }
-    }
-
     if (this.browserInfo.name === Browser.IE) {
+      if (method === "exportKey") {
+        if (args[0]?.toLowerCase?.() === "jwk" && res instanceof ArrayBuffer) {
+          // IE11 uses ArrayBuffer instead of JSON object
+          return JSON.parse(Convert.ToUtf8String(res));
+        }
+      }
       // wrap IE11 native key
       if ("privateKey" in res) {
         const privateKeyUsages = ["sign", "decrypt", "unwrapKey", "deriveKey", "deriveBits"];
@@ -268,7 +267,27 @@ export class SubtleCrypto extends core.SubtleCrypto {
           publicKey: this.wrapNativeKey(res.publicKey, args[0], args[1], args[2].filter((o: string) => publicKeyUsages.includes(o))),
         };
       } else if ("extractable" in res) {
-        return this.wrapNativeKey(res, method === "importKey" ? args[2] : args[4], res.extractable, method === "importKey" ? args[4] : args[6]);
+        let algorithm: Algorithm;
+        let usages: KeyUsage[];
+        switch (method) {
+          case "importKey":
+            algorithm = args[2];
+            usages = args[4];
+            break;
+          case "unwrapKey":
+            algorithm = args[4];
+            usages = args[6];
+
+            break;
+          case "generateKey":
+            algorithm = args[0];
+            usages = args[2];
+            break;
+
+          default:
+            throw new core.OperationError("Cannot wrap native key. Unsupported method in use");
+        }
+        return this.wrapNativeKey(res, algorithm, res.extractable, usages);
       }
     }
 
@@ -277,18 +296,24 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
   private wrapNativeKey(key: core.NativeCryptoKey, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): core.NativeCryptoKey {
     if (this.browserInfo.name === Browser.IE) {
-      const algs = ["RSASSA-PKCS1-v1_5", "RSA-PSS", "RSA-OAEP"];
+      const algs = [
+        "RSASSA-PKCS1-v1_5", "RSA-PSS", "RSA-OAEP",
+        "AES-CBC", "AES-CTR", "AES-KW", "HMAC",
+      ];
       const index = algs.map((o) => o.toLowerCase()).indexOf(key.algorithm.name.toLowerCase());
       if (index !== -1) {
         const alg = this.prepareAlgorithm(algorithm);
+        const newAlg: any = {
+          ...key.algorithm,
+          name: algs[index],
+        };
         if (core.SubtleCrypto.isHashedAlgorithm(alg)) {
-          const newAlg = {
-            ...key.algorithm,
-            ...alg,
-            name: algs[index],
+          newAlg.hash = {
+            name: (alg.hash as any).name.toUpperCase(),
           };
-          return new WrappedNativeCryptoKey(newAlg, extractable, key.type, keyUsages, key);
         }
+        Debug.info(`Wrapping ${algs[index]} crypto key to WrappedNativeCryptoKey`);
+        return new WrappedNativeCryptoKey(newAlg, extractable, key.type, keyUsages, key);
       }
     }
     return key;
