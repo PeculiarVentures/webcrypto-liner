@@ -4,13 +4,22 @@ import { CryptoKey } from "./key";
 
 export class WrappedNativeCryptoKey extends CryptoKey {
 
+  // tslint:disable-next-line: member-access
+  #nativeKey: CryptoKey;
+
   constructor(
     algorithm: KeyAlgorithm,
     extractable: boolean,
     type: KeyType,
     usages: KeyUsage[],
-    public nativeKey: NativeCryptoKey) {
+    nativeKey: NativeCryptoKey) {
     super(algorithm, extractable, type, usages);
+    this.#nativeKey = nativeKey;
+  }
+
+  // @internal
+  public getNative() {
+    return this.#nativeKey;
   }
 
 }
