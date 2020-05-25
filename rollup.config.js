@@ -43,6 +43,29 @@ const main = {
   ],
 };
 
+function babelOptions(ie11) {
+  const targets = ie11
+    ? { ie: "11" }
+    : { chrome: "60" };
+  return {
+    babelrc: false,
+    runtimeHelpers: true,
+    compact: false,
+    comments: false,
+    presets: [
+      ["@babel/env", {
+        targets,
+        useBuiltIns: "entry",
+        corejs: 3,
+      }],
+    ],
+    plugins: [
+      ["@babel/plugin-proposal-class-properties"],
+      ["@babel/proposal-object-rest-spread"],
+    ]
+  }
+}
+
 
 //#region Browser
 const browserExternals = {
@@ -74,48 +97,57 @@ const browser = [
     external: Object.keys(browserExternals),
     output: [
       {
-        file: pkg.browser,
+        file: pkg["browser:es5"],
         format: "es",
         globals: browserExternals,
       }
     ]
   },
+  // ES2015
   {
-    input: pkg.browser,
+    input: pkg["browser:es5"],
     external: Object.keys(browserExternals),
     plugins: [
-      babel({
-        babelrc: false,
-        runtimeHelpers: true,
-        compact: false,
-        comments: false,
-        presets: [
-          ["@babel/env", {
-            targets: {
-              ie: "11",
-              chrome: "60",
-            },
-            useBuiltIns: "entry",
-            corejs: 3,
-          }],
-        ],
-        plugins: [
-          ["@babel/plugin-proposal-class-properties"],
-          ["@babel/proposal-object-rest-spread"],
-        ]
-      }),
+      babel(babelOptions(false)),
     ],
     output: [
       {
         banner,
-        file: pkg.browser,
+        file: pkg["browser"],
         globals: browserExternals,
         format: "iife",
         name: "liner",
       },
       {
         banner,
-        file: pkg.browserMin,
+        file: pkg["browser:min"],
+        globals: browserExternals,
+        format: "iife",
+        name: "liner",
+        plugins: [
+          terser(),
+        ]
+      },
+    ],
+  },
+  // ES5
+  {
+    input: pkg["browser:es5"],
+    external: Object.keys(browserExternals),
+    plugins: [
+      babel(babelOptions(true)),
+    ],
+    output: [
+      {
+        banner,
+        file: pkg["browser:es5"],
+        globals: browserExternals,
+        format: "iife",
+        name: "liner",
+      },
+      {
+        banner,
+        file: pkg["browser:es5:min"],
         globals: browserExternals,
         format: "iife",
         name: "liner",

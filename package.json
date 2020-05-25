@@ -4,8 +4,10 @@
   "description": "A WebCrypto polyfill that \"smooths out\" the rough-edges in existing User Agent implementations.",
   "main": "build/index.js",
   "module": "build/index.es.js",
-  "browser": "build/webcrypto-liner.shim.js",
-  "browserMin": "build/webcrypto-liner.shim.min.js",
+  "browser": "build/webcrypto-liner.shim.mjs",
+  "browser:min": "build/webcrypto-liner.shim.es.min.mjs",
+  "browser:es5": "build/webcrypto-liner.shim.js",
+  "browser:es5:min": "build/webcrypto-liner.shim.min.js",
   "types": "index.d.ts",
   "scripts": {
     "test": "mocha",
@@ -29,7 +31,7 @@
     "url": "git+https://github.com/PeculiarVentures/webcrypto-liner"
   },
   "dependencies": {
-    "@peculiar/asn1-schema": "^2.0.1",
+    "@peculiar/asn1-schema": "^2.0.3",
     "@peculiar/json-schema": "^1.1.10",
     "asmcrypto.js": "^2.3.2",
     "asn1js": "^2.0.26",
@@ -37,8 +39,8 @@
     "des.js": "^1.0.1",
     "elliptic": "^6.5.2",
     "pvtsutils": "^1.0.10",
-    "tslib": "^1.11.2",
-    "webcrypto-core": "^1.1.0"
+    "tslib": "^1.13.0",
+    "webcrypto-core": "^1.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
@@ -46,13 +48,13 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
     "@erquhart/rollup-plugin-node-builtins": "^2.1.5",
-    "@peculiar/webcrypto": "^1.1.0",
+    "@peculiar/webcrypto": "^1.1.1",
     "@rollup/plugin-node-resolve": "^6.1.0",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^10.17.21",
+    "@types/node": "^10.17.24",
     "babel-preset-minify": "^0.5.1",
     "coveralls": "^3.1.0",
-    "mocha": "^7.1.2",
+    "mocha": "^7.2.0",
     "nyc": "^15.0.1",
     "rimraf": "^3.0.2",
     "rollup": "^1.32.1",
@@ -61,8 +63,8 @@
     "rollup-plugin-terser": "^5.3.0",
     "rollup-plugin-typescript2": "^0.25.3",
     "ts-node": "^8.10.1",
-    "tslint": "^5.20.1",
-    "typescript": "^3.8.3"
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.3"
   },
   "keywords": [
     "crypto",
@@ -90,6 +92,15 @@
     "reporter": [
       "text-summary",
       "html"
+    ]
+  },
+  "mocha": {
+    "require": "ts-node/register",
+    "extension": [
+      "ts"
+    ],
+    "spec": [
+      "test/**/*.ts"
     ]
   }
 }
