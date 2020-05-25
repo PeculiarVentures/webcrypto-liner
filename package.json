@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "module": "build/index.es.js",
   "browser": "build/webcrypto-liner.shim.mjs",
-  "browser:min": "build/webcrypto-liner.shim.es.min.mjs",
+  "browser:min": "build/webcrypto-liner.shim.min.mjs",
   "browser:es5": "build/webcrypto-liner.shim.js",
   "browser:es5:min": "build/webcrypto-liner.shim.min.js",
   "types": "index.d.ts",
