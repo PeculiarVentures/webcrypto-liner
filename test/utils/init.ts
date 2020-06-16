@@ -6,23 +6,23 @@ const nativeGenerateKey = crypto.subtle.generateKey;
 const nativeExportKey = crypto.subtle.exportKey;
 
 // asmCrypto doesn't have key generation function and uses native generateKey with RSA-PSS
-crypto.subtle.generateKey = async function () {
-  if (arguments[0]?.name !== "RSA-PSS") {
+crypto.subtle.generateKey = async function (...args: any[]) {
+  if (args[0]?.name !== "RSA-PSS") {
     throw new Error("Function is broken for test cases");
   }
-  return nativeGenerateKey.apply(this, arguments);
+  return nativeGenerateKey.apply(this, args);
 };
 
 // asmCrypto doesn't have key generation function and uses native exportKey with RSA-PSS
-crypto.subtle.exportKey = async function () {
+crypto.subtle.exportKey = async function (...args: any[]) {
   if (!(
-    (arguments[0] === "pkcs8"
-      || arguments[0] === "spki")
-    && arguments[1].algorithm.name === "RSA-PSS"
+    (args[0] === "pkcs8"
+      || args[0] === "spki")
+    && args[1].algorithm.name === "RSA-PSS"
   )) {
     throw new Error("Function is broken for test cases");
   }
-  return nativeExportKey.apply(this, arguments);
+  return nativeExportKey.apply(this, args);
 };
 
 // break crypto functions

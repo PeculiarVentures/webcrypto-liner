@@ -82,10 +82,11 @@ export function concat(...buf: Uint8Array[]) {
     return res;
 }
 
-export function assign(target: any, ...sources: any[]) {
-    const res = arguments[0];
-    for (let i = 1; i < arguments.length; i++) {
-        const obj = arguments[i];
+export function assign(target: any, ...sources: any[]): any;
+export function assign(...args: any[]) {
+    const res = args[0];
+    for (let i = 1; i < args.length; i++) {
+        const obj = args[i];
         for (const prop in obj) {
             res[prop] = obj[prop];
         }
