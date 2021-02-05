@@ -37,7 +37,7 @@
     "asn1js": "^2.0.26",
     "core-js": "^3.6.5",
     "des.js": "^1.0.1",
-    "elliptic": "^6.5.3",
+    "elliptic": "^6.5.4",
     "pvtsutils": "^1.0.10",
     "tslib": "^1.13.0",
     "webcrypto-core": "^1.1.2"
