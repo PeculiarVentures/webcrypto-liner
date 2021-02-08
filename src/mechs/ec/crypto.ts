@@ -1,8 +1,7 @@
-import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
+import { AsnConvert } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as elliptic from "elliptic";
 import * as core from "webcrypto-core";
-import * as asn from "../../asn";
 import { concat } from "../../helper";
 import { getOidByNamedCurve } from "./helper";
 import { EcCryptoKey } from "./key";
@@ -95,7 +94,7 @@ export class EcCrypto {
         ecKey = this.importSpkiKey(keyData as ArrayBuffer, algorithm.namedCurve);
         break;
       case "raw":
-        ecKey = this.importEcKey(new asn.EcPublicKey(keyData as ArrayBuffer), algorithm.namedCurve);
+        ecKey = this.importEcKey(new core.asn1.EcPublicKey(keyData as ArrayBuffer), algorithm.namedCurve);
         break;
       case "jwk":
         ecKey = this.importJwkKey(keyData as JsonWebKey);
@@ -133,48 +132,48 @@ export class EcCrypto {
   }
 
   private static exportPkcs8Key(key: EcCryptoKey) {
-    const keyInfo = new asn.PrivateKeyInfo();
+    const keyInfo = new core.asn1.PrivateKeyInfo();
     keyInfo.privateKeyAlgorithm.algorithm = this.ASN_ALGORITHM;
-    keyInfo.privateKeyAlgorithm.parameters = AsnSerializer.serialize(
-      new asn.ObjectIdentifier(getOidByNamedCurve(key.algorithm.namedCurve)),
+    keyInfo.privateKeyAlgorithm.parameters = AsnConvert.serialize(
+      new core.asn1.ObjectIdentifier(getOidByNamedCurve(key.algorithm.namedCurve)),
     );
-    keyInfo.privateKey = AsnSerializer.serialize(this.exportEcKey(key));
+    keyInfo.privateKey = AsnConvert.serialize(this.exportEcKey(key));
 
-    return AsnSerializer.serialize(keyInfo);
+    return AsnConvert.serialize(keyInfo);
   }
 
   private static importPkcs8Key(data: ArrayBuffer, namedCurve: string) {
-    const keyInfo = AsnParser.parse(data, asn.PrivateKeyInfo);
-    const privateKey = AsnParser.parse(keyInfo.privateKey, asn.EcPrivateKey);
+    const keyInfo = AsnConvert.parse(data, core.asn1.PrivateKeyInfo);
+    const privateKey = AsnConvert.parse(keyInfo.privateKey, core.asn1.EcPrivateKey);
     return this.importEcKey(privateKey, namedCurve);
   }
 
   private static importSpkiKey(data: ArrayBuffer, namedCurve: string) {
-    const keyInfo = AsnParser.parse(data, asn.PublicKeyInfo);
-    const publicKey = new asn.EcPublicKey(keyInfo.publicKey);
+    const keyInfo = AsnConvert.parse(data, core.asn1.PublicKeyInfo);
+    const publicKey = new core.asn1.EcPublicKey(keyInfo.publicKey);
     return this.importEcKey(publicKey, namedCurve);
   }
 
   private static exportSpkiKey(key: EcCryptoKey) {
-    const publicKey = new asn.EcPublicKey(new Uint8Array(key.data.getPublic("der")).buffer);
+    const publicKey = new core.asn1.EcPublicKey(new Uint8Array(key.data.getPublic("der")).buffer);
 
-    const keyInfo = new asn.PublicKeyInfo();
+    const keyInfo = new core.asn1.PublicKeyInfo();
     keyInfo.publicKeyAlgorithm.algorithm = this.ASN_ALGORITHM;
-    keyInfo.publicKeyAlgorithm.parameters = AsnSerializer.serialize(
-      new asn.ObjectIdentifier(getOidByNamedCurve(key.algorithm.namedCurve)),
+    keyInfo.publicKeyAlgorithm.parameters = AsnConvert.serialize(
+      new core.asn1.ObjectIdentifier(getOidByNamedCurve(key.algorithm.namedCurve)),
     );
     keyInfo.publicKey = publicKey.value;
-    return AsnSerializer.serialize(keyInfo);
+    return AsnConvert.serialize(keyInfo);
   }
 
   private static importJwkKey(data: JsonWebKey) {
-    let key: asn.EcPrivateKey | asn.EcPublicKey;
+    let key: core.asn1.EcPrivateKey | core.asn1.EcPublicKey;
     if (data.d) {
       // private
-      key = JsonParser.fromJSON(data, { targetSchema: asn.EcPrivateKey });
+      key = JsonParser.fromJSON(data, { targetSchema: core.asn1.EcPrivateKey });
     } else {
       // public
-      key = JsonParser.fromJSON(data, { targetSchema: asn.EcPublicKey });
+      key = JsonParser.fromJSON(data, { targetSchema: core.asn1.EcPublicKey });
     }
     return this.importEcKey(key, data.crv);
   }
@@ -191,10 +190,10 @@ export class EcCrypto {
     return jwk;
   }
 
-  private static exportEcKey(ecKey: EcCryptoKey): asn.EcPrivateKey | asn.EcPublicKey {
+  private static exportEcKey(ecKey: EcCryptoKey): core.asn1.EcPrivateKey | core.asn1.EcPublicKey {
     if (ecKey.type === "private") {
       // private
-      const privateKey = new asn.EcPrivateKey();
+      const privateKey = new core.asn1.EcPrivateKey();
       const point = new Uint8Array(ecKey.data.getPrivate("der").toArray());
       const pointPad = new Uint8Array(this.getPointSize(ecKey.algorithm.namedCurve) - point.length);
 
@@ -203,16 +202,16 @@ export class EcCrypto {
       return privateKey;
     } else if (ecKey.data.pub) {
       // public
-      return new asn.EcPublicKey(new Uint8Array(ecKey.data.getPublic("der")).buffer);
+      return new core.asn1.EcPublicKey(new Uint8Array(ecKey.data.getPublic("der")).buffer);
     } else {
       throw new Error("Cannot get private or public key");
     }
   }
 
-  private static importEcKey(key: asn.EcPrivateKey | asn.EcPublicKey, namedCurve: string) {
+  private static importEcKey(key: core.asn1.EcPrivateKey | core.asn1.EcPublicKey, namedCurve: string) {
     const ecKey = this.initEcKey(namedCurve);
 
-    if (key instanceof asn.EcPublicKey) {
+    if (key instanceof core.asn1.EcPublicKey) {
       return ecKey.keyFromPublic(new Uint8Array(key.value));
     }
     return ecKey.keyFromPrivate(new Uint8Array(key.privateKey));

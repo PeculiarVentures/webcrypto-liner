@@ -71,7 +71,7 @@ context("AES", () => {
             key: {
               format: "raw",
               algorithm: "AES-CBC",
-              data: Convert.FromBase64("AQIDBAUGBwgJAAECAwQFBg"),
+              data: Convert.FromBase64Url("AQIDBAUGBwgJAAECAwQFBg"),
               extractable: true,
               keyUsages: ["wrapKey", "unwrapKey"],
             },
@@ -770,7 +770,7 @@ context("AES", () => {
             key: {
               format: "raw",
               algorithm: "AES-ECB",
-              data: Convert.FromBase64("AQIDBAUGBwgJAAECAwQFBg"),
+              data: Convert.FromBase64Url("AQIDBAUGBwgJAAECAwQFBg"),
               extractable: true,
               keyUsages: ["wrapKey", "unwrapKey"],
             },
