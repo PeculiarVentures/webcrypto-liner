@@ -1,8 +1,7 @@
-import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
+import { AsnConvert } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import { BufferSourceConverter, Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
-import * as asn from "./asn";
 import { Debug } from "./debug";
 import { Browser, BrowserInfo } from "./helper";
 import { CryptoKey } from "./key";
@@ -15,6 +14,7 @@ import {
   Pbkdf2Provider,
   RsaEsProvider, RsaOaepProvider, RsaPssProvider, RsaSsaProvider,
   Sha1Provider, Sha256Provider, Sha512Provider,
+  EdDsaProvider, EcdhEsProvider,
 } from "./mechs";
 import { getOidByNamedCurve } from "./mechs/ec/helper";
 import { nativeSubtle } from "./native";
@@ -83,6 +83,15 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
     //#region HMAC
     this.providers.set(new HmacProvider());
+    //#endregion
+
+    //#region EdDSA
+    this.providers.set(new EdDsaProvider());
+    //#endregion
+
+    //#region ECDH-ES
+    // TODO Elliptic.js has got issue (https://github.com/indutny/elliptic/issues/243). Uncomment the next line after fix
+    // this.providers.set(new EcdhEsProvider());
     //#endregion
 
   }
@@ -379,8 +388,8 @@ export class SubtleCrypto extends core.SubtleCrypto {
       const preparedData = core.BufferSourceConverter.toArrayBuffer(args[1]);
 
       // Convert PKCS8 to JWK
-      const keyInfo = AsnParser.parse(preparedData, asn.PrivateKeyInfo);
-      const privateKey = AsnParser.parse(keyInfo.privateKey, asn.EcPrivateKey);
+      const keyInfo = AsnConvert.parse(preparedData, core.asn1.PrivateKeyInfo);
+      const privateKey = AsnConvert.parse(keyInfo.privateKey, core.asn1.EcPrivateKey);
       const jwk: JsonWebKey = JsonSerializer.toJSON(privateKey);
       jwk.ext = true;
       jwk.key_ops = args[4];
@@ -404,16 +413,16 @@ export class SubtleCrypto extends core.SubtleCrypto {
         const jwk = await this.exportKey("jwk", args[1]);
 
         // Convert JWK to PKCS8
-        const ecKey = JsonParser.fromJSON(jwk, { targetSchema: asn.EcPrivateKey });
+        const ecKey = JsonParser.fromJSON(jwk, { targetSchema: core.asn1.EcPrivateKey });
 
-        const keyInfo = new asn.PrivateKeyInfo();
+        const keyInfo = new core.asn1.PrivateKeyInfo();
         keyInfo.privateKeyAlgorithm.algorithm = EcCrypto.ASN_ALGORITHM;
-        keyInfo.privateKeyAlgorithm.parameters = AsnSerializer.serialize(
-          new asn.ObjectIdentifier(getOidByNamedCurve(args[1].algorithm.namedCurve)),
+        keyInfo.privateKeyAlgorithm.parameters = AsnConvert.serialize(
+          new core.asn1.ObjectIdentifier(getOidByNamedCurve(args[1].algorithm.namedCurve)),
         );
-        keyInfo.privateKey = AsnSerializer.serialize(ecKey);
+        keyInfo.privateKey = AsnConvert.serialize(ecKey);
 
-        return AsnSerializer.serialize(keyInfo);
+        return AsnConvert.serialize(keyInfo);
       }
     } catch (err) {
       Debug.error(err);

@@ -1,7 +1,11 @@
-import { JsonProp, JsonPropTypes } from "@peculiar/json-schema";
-import * as core from "webcrypto-core";
-import { JsonBase64UrlArrayBufferConverter } from "../../converters";
+import { IJsonConverter, JsonProp, JsonPropTypes } from "@peculiar/json-schema";
+import { Convert } from "pvtsutils";
 import { CryptoKey } from "../../key";
+
+export const JsonBase64UrlConverter: IJsonConverter<Buffer, string> = {
+  fromJSON: (value: string) => Buffer.from(Convert.FromBase64Url(value)),
+  toJSON: (value: Buffer) => Convert.ToBase64Url(value),
+};
 
 export class HmacCryptoKey extends CryptoKey {
 
@@ -13,7 +17,7 @@ export class HmacCryptoKey extends CryptoKey {
   @JsonProp({ name: "key_ops", type: JsonPropTypes.String, repeated: true, optional: true })
   public usages: KeyUsage[];
 
-  @JsonProp({ name: "k", converter: JsonBase64UrlArrayBufferConverter })
+  @JsonProp({ name: "k", converter: JsonBase64UrlConverter })
   public data: Uint8Array;
 
   public algorithm: HmacKeyAlgorithm;

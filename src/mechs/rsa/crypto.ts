@@ -1,7 +1,6 @@
-import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema";
+import { AsnConvert } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as core from "webcrypto-core";
-import * as asn from "../../asn";
 import { Crypto } from "../../crypto";
 import { concat } from "../../helper";
 import { nativeCrypto, nativeSubtle } from "../../native";
@@ -105,49 +104,49 @@ export class RsaCrypto {
   }
 
   private static exportPkcs8Key(key: RsaCryptoKey) {
-    const keyInfo = new asn.PrivateKeyInfo();
+    const keyInfo = new core.asn1.PrivateKeyInfo();
     keyInfo.privateKeyAlgorithm.algorithm = "1.2.840.113549.1.1.1";
     keyInfo.privateKeyAlgorithm.parameters = null;
-    keyInfo.privateKey = AsnSerializer.serialize(this.exportAsmKey(key.data));
+    keyInfo.privateKey = AsnConvert.serialize(this.exportAsmKey(key.data));
 
-    return AsnSerializer.serialize(keyInfo);
+    return AsnConvert.serialize(keyInfo);
   }
 
   private static importPkcs8Key(data: ArrayBuffer) {
-    const keyInfo = AsnParser.parse(data, asn.PrivateKeyInfo);
-    const privateKey = AsnParser.parse(keyInfo.privateKey, asn.RsaPrivateKey);
+    const keyInfo = AsnConvert.parse(data, core.asn1.PrivateKeyInfo);
+    const privateKey = AsnConvert.parse(keyInfo.privateKey, core.asn1.RsaPrivateKey);
     return this.importAsmKey(privateKey);
   }
 
   private static importSpkiKey(data: ArrayBuffer) {
-    const keyInfo = AsnParser.parse(data, asn.PublicKeyInfo);
-    const publicKey = AsnParser.parse(keyInfo.publicKey, asn.RsaPublicKey);
+    const keyInfo = AsnConvert.parse(data, core.asn1.PublicKeyInfo);
+    const publicKey = AsnConvert.parse(keyInfo.publicKey, core.asn1.RsaPublicKey);
     return this.importAsmKey(publicKey);
   }
 
   private static exportSpkiKey(key: RsaCryptoKey) {
-    const publicKey = new asn.RsaPublicKey();
+    const publicKey = new core.asn1.RsaPublicKey();
     publicKey.modulus = key.data[0].buffer;
     publicKey.publicExponent = key.data[1][1] === 1
       ? key.data[1].buffer.slice(1)
       : key.data[1].buffer.slice(3);
 
-    const keyInfo = new asn.PublicKeyInfo();
+    const keyInfo = new core.asn1.PublicKeyInfo();
     keyInfo.publicKeyAlgorithm.algorithm = "1.2.840.113549.1.1.1";
     keyInfo.publicKeyAlgorithm.parameters = null;
-    keyInfo.publicKey = AsnSerializer.serialize(publicKey);
+    keyInfo.publicKey = AsnConvert.serialize(publicKey);
 
-    return AsnSerializer.serialize(keyInfo);
+    return AsnConvert.serialize(keyInfo);
   }
 
   private static importJwkKey(data: JsonWebKey) {
-    let key: asn.RsaPrivateKey | asn.RsaPublicKey;
+    let key: core.asn1.RsaPrivateKey | core.asn1.RsaPublicKey;
     if (data.d) {
       // private
-      key = JsonParser.fromJSON(data, { targetSchema: asn.RsaPrivateKey });
+      key = JsonParser.fromJSON(data, { targetSchema: core.asn1.RsaPrivateKey });
     } else {
       // public
-      key = JsonParser.fromJSON(data, { targetSchema: asn.RsaPublicKey });
+      key = JsonParser.fromJSON(data, { targetSchema: core.asn1.RsaPublicKey });
     }
     return this.importAsmKey(key);
   }
@@ -180,11 +179,11 @@ export class RsaCrypto {
     }
   }
 
-  private static exportAsmKey(asmKey: AsmCryptoRsaKey): asn.RsaPrivateKey | asn.RsaPublicKey {
-    let key: asn.RsaPrivateKey | asn.RsaPublicKey;
+  private static exportAsmKey(asmKey: AsmCryptoRsaKey): core.asn1.RsaPrivateKey | core.asn1.RsaPublicKey {
+    let key: core.asn1.RsaPrivateKey | core.asn1.RsaPublicKey;
     if (asmKey.length > 2) {
       // private
-      const privateKey = new asn.RsaPrivateKey();
+      const privateKey = new core.asn1.RsaPrivateKey();
       privateKey.privateExponent = asmKey[2].buffer;
       privateKey.prime1 = asmKey[3].buffer;
       privateKey.prime2 = asmKey[4].buffer;
@@ -194,7 +193,7 @@ export class RsaCrypto {
       key = privateKey;
     } else {
       // public
-      key = new asn.RsaPublicKey();
+      key = new core.asn1.RsaPublicKey();
     }
     key.modulus = asmKey[0].buffer;
     key.publicExponent = asmKey[1][1] === 1
@@ -204,13 +203,13 @@ export class RsaCrypto {
     return key;
   }
 
-  private static importAsmKey(key: asn.RsaPrivateKey | asn.RsaPublicKey) {
+  private static importAsmKey(key: core.asn1.RsaPrivateKey | core.asn1.RsaPublicKey) {
     const expPadding = new Uint8Array(4 - key.publicExponent.byteLength);
     const asmKey: AsmCryptoRsaKey = [
       new Uint8Array(key.modulus),
       concat(expPadding, new Uint8Array(key.publicExponent)),
     ];
-    if (key instanceof asn.RsaPrivateKey) {
+    if (key instanceof core.asn1.RsaPrivateKey) {
       asmKey.push(new Uint8Array(key.privateExponent));
       asmKey.push(new Uint8Array(key.prime1));
       asmKey.push(new Uint8Array(key.prime2));

@@ -3,7 +3,11 @@ import { Crypto } from "../../crypto";
 import { EcCrypto } from "./crypto";
 import { EcCryptoKey } from "./key";
 
-function b2a(buffer: ArrayBuffer | ArrayBufferView) {
+/**
+ * Converts buffer to number array
+ * @param buffer ArrayBuffer or ArrayBufferView
+ */
+export function b2a(buffer: ArrayBuffer | ArrayBufferView) {
   const buf = new Uint8Array(buffer as ArrayBuffer);
   const res: number[] = [];
   // tslint:disable-next-line:prefer-for-of
