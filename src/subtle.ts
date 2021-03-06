@@ -14,6 +14,7 @@ import {
   Pbkdf2Provider,
   RsaEsProvider, RsaOaepProvider, RsaPssProvider, RsaSsaProvider,
   Sha1Provider, Sha256Provider, Sha512Provider,
+  EdDsaProvider, EcdhEsProvider,
 } from "./mechs";
 import { getOidByNamedCurve } from "./mechs/ec/helper";
 import { nativeSubtle } from "./native";
@@ -82,6 +83,15 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
     //#region HMAC
     this.providers.set(new HmacProvider());
+    //#endregion
+
+    //#region EdDSA
+    this.providers.set(new EdDsaProvider());
+    //#endregion
+
+    //#region ECDH-ES
+    // TODO Elliptic.js has got issue (https://github.com/indutny/elliptic/issues/243). Uncomment the next line after fix
+    // this.providers.set(new EcdhEsProvider());
     //#endregion
 
   }

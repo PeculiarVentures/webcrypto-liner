@@ -4,6 +4,7 @@ declare namespace EllipticJS {
     class EC {
         constructor();
         genKeyPair(): EllipticKeyPair;
+        keyFromPrivate(hexString: string, encoding: "hex" | "der"): EllipticKeyPair;
         keyFromPrivate(hexString: string | number[] | ArrayBuffer): EllipticKeyPair;
         keyFromPublic(hexString: string | number[] | ArrayBuffer, enc?: string): EllipticKeyPair;
     }
@@ -21,6 +22,7 @@ declare namespace EllipticJS {
     type EncodeFormat = "hex" | "der";
 
     class EllipticKeyPair {
+        getSecret(enc?: string): any;
         getPrivate(enc?: string): any;
         getPublic(enc: "der"): number[];
         getPublic(enc: "hex"): string;
@@ -29,6 +31,7 @@ declare namespace EllipticJS {
         priv?: any;
         pub?: Point;
         sign(data: number[]): any;
+        verify(data: number[], hexSignature: string): boolean;
         verify(data: number[], signature: object): boolean;
         derive(point: any): BN;
     }
