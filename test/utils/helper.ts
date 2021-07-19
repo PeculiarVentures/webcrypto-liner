@@ -166,20 +166,20 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
                 action.keyUsages,
               );
 
-              assert.equal(!!key, true);
+              assert.strictEqual(!!key, true);
               if (!key.privateKey) {
-                assert.equal(key.algorithm.name, action.algorithm.name, "Algorithm name MUST be equal to incoming algorithm and in the same case");
-                assert.equal(key.extractable, action.extractable);
-                assert.deepEqual([...key.usages].sort(), [...action.keyUsages].sort());
+                assert.strictEqual(key.algorithm.name, action.algorithm.name, "Algorithm name MUST be equal to incoming algorithm and in the same case");
+                assert.strictEqual(key.extractable, action.extractable);
+                assert.deepStrictEqual([...key.usages].sort(), [...action.keyUsages].sort());
 
               } else {
-                assert.equal(!!key.privateKey, true);
-                assert.equal(key.privateKey.algorithm.name, action.algorithm.name, "Algorithm name MUST be equal to incoming algorithm and in the same case");
-                assert.equal(key.privateKey.extractable, action.extractable);
+                assert.strictEqual(!!key.privateKey, true);
+                assert.strictEqual(key.privateKey.algorithm.name, action.algorithm.name, "Algorithm name MUST be equal to incoming algorithm and in the same case");
+                assert.strictEqual(key.privateKey.extractable, action.extractable);
 
-                assert.equal(!!key.publicKey, true);
-                assert.equal(key.publicKey.algorithm.name, action.algorithm.name, "Algorithm name MUST be equal to incoming algorithm and in the same case");
-                assert.equal(key.publicKey.extractable, true);
+                assert.strictEqual(!!key.publicKey, true);
+                assert.strictEqual(key.publicKey.algorithm.name, action.algorithm.name, "Algorithm name MUST be equal to incoming algorithm and in the same case");
+                assert.strictEqual(key.publicKey.extractable, true);
               }
             }, action, index);
           });
@@ -204,10 +204,10 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
               const enc = await crypto.subtle.encrypt(algorithm, encKey, action.data);
               // decrypt
               let dec = await crypto.subtle.decrypt(algorithm, decKey, enc);
-              assert.equal(Convert.ToHex(dec), Convert.ToHex(action.data));
+              assert.strictEqual(Convert.ToHex(dec), Convert.ToHex(action.data));
 
               dec = await crypto.subtle.decrypt(algorithm, decKey, action.encData);
-              assert.equal(Convert.ToHex(dec), Convert.ToHex(action.data));
+              assert.strictEqual(Convert.ToHex(dec), Convert.ToHex(action.data));
             }, action, index);
           });
         });
@@ -238,9 +238,9 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
               if (action.format === "jwk") {
                 exportedData.key_ops.sort();
                 (action.data as JsonWebKey).key_ops.sort();
-                assert.deepEqual(exportedData, action.data);
+                assert.deepStrictEqual(exportedData, action.data);
               } else {
-                assert.equal(Convert.ToHex(exportedData as ArrayBuffer), Convert.ToHex(action.data as ArrayBuffer));
+                assert.strictEqual(Convert.ToHex(exportedData as ArrayBuffer), Convert.ToHex(action.data as ArrayBuffer));
               }
             }, action, index);
           });
@@ -265,13 +265,13 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
               const signature = await crypto.subtle.sign(algorithm, signKey, action.data);
               // verify
               let ok = await crypto.subtle.verify(algorithm, verifyKey, signature, action.data);
-              assert.equal(true, ok, "Cannot verify signature from Action data");
+              assert.strictEqual(true, ok, "Cannot verify signature from Action data");
 
               ok = await crypto.subtle.verify(algorithm, verifyKey, action.signature, action.data);
               if (!ok) {
-                assert.equal(Convert.ToHex(signature), Convert.ToHex(action.signature));
+                assert.strictEqual(Convert.ToHex(signature), Convert.ToHex(action.signature));
               }
-              assert.equal(true, ok);
+              assert.strictEqual(true, ok);
             }, action, index);
           });
         });
@@ -291,7 +291,7 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
 
               // derive bits
               const derivedBits = await crypto.subtle.deriveBits(algorithm, keys.privateKey, action.length);
-              assert.equal(Convert.ToHex(derivedBits), Convert.ToHex(action.data));
+              assert.strictEqual(Convert.ToHex(derivedBits), Convert.ToHex(action.data));
             }, action, index);
           });
         });
@@ -313,9 +313,9 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
               const derivedKey = await crypto.subtle.deriveKey(algorithm, keys.privateKey, action.derivedKeyType, true, action.keyUsages);
               const keyData = await crypto.subtle.exportKey(action.format, derivedKey);
               if (action.format === "jwk") {
-                assert.deepEqual(keyData, action.keyData);
+                assert.deepStrictEqual(keyData, action.keyData);
               } else {
-                assert.equal(Convert.ToHex(keyData as ArrayBuffer), Convert.ToHex(action.keyData as ArrayBuffer));
+                assert.strictEqual(Convert.ToHex(keyData as ArrayBuffer), Convert.ToHex(action.keyData as ArrayBuffer));
               }
             }, action, index);
           });
@@ -329,7 +329,7 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
           param.actions.digest!.forEach((action, index) => {
             wrapTest(async () => {
               const hash = await crypto.subtle.digest(action.algorithm, action.data);
-              assert.equal(Convert.ToHex(hash), Convert.ToHex(action.hash));
+              assert.strictEqual(Convert.ToHex(hash), Convert.ToHex(action.hash));
             }, action, index);
           });
         });
@@ -347,7 +347,7 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
               const wrappedKey = await crypto.subtle.wrapKey(action.wKey.format, wKey, key.publicKey, action.algorithm);
 
               if (action.wrappedKey) {
-                assert.equal(Convert.ToHex(wrappedKey), Convert.ToHex(action.wrappedKey));
+                assert.strictEqual(Convert.ToHex(wrappedKey), Convert.ToHex(action.wrappedKey));
               }
 
               const unwrappedKey = await crypto.subtle.unwrapKey(
@@ -359,7 +359,7 @@ export function testCrypto(crypto: Crypto, params: ITestParams[]) {
                 action.wKey.extractable,
                 action.wKey.keyUsages);
 
-              assert.deepEqual(unwrappedKey.algorithm, wKey.algorithm);
+              assert.deepStrictEqual(unwrappedKey.algorithm, wKey.algorithm);
             }, action, index);
           });
         });
