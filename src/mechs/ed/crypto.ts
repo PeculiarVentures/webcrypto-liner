@@ -1,6 +1,7 @@
 import { AsnConvert, OctetString } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as elliptic from "elliptic";
+import * as stable from "@stablelib/x25519";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";
@@ -41,7 +42,7 @@ export class EdCrypto {
       const raw = nativeCrypto.getRandomValues(new Uint8Array(32));
       const eddsa = new elliptic.eddsa(curve);
       edKey = eddsa.keyFromSecret(raw);
-    } else {
+    } else if (curve === "curve25519") {
       edKey = elliptic.ec(curve).genKeyPair();
       edKey.getPublic(); // Fills internal `pub` field
     }

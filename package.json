@@ -33,6 +33,7 @@
   "dependencies": {
     "@peculiar/asn1-schema": "^2.0.27",
     "@peculiar/json-schema": "^1.1.12",
+    "@stablelib/x25519": "^1.0.1",
     "asmcrypto.js": "^2.3.2",
     "asn1js": "^2.0.26",
     "core-js": "^3.8.3",
