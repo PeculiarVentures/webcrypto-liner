@@ -103,8 +103,7 @@ export class EdCrypto {
 
   public static async exportKey(format: KeyFormat, key: EdPrivateKey | EdPublicKey): Promise<JsonWebKey | ArrayBuffer> {
     this.checkLib();
-    //TODO x25519
-
+    
     switch (format.toLowerCase()) {
       case "jwk":
         return JsonSerializer.toJSON(key);

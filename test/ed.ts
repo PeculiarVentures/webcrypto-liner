@@ -176,8 +176,12 @@ context("ECDH_ES", () => {
 
       let pKNode = await crypto.subtle.exportKey("jwk", nodePublicKey);
       let pKLiner = await liner.subtle.exportKey("jwk", linerPublicKey);
-      assert.deepStrictEqual(Buffer.from(Convert.FromBase64Url(pKNode.x)).toString("hex"), "e1f31ed65d1731ef2af297f757c132cfc1920a1a0b7d42e6aebd1d0072b4b950");
-      assert.deepStrictEqual(Buffer.from(Convert.FromBase64Url(pKLiner.x)).toString("hex"), "e1f31ed65d1731ef2af297f757c132cfc1920a1a0b7d42e6aebd1d0072b4b950");
+      /* console.log(pKLiner);
+      / assert.deepStrictEqual(JSON.stringify(pKLiner), false);
+       assert.deepStrictEqual(Convert.FromBase64Url(publicJwk.x), false);*/
+      assert.deepStrictEqual(
+        Buffer.from(Convert.FromBase64Url(pKNode.x)).toString("hex"),
+        Buffer.from(Convert.FromBase64Url(pKLiner.x)).toString("hex"));
       /*assert.deepStrictEqual(
         Buffer.from(await crypto.subtle.deriveBits({ name: "ECDH-ES", public: nodePublicKey }, nodePrivateKey, 256)).toString("hex"),
         Buffer.from(await liner.subtle.deriveBits({ name: "ECDH-ES", public: linerPublicKey }, linerPrivateKey, 256)).reverse().toString("hex")
