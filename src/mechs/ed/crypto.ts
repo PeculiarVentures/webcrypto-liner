@@ -1,7 +1,7 @@
 import { AsnConvert, OctetString } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as elliptic from "elliptic";
-import { sharedKey, generateKeyPair } from 'curve25519-js';
+import { sharedKey } from 'curve25519-js';
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";
@@ -16,7 +16,7 @@ export class EdCrypto {
   public static privateKeyUsages = ["sign", "deriveKey", "deriveBits"];
 
   public static checkLib() {
-    if (typeof (elliptic) === "undefined") {
+    if (typeof (elliptic) === "undefined" || typeof (sharedKey) === "undefined") {
       throw new core.OperationError("Cannot implement EC mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
     }
   }

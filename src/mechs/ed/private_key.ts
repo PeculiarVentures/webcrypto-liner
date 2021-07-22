@@ -40,9 +40,6 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
       const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
       this.data = eddsa.keyFromSecret(hexPrivateKey);
     } else {
-      //TODO x25519
-      // const ecdhEs = elliptic.ec(json.crv.replace(/^x/i, "curve"));
-      // this.data = ecdhEs.keyFromPrivate(hexPrivateKey, "hex");
       const keys = generateKeyPair(new Uint8Array(Convert.FromBase64Url(json.d)));
       const pubBigNum: EllipticJS.BN = {
         toBytes: () => { return keys.public },
