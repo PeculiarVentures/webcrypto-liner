@@ -86,24 +86,19 @@ export class EdCrypto {
 
   public static async deriveBits(algorithm: EcdhKeyDeriveParams, baseKey: EdPrivateKey, length: number): Promise<ArrayBuffer> {
     this.checkLib();
+    const publicArray = Convert.FromBase64Url((await crypto.subtle.exportKey("jwk", algorithm.public)).x);
+    const privateArray = Convert.FromBase64Url(((baseKey.toJSON()).d));
 
-    const publicKeyHex = (await crypto.subtle.exportKey("jwk", algorithm.public)).x;
-    const privateKeyHex = (baseKey.toJSON()).d;
+    const publicUint8 = new Uint8Array(publicArray);
+    const privateUint8 = new Uint8Array(privateArray);
 
-    const cU8 = (h) => {
-      let nBuf: Buffer = Buffer.alloc(32);
-      let hex: ArrayBuffer = Convert.FromBase64Url(h);
-      let hexString: string = Buffer.from(hex, 0).toString("hex");
-      nBuf.write(hexString, 0);
-      return nBuf;
-    }
-    const buf = sharedKey(cU8(privateKeyHex), cU8(publicKeyHex));
+    const buf = sharedKey(privateUint8, publicUint8);
     return buf;
   }
 
   public static async exportKey(format: KeyFormat, key: EdPrivateKey | EdPublicKey): Promise<JsonWebKey | ArrayBuffer> {
     this.checkLib();
-    
+
     switch (format.toLowerCase()) {
       case "jwk":
         return JsonSerializer.toJSON(key);

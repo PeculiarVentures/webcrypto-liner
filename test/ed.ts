@@ -182,10 +182,10 @@ context("ECDH_ES", () => {
       assert.deepStrictEqual(
         Buffer.from(Convert.FromBase64Url(pKNode.x)).toString("hex"),
         Buffer.from(Convert.FromBase64Url(pKLiner.x)).toString("hex"));
-      /*assert.deepStrictEqual(
+      assert.deepStrictEqual(
         Buffer.from(await crypto.subtle.deriveBits({ name: "ECDH-ES", public: nodePublicKey }, nodePrivateKey, 256)).toString("hex"),
-        Buffer.from(await liner.subtle.deriveBits({ name: "ECDH-ES", public: linerPublicKey }, linerPrivateKey, 256)).reverse().toString("hex")
-      )*/
+        Buffer.from(await liner.subtle.deriveBits({ name: "ECDH-ES", public: linerPublicKey }, linerPrivateKey, 256)).toString("hex")
+      )
     });
   });
 

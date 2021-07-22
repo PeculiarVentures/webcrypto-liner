@@ -59,9 +59,18 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
         toArray: () => { return [] }
       };
 
+      const pF = (enc: any) => {
+        if (enc === "hex") {
+          return Convert.ToHex(keys.private);
+        } else if (enc === "der") {
+          return Uint8Array.from(keys.private);
+        } else {
+          return keys.private;
+        }
+      };
       this.data = {
-        getSecret: () => { return keys.private },
-        getPrivate: () => { return keys.private },
+        getSecret: pF,
+        getPrivate: pF,
         getPublic: (enc?: "hex" | "der"): number[] | string | Point => {
           if (enc === "hex") {
             return Convert.ToHex(keys.public);
