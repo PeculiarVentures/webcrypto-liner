@@ -87,7 +87,7 @@ context("ECDH_ES", () => {
   context("generate/export/import/sign/verify", () => {
     const alg = { name: "ECDH-ES", namedCurve: "x25519" };
     const data = Buffer.from("Some message to sign");
-    /*
+    /* */
     it("pkcs8/spki", async () => {
       const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
       const pkcs8 = await liner.subtle.exportKey("pkcs8", linerKeys.privateKey);
@@ -147,7 +147,7 @@ context("ECDH_ES", () => {
         await liner.subtle.exportKey("raw", linerPublicKey)
       );
     });
-    */
+   
     it("deriveBits", async () => {
       const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
       const privateJwk = await liner.subtle.exportKey("jwk", linerKeys.privateKey);
