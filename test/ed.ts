@@ -5,7 +5,7 @@ import { Crypto } from "../src";
 
 const crypto = new NodeCrypto();
 const liner = new Crypto();
-/*
+
 context("ED", () => {
 
   context("generate/export/import/sign/verify", () => {
@@ -81,72 +81,72 @@ context("ED", () => {
 
 });
 
-*/
+
 context("ECDH_ES", () => {
 
   context("generate/export/import/sign/verify", () => {
     const alg = { name: "ECDH-ES", namedCurve: "x25519" };
     const data = Buffer.from("Some message to sign");
     /*
-        it("pkcs8/spki", async () => {
-          const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
-          const pkcs8 = await liner.subtle.exportKey("pkcs8", linerKeys.privateKey);
-          const spki = await liner.subtle.exportKey("spki", linerKeys.publicKey);
-    
-          const nodePrivateKey = await crypto.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
-          const nodePublicKey = await crypto.subtle.importKey("spki", spki, alg, true, ["deriveKey"]);
-          const linerPrivateKey = await liner.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
-          const linerPublicKey = await liner.subtle.importKey("spki", spki, alg, true, ["deriveKey"]);
-    
-          assert.deepStrictEqual(
-            await crypto.subtle.exportKey("pkcs8", nodePrivateKey),
-            await liner.subtle.exportKey("pkcs8", linerPrivateKey)
-          );
-          assert.deepStrictEqual(
-            await crypto.subtle.exportKey("spki", nodePublicKey),
-            await liner.subtle.exportKey("spki", linerPublicKey)
-          );
-    
-        });
-    
-        it("jwk", async () => {
-          const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
-          const privateJwk = await liner.subtle.exportKey("jwk", linerKeys.privateKey);
-          const publicJwk = await liner.subtle.exportKey("jwk", linerKeys.publicKey);
-    
-          const nodePrivateKey = await crypto.subtle.importKey("jwk", privateJwk, alg, true, ["deriveBits"]);
-          const nodePublicKey = await crypto.subtle.importKey("jwk", publicJwk, alg, true, ["deriveKey"]);
-          const linerPrivateKey = await liner.subtle.importKey("jwk", privateJwk, alg, true, ["deriveBits"]);
-          const linerPublicKey = await liner.subtle.importKey("jwk", publicJwk, alg, true, ["deriveKey"]);
-          assert.deepStrictEqual(
-            await crypto.subtle.exportKey("jwk", nodePrivateKey),
-            await liner.subtle.exportKey("jwk", linerPrivateKey)
-          );
-          assert.deepStrictEqual(
-            await crypto.subtle.exportKey("jwk", nodePublicKey),
-            await liner.subtle.exportKey("jwk", linerPublicKey)
-          );
-    
-        });
-    
-        it("pkcs8/raw", async () => {
-          const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
-          const pkcs8 = await liner.subtle.exportKey("pkcs8", linerKeys.privateKey);
-          const raw = await liner.subtle.exportKey("raw", linerKeys.publicKey);
-    
-          const nodePrivateKey = await crypto.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
-          const nodePublicKey = await crypto.subtle.importKey("raw", raw, alg, true, ["deriveKey"]);
-          const linerPrivateKey = await liner.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
-          const linerPublicKey = await liner.subtle.importKey("raw", raw, alg, true, ["deriveKey"]);
-          assert.deepStrictEqual(
-            await crypto.subtle.exportKey("pkcs8", nodePrivateKey),
-            await liner.subtle.exportKey("pkcs8", linerPrivateKey)
-          );
-          assert.deepStrictEqual(
-            await crypto.subtle.exportKey("raw", nodePublicKey),
-            await liner.subtle.exportKey("raw", linerPublicKey)
-          );
-        });
+    it("pkcs8/spki", async () => {
+      const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
+      const pkcs8 = await liner.subtle.exportKey("pkcs8", linerKeys.privateKey);
+      const spki = await liner.subtle.exportKey("spki", linerKeys.publicKey);
+
+      const nodePrivateKey = await crypto.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
+      const nodePublicKey = await crypto.subtle.importKey("spki", spki, alg, true, ["deriveKey"]);
+      const linerPrivateKey = await liner.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
+      const linerPublicKey = await liner.subtle.importKey("spki", spki, alg, true, ["deriveKey"]);
+
+      assert.deepStrictEqual(
+        await crypto.subtle.exportKey("pkcs8", nodePrivateKey),
+        await liner.subtle.exportKey("pkcs8", linerPrivateKey)
+      );
+      assert.deepStrictEqual(
+        await crypto.subtle.exportKey("spki", nodePublicKey),
+        await liner.subtle.exportKey("spki", linerPublicKey)
+      );
+
+    });
+
+    it("jwk", async () => {
+      const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
+      const privateJwk = await liner.subtle.exportKey("jwk", linerKeys.privateKey);
+      const publicJwk = await liner.subtle.exportKey("jwk", linerKeys.publicKey);
+
+      const nodePrivateKey = await crypto.subtle.importKey("jwk", privateJwk, alg, true, ["deriveBits"]);
+      const nodePublicKey = await crypto.subtle.importKey("jwk", publicJwk, alg, true, ["deriveKey"]);
+      const linerPrivateKey = await liner.subtle.importKey("jwk", privateJwk, alg, true, ["deriveBits"]);
+      const linerPublicKey = await liner.subtle.importKey("jwk", publicJwk, alg, true, ["deriveKey"]);
+      assert.deepStrictEqual(
+        await crypto.subtle.exportKey("jwk", nodePrivateKey),
+        await liner.subtle.exportKey("jwk", linerPrivateKey)
+      );
+      assert.deepStrictEqual(
+        await crypto.subtle.exportKey("jwk", nodePublicKey),
+        await liner.subtle.exportKey("jwk", linerPublicKey)
+      );
+
+    });
+
+    it("pkcs8/raw", async () => {
+      const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
+      const pkcs8 = await liner.subtle.exportKey("pkcs8", linerKeys.privateKey);
+      const raw = await liner.subtle.exportKey("raw", linerKeys.publicKey);
+
+      const nodePrivateKey = await crypto.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
+      const nodePublicKey = await crypto.subtle.importKey("raw", raw, alg, true, ["deriveKey"]);
+      const linerPrivateKey = await liner.subtle.importKey("pkcs8", pkcs8, alg, true, ["deriveBits"]);
+      const linerPublicKey = await liner.subtle.importKey("raw", raw, alg, true, ["deriveKey"]);
+      assert.deepStrictEqual(
+        await crypto.subtle.exportKey("pkcs8", nodePrivateKey),
+        await liner.subtle.exportKey("pkcs8", linerPrivateKey)
+      );
+      assert.deepStrictEqual(
+        await crypto.subtle.exportKey("raw", nodePublicKey),
+        await liner.subtle.exportKey("raw", linerPublicKey)
+      );
+    });
     */
     it("deriveBits", async () => {
       const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);

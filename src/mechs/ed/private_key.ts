@@ -2,10 +2,8 @@ import { IJsonConvertible } from "@peculiar/json-schema";
 import * as core from "webcrypto-core";
 import { CryptoKey } from "../../key";
 import * as elliptic from "elliptic";
-import { sharedKey, generateKeyPair } from 'curve25519-js';
-import BN from "bn.js";
+import { generateKeyPair } from 'curve25519-js';
 import { Convert } from "pvtsutils";
-import { Any } from "asn1js";
 
 export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
   public algorithm!: EcKeyAlgorithm;
