@@ -9,6 +9,7 @@ import { b2a } from "../ec";
 import { getOidByNamedCurve } from "./helper";
 import { EdPrivateKey } from "./private_key";
 import { EdPublicKey } from "./public_key";
+import { generateEllipticKeys } from "./helper";
 
 export class EdCrypto {
 
@@ -38,13 +39,12 @@ export class EdCrypto {
 
     const curve = algorithm.namedCurve.toLowerCase() === "x25519" ? "curve25519" : "ed25519"; // "x25519" | "ed25519"
     let edKey: EllipticJS.EllipticKeyPair;
+    const raw = nativeCrypto.getRandomValues(new Uint8Array(32));
     if (curve === "ed25519") {
-      const raw = nativeCrypto.getRandomValues(new Uint8Array(32));
       const eddsa = new elliptic.eddsa(curve);
       edKey = eddsa.keyFromSecret(raw);
     } else if (curve === "curve25519") {
-      edKey = elliptic.ec(curve).genKeyPair();
-      edKey.getPublic(); // Fills internal `pub` field
+      edKey = generateEllipticKeys(raw);
     }
 
     // set key params
