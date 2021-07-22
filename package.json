@@ -37,6 +37,7 @@
     "asmcrypto.js": "^2.3.2",
     "asn1js": "^2.0.26",
     "core-js": "^3.8.3",
+    "curve25519-js": "^0.0.4",
     "des.js": "^1.0.1",
     "elliptic": "^6.5.4",
     "pvtsutils": "^1.1.2",

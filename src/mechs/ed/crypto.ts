@@ -1,7 +1,7 @@
 import { AsnConvert, OctetString } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as elliptic from "elliptic";
-import * as stable from "@stablelib/x25519";
+import { sharedKey, generateKeyPair } from 'curve25519-js';
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";
@@ -87,21 +87,23 @@ export class EdCrypto {
   public static async deriveBits(algorithm: EcdhKeyDeriveParams, baseKey: EdPrivateKey, length: number): Promise<ArrayBuffer> {
     this.checkLib();
 
-    const shared = baseKey.data.derive((algorithm.public as EdPublicKey).data.getPublic());
-    let array = new Uint8Array(shared.toArray());
+    const publicKeyHex = (await crypto.subtle.exportKey("jwk", algorithm.public)).x;
+    const privateKeyHex = (baseKey.toJSON()).d;
 
-    // Padding
-    let len = array.length;
-    len = (len > 32 ? (len > 48 ? 66 : 48) : 32);
-    if (array.length < len) {
-      array = EdCrypto.concat(new Uint8Array(len - array.length), array);
+    const cU8 = (h) => {
+      let nBuf: Buffer = Buffer.alloc(32);
+      let hex: ArrayBuffer = Convert.FromBase64Url(h);
+      let hexString: string = Buffer.from(hex, 0).toString("hex");
+      nBuf.write(hexString, 0);
+      return nBuf;
     }
-    const buf = array.slice(0, length / 8).buffer;
+    const buf = sharedKey(cU8(privateKeyHex), cU8(publicKeyHex));
     return buf;
   }
 
   public static async exportKey(format: KeyFormat, key: EdPrivateKey | EdPublicKey): Promise<JsonWebKey | ArrayBuffer> {
     this.checkLib();
+    //TODO x25519
 
     switch (format.toLowerCase()) {
       case "jwk":
