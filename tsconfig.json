@@ -6,7 +6,8 @@
         "outDir": "build",
         "importHelpers": true,
         "removeComments": true,
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "esModuleInterop": true, 
     },
     "exclude": [
         "index.d.ts"
