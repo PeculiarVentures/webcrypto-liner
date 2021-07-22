@@ -3,6 +3,7 @@ import * as elliptic from "elliptic";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { CryptoKey } from "../../key";
+import { generateEllipticKeys } from "./helper";
 
 export class EdPublicKey extends CryptoKey implements IJsonConvertible {
 
@@ -38,43 +39,8 @@ export class EdPublicKey extends CryptoKey implements IJsonConvertible {
       const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
       this.data = eddsa.keyFromPublic(hexPublicKey, "hex");
     } else {
-      const keys = { public: new Uint8Array(Convert.FromBase64Url(json.x)), private: null };
-      const pubBigNum: EllipticJS.BN = {
-        toBytes: () => { return keys.public },
-        toArray: () => { return Array.from(keys.public) }
-      }
-      pubBigNum.toBytes = function () {
-        return keys.public
-      };
 
-      type Point = any;
-
-      const blankBN = {
-        toBytes: () => { return new Uint8Array() },
-        toArray: () => { return [] }
-      };
-
-      this.data = {
-        getSecret: () => { return keys.private },
-        getPrivate: () => { return keys.private },
-        getPublic: (enc?: "hex" | "der"): number[] | string | Point => {
-          if (enc === "hex") {
-            return Convert.ToHex(keys.public);
-          } else if (enc === "der") {
-            return Uint8Array.from(keys.public);
-          } else {
-            return keys.public;
-          }
-        },
-        priv: keys.private,
-        pub: {
-          x: pubBigNum, y: blankBN
-        },
-        sign: (data: number[]) => { return false },
-        verify: (data: number[], signature: string | object): boolean => { return false },
-        derive: (point: any) => { return blankBN }
-
-      };
+      this.data = generateEllipticKeys(null, { public: new Uint8Array(Convert.FromBase64Url(json.x)), private: null });
     }
 
     return this;

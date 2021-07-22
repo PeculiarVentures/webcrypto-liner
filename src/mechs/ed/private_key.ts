@@ -4,6 +4,7 @@ import { CryptoKey } from "../../key";
 import * as elliptic from "elliptic";
 import { generateKeyPair } from 'curve25519-js';
 import { Convert } from "pvtsutils";
+import { generateEllipticKeys } from "./helper";
 
 export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
   public algorithm!: EcKeyAlgorithm;
@@ -38,52 +39,7 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
       const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
       this.data = eddsa.keyFromSecret(hexPrivateKey);
     } else {
-      const keys = generateKeyPair(new Uint8Array(Convert.FromBase64Url(json.d)));
-      const pubBigNum: EllipticJS.BN = {
-        toBytes: () => { return keys.public },
-        toArray: () => { return Array.from(keys.public) }
-      }
-      pubBigNum.toBytes = function () {
-        return keys.public
-      };
-
-      type Point = any;
-
-      const blankBN = {
-        toBytes: () => { return new Uint8Array() },
-        toArray: () => { return [] }
-      };
-
-      const pF = (enc: any) => {
-        if (enc === "hex") {
-          return Convert.ToHex(keys.private);
-        } else if (enc === "der") {
-          return Uint8Array.from(keys.private);
-        } else {
-          return keys.private;
-        }
-      };
-      this.data = {
-        getSecret: pF,
-        getPrivate: pF,
-        getPublic: (enc?: "hex" | "der"): number[] | string | Point => {
-          if (enc === "hex") {
-            return Convert.ToHex(keys.public);
-          } else if (enc === "der") {
-            return Uint8Array.from(keys.public);
-          } else {
-            return keys.public;
-          }
-        },
-        priv: keys.private,
-        pub: {
-          x: pubBigNum, y: blankBN
-        },
-        sign: (data: number[]) => { return false },
-        verify: (data: number[], signature: string | object): boolean => { return false },
-        derive: (point: any) => { return blankBN }
-
-      };
+      this.data = generateEllipticKeys(new Uint8Array(Convert.FromBase64Url(json.d)));
     }
 
     return this;

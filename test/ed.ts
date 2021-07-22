@@ -150,24 +150,8 @@ context("ECDH_ES", () => {
     */
     it("deriveBits", async () => {
       const linerKeys = await liner.subtle.generateKey(alg, true, ["deriveBits", "deriveKey"]);
-
-      const privateJwk = {
-        kty: "OKP",
-        crv: "X25519",
-        key_ops: ["deriveBits"],
-        ext: true,
-        d: "YP_Dbf6rotbZd-2gBwSIdr_MM8ZKiAG33CPvOHo97WI"
-        // d(hex): 60ffc36dfeaba2d6d977eda007048876bfcc33c64a8801b7dc23ef387a3ded62
-      };
-
-      const publicJwk = {
-        kty: "OKP",
-        crv: "X25519",
-        key_ops: [],
-        ext: true,
-        x: "4fMe1l0XMe8q8pf3V8Eyz8GSChoLfULmrr0dAHK0uVA"
-        // x(hex): e1f31ed65d1731ef2af297f757c132cfc1920a1a0b7d42e6aebd1d0072b4b950
-      };
+      const privateJwk = await liner.subtle.exportKey("jwk", linerKeys.privateKey);
+      const publicJwk = await liner.subtle.exportKey("jwk", linerKeys.publicKey);
 
       const nodePrivateKey = await crypto.subtle.importKey("jwk", privateJwk, alg, true, ["deriveBits"]);
       const nodePublicKey = await crypto.subtle.importKey("jwk", publicJwk, alg, true, ["deriveKey"]);
@@ -176,16 +160,16 @@ context("ECDH_ES", () => {
 
       let pKNode = await crypto.subtle.exportKey("jwk", nodePublicKey);
       let pKLiner = await liner.subtle.exportKey("jwk", linerPublicKey);
-      /* console.log(pKLiner);
-      / assert.deepStrictEqual(JSON.stringify(pKLiner), false);
-       assert.deepStrictEqual(Convert.FromBase64Url(publicJwk.x), false);*/
+
       assert.deepStrictEqual(
         Buffer.from(Convert.FromBase64Url(pKNode.x)).toString("hex"),
         Buffer.from(Convert.FromBase64Url(pKLiner.x)).toString("hex"));
+
       assert.deepStrictEqual(
         Buffer.from(await crypto.subtle.deriveBits({ name: "ECDH-ES", public: nodePublicKey }, nodePrivateKey, 256)).toString("hex"),
         Buffer.from(await liner.subtle.deriveBits({ name: "ECDH-ES", public: linerPublicKey }, linerPrivateKey, 256)).toString("hex")
-      )
+      );
+
     });
   });
 
