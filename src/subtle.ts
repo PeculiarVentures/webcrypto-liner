@@ -91,7 +91,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
     //#region ECDH-ES
     // TODO Elliptic.js has got issue (https://github.com/indutny/elliptic/issues/243). Uncomment the next line after fix
-    // this.providers.set(new EcdhEsProvider());
+    this.providers.set(new EcdhEsProvider());
     //#endregion
 
   }

@@ -1,10 +1,9 @@
-import { AsnConvert } from "@peculiar/asn1-schema";
 import { IJsonConvertible } from "@peculiar/json-schema";
 import * as elliptic from "elliptic";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { CryptoKey } from "../../key";
-import { getOidByNamedCurve } from "./helper";
+import { generateEllipticKeys } from "./helper";
 
 export class EdPublicKey extends CryptoKey implements IJsonConvertible {
 
@@ -40,8 +39,8 @@ export class EdPublicKey extends CryptoKey implements IJsonConvertible {
       const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
       this.data = eddsa.keyFromPublic(hexPublicKey, "hex");
     } else {
-      const ecdhEs = elliptic.ec(json.crv.replace(/^x/i, "curve"));
-      this.data = ecdhEs.keyFromPublic(hexPublicKey, "hex");
+
+      this.data = generateEllipticKeys(null, { public: new Uint8Array(Convert.FromBase64Url(json.x)), private: null });
     }
 
     return this;

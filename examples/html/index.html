@@ -6,6 +6,8 @@
     <title>WebCrypto Liner</title>
     <script src="../../node_modules/@babel/polyfill/dist/polyfill.min.js"></script>
     <script src="../../build/webcrypto-liner.shim.js"></script>
+    <script src="./src/main.js"></script>
+
 </head>
 
 <body>
@@ -13,19 +15,19 @@
     <div>
         <h4>Signing</h4>
         <textarea id="text" cols="10" rows="10" style="width: 100%">Some text</textarea>
-        <br/>
-        <input type="button" value="Sign" onclick="sign()"/>
+        <br />
+        <input type="button" value="Sign" onclick="sign()" />
         <div id="result"></div>
     </div>
     <div>
         <h4>Verifying</h4>
-        <label for="jwk">JWK key:</label><br/>
+        <label for="jwk">JWK key:</label><br />
         <textarea id="jwk" cols="10" rows="3" style="width: 100%"></textarea>
-        <label for="signed_text">Signed text:</label><br/>
+        <label for="signed_text">Signed text:</label><br />
         <textarea id="signed_text" cols="10" rows="10" style="width: 100%">Some text</textarea>
-        <label for="signature">Signature:</label><br/>
+        <label for="signature">Signature:</label><br />
         <textarea id="signature" cols="10" rows="1" style="width: 100%"></textarea>
-        <input type="button" value="Verify" onclick="verify()"/>
+        <input type="button" value="Verify" onclick="verify()" />
         <div id="verify_result"></div>
     </div>
 </body>

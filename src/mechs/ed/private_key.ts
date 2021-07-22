@@ -2,7 +2,9 @@ import { IJsonConvertible } from "@peculiar/json-schema";
 import * as core from "webcrypto-core";
 import { CryptoKey } from "../../key";
 import * as elliptic from "elliptic";
+import { generateKeyPair } from 'curve25519-js';
 import { Convert } from "pvtsutils";
+import { generateEllipticKeys } from "./helper";
 
 export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
   public algorithm!: EcKeyAlgorithm;
@@ -37,8 +39,7 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
       const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
       this.data = eddsa.keyFromSecret(hexPrivateKey);
     } else {
-      const ecdhEs = elliptic.ec(json.crv.replace(/^x/i, "curve"));
-      this.data = ecdhEs.keyFromPrivate(hexPrivateKey, "hex");
+      this.data = generateEllipticKeys(new Uint8Array(Convert.FromBase64Url(json.d)));
     }
 
     return this;

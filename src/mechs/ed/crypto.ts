@@ -1,6 +1,7 @@
 import { AsnConvert, OctetString } from "@peculiar/asn1-schema";
 import { JsonParser, JsonSerializer } from "@peculiar/json-schema";
 import * as elliptic from "elliptic";
+import { sharedKey } from 'curve25519-js';
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { nativeCrypto } from "../../native";
@@ -8,6 +9,7 @@ import { b2a } from "../ec";
 import { getOidByNamedCurve } from "./helper";
 import { EdPrivateKey } from "./private_key";
 import { EdPublicKey } from "./public_key";
+import { generateEllipticKeys } from "./helper";
 
 export class EdCrypto {
 
@@ -15,7 +17,7 @@ export class EdCrypto {
   public static privateKeyUsages = ["sign", "deriveKey", "deriveBits"];
 
   public static checkLib() {
-    if (typeof (elliptic) === "undefined") {
+    if (typeof (elliptic) === "undefined" || typeof (sharedKey) === "undefined") {
       throw new core.OperationError("Cannot implement EC mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
     }
   }
@@ -37,13 +39,12 @@ export class EdCrypto {
 
     const curve = algorithm.namedCurve.toLowerCase() === "x25519" ? "curve25519" : "ed25519"; // "x25519" | "ed25519"
     let edKey: EllipticJS.EllipticKeyPair;
+    const raw = nativeCrypto.getRandomValues(new Uint8Array(32));
     if (curve === "ed25519") {
-      const raw = nativeCrypto.getRandomValues(new Uint8Array(32));
       const eddsa = new elliptic.eddsa(curve);
       edKey = eddsa.keyFromSecret(raw);
-    } else {
-      edKey = elliptic.ec(curve).genKeyPair();
-      edKey.getPublic(); // Fills internal `pub` field
+    } else if (curve === "curve25519") {
+      edKey = generateEllipticKeys(raw);
     }
 
     // set key params
@@ -85,17 +86,13 @@ export class EdCrypto {
 
   public static async deriveBits(algorithm: EcdhKeyDeriveParams, baseKey: EdPrivateKey, length: number): Promise<ArrayBuffer> {
     this.checkLib();
+    const publicArray = Convert.FromBase64Url((await crypto.subtle.exportKey("jwk", algorithm.public)).x);
+    const privateArray = Convert.FromBase64Url(((baseKey.toJSON()).d));
 
-    const shared = baseKey.data.derive((algorithm.public as EdPublicKey).data.getPublic());
-    let array = new Uint8Array(shared.toArray());
+    const publicUint8 = new Uint8Array(publicArray);
+    const privateUint8 = new Uint8Array(privateArray);
 
-    // Padding
-    let len = array.length;
-    len = (len > 32 ? (len > 48 ? 66 : 48) : 32);
-    if (array.length < len) {
-      array = EdCrypto.concat(new Uint8Array(len - array.length), array);
-    }
-    const buf = array.slice(0, length / 8).buffer;
+    const buf = sharedKey(privateUint8, publicUint8);
     return buf;
   }
 
