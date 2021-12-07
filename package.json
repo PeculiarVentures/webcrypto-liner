@@ -9,6 +9,12 @@
   "browser:es5": "build/webcrypto-liner.shim.js",
   "browser:es5:min": "build/webcrypto-liner.shim.min.js",
   "types": "index.d.ts",
+  "files": [
+    "build",
+    "LICENSE",
+    "README.md",
+    "index.d.ts"
+  ],
   "scripts": {
     "test": "mocha",
     "prepare": "npm run build",
