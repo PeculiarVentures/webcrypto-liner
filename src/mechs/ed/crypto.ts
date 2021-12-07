@@ -159,7 +159,7 @@ export class EdCrypto {
           return this.importPrivateKey(asnKey, algorithm, extractable, keyUsages);
         } else {
           if (!jwk.x) {
-            throw new TypeError("keyData: Cannot get required 'x' filed");
+            throw new TypeError("keyData: Cannot get required 'x' field");
           }
           return this.importPublicKey(Convert.FromBase64Url(jwk.x), algorithm, extractable, keyUsages);
         }
