@@ -32,10 +32,11 @@ export class EdCrypto {
     return res;
   }
 
-  public static async generateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
+  public static async generateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
     this.checkLib();
 
-    const curve = algorithm.namedCurve.toLowerCase() === "x25519" ? "curve25519" : "ed25519"; // "x25519" | "ed25519"
+    // const curve = algorithm.namedCurve.toLowerCase() === "x25519" ? "curve25519" : "ed25519"; // "x25519" | "ed25519"
+    const curve = "ed25519";
     let edKey: EllipticJS.EllipticKeyPair;
     if (curve === "ed25519") {
       const raw = nativeCrypto.getRandomValues(new Uint8Array(32));
@@ -86,7 +87,22 @@ export class EdCrypto {
   public static async deriveBits(algorithm: EcdhKeyDeriveParams, baseKey: EdPrivateKey, length: number): Promise<ArrayBuffer> {
     this.checkLib();
 
-    const shared = baseKey.data.derive((algorithm.public as EdPublicKey).data.getPublic());
+    const key = new Uint8Array(Convert.FromHex(baseKey.data.getSecret("hex")));
+    // key[0] &= 248;
+    // key[31] &= 127;
+    // key[31] |= 64;
+    // key.reverse();
+
+    // @ts-ignore
+    const ecdh = new elliptic.ec("curve25519");
+    const privateKey = ecdh.keyFromPrivate(Convert.ToHex(key), "hex");
+
+    const publicHex = (algorithm.public as EdPublicKey).data.getPublic("hex") as string;
+    const publicView = new Uint8Array(Convert.FromHex(publicHex));
+    // publicView.reverse();
+    // const publicKey = ecdh.keyFromPublic(Convert.ToHex(publicView), "hex").getPublic();
+    const publicKey = (algorithm.public as EdPublicKey).data.getPublic();
+    const shared = privateKey.derive(publicKey);
     let array = new Uint8Array(shared.toArray());
 
     // Padding
@@ -106,9 +122,10 @@ export class EdCrypto {
       case "jwk":
         return JsonSerializer.toJSON(key);
       case "pkcs8": {
-        const raw = Convert.FromHex(/^x/i.test(key.algorithm.namedCurve)
-          ? key.data.getPrivate("hex")
-          : key.data.getSecret("hex"));
+        // const raw = Convert.FromHex(/^x/i.test(key.algorithm.namedCurve)
+        //   ? key.data.getPrivate("hex")
+        //   : key.data.getSecret("hex"));
+        const raw = Convert.FromHex(key.data.getSecret("hex"));
         const keyInfo = new core.asn1.PrivateKeyInfo();
         keyInfo.privateKeyAlgorithm.algorithm = getOidByNamedCurve(key.algorithm.namedCurve);
         keyInfo.privateKey = AsnConvert.serialize(new OctetString(raw));

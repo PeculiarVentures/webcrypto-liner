@@ -91,7 +91,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
 
     //#region ECDH-ES
     // TODO Elliptic.js has got issue (https://github.com/indutny/elliptic/issues/243). Uncomment the next line after fix
-    // this.providers.set(new EcdhEsProvider());
+    this.providers.set(new EcdhEsProvider());
     //#endregion
 
   }
@@ -220,7 +220,12 @@ export class SubtleCrypto extends core.SubtleCrypto {
       }
     }
 
-    return super[method].apply(this, args);
+    const fn = super[method];
+    if (typeof fn === "function") {
+      return fn.apply(this, args);
+    }
+
+    throw new Error("Incorrect type of 'method'. Must be 'function'.");
   }
 
   private fixNativeArguments(method: SubtleMethods, args: any[]) {

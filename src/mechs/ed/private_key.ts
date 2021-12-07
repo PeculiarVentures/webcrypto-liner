@@ -33,8 +33,9 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
     }
 
     const hexPrivateKey = Convert.ToHex(Convert.FromBase64Url(json.d));
-    if (/^ed/i.test(json.crv)) {
-      const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
+    if (true || /^ed/i.test(json.crv)) {
+      // const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
+      const eddsa = new elliptic.eddsa("ed25519");
       this.data = eddsa.keyFromSecret(hexPrivateKey);
     } else {
       const ecdhEs = elliptic.ec(json.crv.replace(/^x/i, "curve"));

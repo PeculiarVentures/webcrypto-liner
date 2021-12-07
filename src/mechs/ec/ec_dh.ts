@@ -4,7 +4,7 @@ import { EcCryptoKey } from "./key";
 
 export class EcdhProvider extends core.EcdhProvider {
 
-  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
+  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
     return EcCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 

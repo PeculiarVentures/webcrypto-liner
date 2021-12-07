@@ -59,7 +59,7 @@ function buffer2hex(buffer: Uint8Array, padded?: boolean): string {
 
 export class EcdsaProvider extends core.EcdsaProvider {
 
-  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
+  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
     return EcCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 

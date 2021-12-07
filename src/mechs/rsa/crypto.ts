@@ -27,7 +27,7 @@ export class RsaCrypto {
     }
   }
 
-  public static async generateKey(algorithm: RsaHashedKeyGenParams | RsaKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
+  public static async generateKey(algorithm: RsaHashedKeyGenParams | RsaKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
     const alg: RsaHashedKeyGenParams = {
       name: "RSA-PSS",
       hash: "SHA-256",
@@ -35,7 +35,7 @@ export class RsaCrypto {
       modulusLength: algorithm.modulusLength,
     };
     // generate keys using native crypto
-    const keys = (await nativeSubtle.generateKey(alg, true, ["sign", "verify"])) as CryptoKeyPair;
+    const keys = (await nativeSubtle.generateKey(alg, true, ["sign", "verify"])) as core.CryptoKeyPair;
     const crypto = new Crypto();
 
     // create private key

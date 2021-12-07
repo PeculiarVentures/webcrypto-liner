@@ -19,7 +19,7 @@ export class EcCrypto {
     }
   }
 
-  public static async generateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
+  public static async generateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
     this.checkLib();
 
     const key = this.initEcKey(algorithm.namedCurve);
