@@ -11,6 +11,7 @@
   "types": "index.d.ts",
   "files": [
     "build",
+    "scripts",
     "LICENSE",
     "README.md",
     "index.d.ts"
