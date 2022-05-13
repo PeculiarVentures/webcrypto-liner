@@ -4,7 +4,9 @@ import { EcCryptoKey } from "./key";
 
 export class EcdhProvider extends core.EcdhProvider {
 
-  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
+  public namedCurves = ["P-256", "P-384", "P-521", "K-256", "brainpoolP256r1", "brainpoolP384r1", "brainpoolP512r1"];
+
+  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
     return EcCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 

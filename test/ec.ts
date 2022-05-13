@@ -1,3 +1,4 @@
+import * as assert from "assert";
 import { Convert } from "pvtsutils";
 import { Browser } from "../src/helper";
 import { browser, ITestGenerateKeyAction, testCrypto } from "./utils";
@@ -538,5 +539,15 @@ context("EC", () => {
       },
     },
   ]);
+
+  it("sig", async () => {
+    const data = new Uint8Array(10);
+    const keys = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "brainpoolP512r1" }, false, ["sign", "verify"]);
+    const spki = await crypto.subtle.exportKey("spki", keys.publicKey);
+
+    const signature = await crypto.subtle.sign({ ...keys.privateKey.algorithm, hash: "SHA-256" }, keys.privateKey, data);
+    const ok = await crypto.subtle.verify({name: "ECDSA", hash: "SHA-256"}, keys.publicKey, signature, data);
+    assert.strictEqual(ok, true);
+  });
 
 });

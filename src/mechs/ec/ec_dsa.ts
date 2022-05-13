@@ -17,49 +17,12 @@ export function b2a(buffer: ArrayBuffer | ArrayBufferView) {
   return res;
 }
 
-function hex2buffer(hexString: string, padded?: boolean) {
-  if (hexString.length % 2) {
-    hexString = "0" + hexString;
-  }
-  let res = new Uint8Array(hexString.length / 2);
-  for (let i = 0; i < hexString.length; i++) {
-    const c = hexString.slice(i, ++i + 1);
-    res[(i - 1) / 2] = parseInt(c, 16);
-  }
-  // BN padding
-  if (padded) {
-    let len = res.length;
-    len = len > 32 ? len > 48 ? 66 : 48 : 32;
-    if (res.length < len) {
-      res = EcCrypto.concat(new Uint8Array(len - res.length), res);
-    }
-  }
-  return res;
-}
-
-function buffer2hex(buffer: Uint8Array, padded?: boolean): string {
-  let res = "";
-  // tslint:disable-next-line:prefer-for-of
-  for (let i = 0; i < buffer.length; i++) {
-    const char = buffer[i].toString(16);
-    res += char.length % 2 ? "0" + char : char;
-  }
-
-  // BN padding
-  if (padded) {
-    let len = buffer.length;
-    len = len > 32 ? len > 48 ? 66 : 48 : 32;
-    if ((res.length / 2) < len) {
-      res = new Array(len * 2 - res.length + 1).join("0") + res;
-    }
-  }
-
-  return res;
-}
-
 export class EcdsaProvider extends core.EcdsaProvider {
 
-  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
+  public override hashAlgorithms = ["SHA-1", "SHA-256", "SHA-384", "SHA-512", "SHA3-256", "SHA3-384", "SHA3-512"];
+  public namedCurves = ["P-256", "P-384", "P-521", "K-256", "brainpoolP256r1", "brainpoolP384r1", "brainpoolP512r1"];
+
+  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
     return EcCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 
@@ -81,8 +44,11 @@ export class EcdsaProvider extends core.EcdsaProvider {
     const hash = await crypto.subtle.digest(algorithm.hash, data);
     array = b2a(hash);
     const signature = await key.data.sign(array);
-    const hexSignature = buffer2hex(signature.r.toArray(), true) + buffer2hex(signature.s.toArray(), true);
-    return hex2buffer(hexSignature).buffer;
+    const asnSignature = new core.asn1.EcDsaSignature();
+    asnSignature.r = new Uint8Array(signature.r.toArray()).buffer;
+    asnSignature.s = new Uint8Array(signature.s.toArray()).buffer;
+
+    return asnSignature.toWebCryptoSignature();
   }
 
   public async onVerify(algorithm: EcdsaParams, key: EcCryptoKey, signature: ArrayBuffer, data: ArrayBuffer): Promise<boolean> {

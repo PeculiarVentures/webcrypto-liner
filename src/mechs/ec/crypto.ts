@@ -19,7 +19,7 @@ export class EcCrypto {
     }
   }
 
-  public static async generateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
+  public static async generateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
     this.checkLib();
 
     const key = this.initEcKey(algorithm.namedCurve);
@@ -121,6 +121,8 @@ export class EcCrypto {
       res = crv.replace("-", "").toLowerCase();
     } else if (crv === "K-256") {
       res = "secp256k1";
+    } else if (["brainpoolP256r1", "brainpoolP384r1", "brainpoolP512r1"].includes(wcNamedCurve)) {
+      res = wcNamedCurve;
     } else {
       throw new core.OperationError(`Unsupported named curve '${wcNamedCurve}'`);
     }
