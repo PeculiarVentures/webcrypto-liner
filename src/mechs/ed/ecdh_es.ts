@@ -7,7 +7,7 @@ export class EcdhEsProvider extends core.EcdhEsProvider {
 
   public namedCurves: string[] = ["X25519"];
 
-  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
+  public async onGenerateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
     const keys = await EdCrypto.generateKey(
       {
         name: this.name,

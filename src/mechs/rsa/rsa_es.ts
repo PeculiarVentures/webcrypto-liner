@@ -17,7 +17,7 @@ export class RsaEsProvider extends core.ProviderCrypto {
   };
   public hashAlgorithms = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 
-  public async onGenerateKey(algorithm: RsaKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
+  public async onGenerateKey(algorithm: RsaKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
     return RsaCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 

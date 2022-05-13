@@ -40,6 +40,6 @@ crypto.subtle.exportKey = async function (...args: any[]) {
 });
 
 // set native crypto
-setCrypto(crypto);
+setCrypto(crypto as globalThis.Crypto);
 
 global["crypto"] = new WebCrypto();

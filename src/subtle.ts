@@ -14,7 +14,7 @@ import {
   Pbkdf2Provider,
   RsaEsProvider, RsaOaepProvider, RsaPssProvider, RsaSsaProvider,
   Sha1Provider, Sha256Provider, Sha512Provider,
-  EdDsaProvider, EcdhEsProvider,
+  EdDsaProvider, EcdhEsProvider, Sha3256Provider, Sha3384Provider, Sha3512Provider, Shake128Provider, Shake256Provider,
 } from "./mechs";
 import { getOidByNamedCurve } from "./mechs/ec/helper";
 import { nativeSubtle } from "./native";
@@ -94,6 +94,16 @@ export class SubtleCrypto extends core.SubtleCrypto {
     this.providers.set(new EcdhEsProvider());
     //#endregion
 
+    //#region SHA3
+    this.providers.set(new Sha3256Provider());
+    this.providers.set(new Sha3384Provider());
+    this.providers.set(new Sha3512Provider());
+    //#endregion
+
+    //#region SHAKE
+    this.providers.set(new Shake128Provider());
+    this.providers.set(new Shake256Provider());
+    //#endregion
   }
 
   public async digest(...args: any[]) {

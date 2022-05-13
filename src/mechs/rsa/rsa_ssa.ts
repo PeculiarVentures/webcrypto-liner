@@ -6,7 +6,7 @@ import { RsaCryptoKey } from "./key";
 
 export class RsaSsaProvider extends core.RsaSsaProvider {
 
-  public async onGenerateKey(algorithm: RsaHashedKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<core.CryptoKeyPair> {
+  public async onGenerateKey(algorithm: RsaHashedKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair> {
     return RsaCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 
