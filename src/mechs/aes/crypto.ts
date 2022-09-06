@@ -78,7 +78,7 @@ export class AesCrypto {
       const iv = core.BufferSourceConverter.toUint8Array(algorithm.iv);
       let additionalData;
       if (algorithm.additionalData) {
-        additionalData = core.BufferSourceConverter.toArrayBuffer(algorithm.additionalData);
+        additionalData = core.BufferSourceConverter.toUint8Array(algorithm.additionalData);
       }
       const tagLength = (algorithm.tagLength || 128) / 8;
       result = asmCrypto.AES_GCM[action](data, key.raw, iv, additionalData, tagLength);
