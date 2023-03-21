@@ -3,7 +3,7 @@ import { getBabelOutputPlugin } from "@rollup/plugin-babel";
 import { terser } from "rollup-plugin-terser";
 import typescript from "rollup-plugin-typescript2";
 import commonjs from "@rollup/plugin-commonjs";
-import pkg from "./package.json";
+import pkg from "./package.json" assert { type: "json" };
 
 const external = Object.keys(pkg.dependencies)
   .concat(["crypto"]);
