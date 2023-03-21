@@ -31,7 +31,9 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install nyc coveralls -g
+          npm install
 
       - name: Run linter
         run: npm run lint
