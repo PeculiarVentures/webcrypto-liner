@@ -11,24 +11,24 @@ export class AesCrypto {
   public static AesECB = "AES-ECB";
   public static AesGCM = "AES-GCM";
 
-  public static checkCryptoKey(key: any) {
+  public static checkCryptoKey(key: any): void {
     if (!(key instanceof AesCryptoKey)) {
       throw new TypeError("key: Is not AesCryptoKey");
     }
   }
 
-  public static async generateKey(algorithm: AesKeyGenParams, extractable: boolean, usages: KeyUsage[]) {
+  public static async generateKey(algorithm: AesKeyGenParams, extractable: boolean, usages: KeyUsage[]): Promise<AesCryptoKey> {
     // gat random bytes for key
     const raw = nativeCrypto.getRandomValues(new Uint8Array(algorithm.length / 8));
 
     return new AesCryptoKey(algorithm, extractable, usages, raw);
   }
 
-  public static async encrypt(algorithm: Algorithm, key: AesCryptoKey, data: ArrayBuffer) {
+  public static async encrypt(algorithm: Algorithm, key: AesCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
     return this.cipher(algorithm, key, core.BufferSourceConverter.toUint8Array(data), true);
   }
 
-  public static async decrypt(algorithm: Algorithm, key: AesCryptoKey, data: ArrayBuffer) {
+  public static async decrypt(algorithm: Algorithm, key: AesCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
     return this.cipher(algorithm, key, core.BufferSourceConverter.toUint8Array(data), false);
   }
 
@@ -66,7 +66,7 @@ export class AesCrypto {
     return key;
   }
 
-  private static async cipher(algorithm: Algorithm, key: AesCryptoKey, data: Uint8Array, encrypt: boolean) {
+  private static async cipher(algorithm: Algorithm, key: AesCryptoKey, data: Uint8Array, encrypt: boolean): Promise<ArrayBuffer> {
     const action = encrypt ? "encrypt" : "decrypt";
     let result: Uint8Array;
     if (isAlgorithm<AesCbcParams>(algorithm, AesCrypto.AesCBC)) {

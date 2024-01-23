@@ -93,7 +93,7 @@ export class RsaCrypto {
     return key;
   }
 
-  public static randomNonZeroValues(data: Uint8Array) {
+  public static randomNonZeroValues(data: Uint8Array): Uint8Array {
     data = nativeCrypto.getRandomValues(data);
     return data.map((n) => {
       while (!n) {
@@ -103,7 +103,7 @@ export class RsaCrypto {
     });
   }
 
-  private static exportPkcs8Key(key: RsaCryptoKey) {
+  private static exportPkcs8Key(key: RsaCryptoKey): ArrayBuffer {
     const keyInfo = new core.asn1.PrivateKeyInfo();
     keyInfo.privateKeyAlgorithm.algorithm = "1.2.840.113549.1.1.1";
     keyInfo.privateKeyAlgorithm.parameters = null;
@@ -112,19 +112,19 @@ export class RsaCrypto {
     return AsnConvert.serialize(keyInfo);
   }
 
-  private static importPkcs8Key(data: ArrayBuffer) {
+  private static importPkcs8Key(data: ArrayBuffer): AsmCryptoRsaKey {
     const keyInfo = AsnConvert.parse(data, core.asn1.PrivateKeyInfo);
     const privateKey = AsnConvert.parse(keyInfo.privateKey, core.asn1.RsaPrivateKey);
     return this.importAsmKey(privateKey);
   }
 
-  private static importSpkiKey(data: ArrayBuffer) {
+  private static importSpkiKey(data: ArrayBuffer): AsmCryptoRsaKey {
     const keyInfo = AsnConvert.parse(data, core.asn1.PublicKeyInfo);
     const publicKey = AsnConvert.parse(keyInfo.publicKey, core.asn1.RsaPublicKey);
     return this.importAsmKey(publicKey);
   }
 
-  private static exportSpkiKey(key: RsaCryptoKey) {
+  private static exportSpkiKey(key: RsaCryptoKey): ArrayBuffer {
     const publicKey = new core.asn1.RsaPublicKey();
     publicKey.modulus = key.data[0].buffer;
     publicKey.publicExponent = key.data[1][1] === 1
@@ -139,7 +139,7 @@ export class RsaCrypto {
     return AsnConvert.serialize(keyInfo);
   }
 
-  private static importJwkKey(data: JsonWebKey) {
+  private static importJwkKey(data: JsonWebKey): AsmCryptoRsaKey {
     let key: core.asn1.RsaPrivateKey | core.asn1.RsaPublicKey;
     if (data.d) {
       // private
@@ -151,7 +151,7 @@ export class RsaCrypto {
     return this.importAsmKey(key);
   }
 
-  private static exportJwkKey(key: RsaCryptoKey) {
+  private static exportJwkKey(key: RsaCryptoKey): JsonWebKey {
     const asnKey = this.exportAsmKey(key.data);
     const jwk = JsonSerializer.toJSON(asnKey) as JsonWebKey;
 
@@ -163,11 +163,12 @@ export class RsaCrypto {
     return jwk;
   }
 
-  private static getJwkAlgorithm(algorithm: RsaHashedKeyAlgorithm) {
+  private static getJwkAlgorithm(algorithm: RsaHashedKeyAlgorithm): string {
     switch (algorithm.name.toUpperCase()) {
-      case "RSA-OAEP":
+      case "RSA-OAEP": {
         const mdSize = /(\d+)$/.exec(algorithm.hash.name)![1];
         return `RSA-OAEP${mdSize !== "1" ? `-${mdSize}` : ""}`;
+      }
       case "RSASSA-PKCS1-V1_5":
         return `RS${/(\d+)$/.exec(algorithm.hash.name)![1]}`;
       case "RSA-PSS":
@@ -203,7 +204,7 @@ export class RsaCrypto {
     return key;
   }
 
-  private static importAsmKey(key: core.asn1.RsaPrivateKey | core.asn1.RsaPublicKey) {
+  private static importAsmKey(key: core.asn1.RsaPrivateKey | core.asn1.RsaPublicKey): AsmCryptoRsaKey {
     const expPadding = new Uint8Array(4 - key.publicExponent.byteLength);
     const asmKey: AsmCryptoRsaKey = [
       new Uint8Array(key.modulus),

@@ -14,16 +14,16 @@ export class EdCrypto {
   public static publicKeyUsages = ["verify"];
   public static privateKeyUsages = ["sign", "deriveKey", "deriveBits"];
 
-  public static checkLib() {
+  public static checkLib(): void {
     if (typeof (elliptic) === "undefined") {
       throw new core.OperationError("Cannot implement EC mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/elliptic.js' script to your project");
     }
   }
 
-  public static concat(...buf: Uint8Array[]) {
+  public static concat(...buf: Uint8Array[]): Uint8Array {
     const res = new Uint8Array(buf.map((item) => item.length).reduce((prev, cur) => prev + cur));
     let offset = 0;
-    buf.forEach((item, index) => {
+    buf.forEach((item) => {
       for (let i = 0; i < item.length; i++) {
         res[offset + i] = item[i];
       }
@@ -93,12 +93,13 @@ export class EdCrypto {
     // key[31] |= 64;
     // key.reverse();
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const ecdh = new elliptic.ec("curve25519");
     const privateKey = ecdh.keyFromPrivate(Convert.ToHex(key), "hex");
 
     const publicHex = (algorithm.public as EdPublicKey).data.getPublic("hex") as string;
-    const publicView = new Uint8Array(Convert.FromHex(publicHex));
+    new Uint8Array(Convert.FromHex(publicHex));
     // publicView.reverse();
     // const publicKey = ecdh.keyFromPublic(Convert.ToHex(publicView), "hex").getPublic();
     const publicKey = (algorithm.public as EdPublicKey).data.getPublic();
@@ -130,7 +131,7 @@ export class EdCrypto {
         keyInfo.privateKeyAlgorithm.algorithm = getOidByNamedCurve(key.algorithm.namedCurve);
         keyInfo.privateKey = AsnConvert.serialize(new OctetString(raw));
 
-        return AsnConvert.serialize(keyInfo)
+        return AsnConvert.serialize(keyInfo);
       }
       case "spki": {
         const raw = Convert.FromHex(key.data.getPublic("hex"));
@@ -138,7 +139,7 @@ export class EdCrypto {
         keyInfo.publicKeyAlgorithm.algorithm = getOidByNamedCurve(key.algorithm.namedCurve);
         keyInfo.publicKey = raw;
 
-        return AsnConvert.serialize(keyInfo)
+        return AsnConvert.serialize(keyInfo);
       }
       case "raw": {
         return Convert.FromHex(key.data.getPublic("hex"));
@@ -181,7 +182,7 @@ export class EdCrypto {
     }
   }
 
-  protected static importPrivateKey(asnKey: core.asn1.CurvePrivateKey, algorithm: EcKeyImportParams, extractable: boolean, keyUsages: KeyUsage[]) {
+  protected static importPrivateKey(asnKey: core.asn1.CurvePrivateKey, algorithm: EcKeyImportParams, extractable: boolean, keyUsages: KeyUsage[]): EdPrivateKey {
     const key = new EdPrivateKey(
       Object.assign({}, algorithm),
       extractable,
@@ -195,7 +196,7 @@ export class EdCrypto {
     return key;
   }
 
-  protected static async importPublicKey(asnKey: ArrayBuffer, algorithm: EcKeyImportParams, extractable: boolean, keyUsages: KeyUsage[]) {
+  protected static async importPublicKey(asnKey: ArrayBuffer, algorithm: EcKeyImportParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<EdPublicKey> {
     const key = new EdPublicKey(
       Object.assign({}, algorithm),
       extractable,

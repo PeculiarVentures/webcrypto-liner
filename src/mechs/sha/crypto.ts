@@ -3,7 +3,7 @@ import * as core from "webcrypto-core";
 
 export class ShaCrypto {
 
-  public static getDigest(name: string) {
+  public static getDigest(name: string): asmCrypto.Sha1 | asmCrypto.Sha256 | asmCrypto.Sha512 {
     switch (name) {
       case "SHA-1":
         return new asmCrypto.Sha1();

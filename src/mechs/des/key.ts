@@ -9,7 +9,7 @@ export class DesCryptoKey extends CryptoKey {
     super(algorithm, extractable, "secret", usages);
   }
 
-  public toJSON() {
+  public toJSON(): JsonWebKey {
     const jwk: JsonWebKey = {
       kty: "oct",
       alg: this.getJwkAlgorithm(),
@@ -20,7 +20,7 @@ export class DesCryptoKey extends CryptoKey {
     return jwk;
   }
 
-  private getJwkAlgorithm() {
+  private getJwkAlgorithm(): string {
     switch (this.algorithm.name.toUpperCase()) {
       case "DES-CBC":
         return `DES-CBC`;

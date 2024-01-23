@@ -1,12 +1,12 @@
 import { Convert } from "pvtsutils";
 import { ShakeParams } from "webcrypto-core";
-import { testCrypto } from "./utils";
+import { liner, testCrypto } from "./utils";
 
 context("SHA", () => {
 
   const data = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]);
 
-  testCrypto(crypto, [
+  testCrypto(liner, [
     {
       name: "SHA",
       actions: {

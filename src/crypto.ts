@@ -4,7 +4,7 @@ import { SubtleCrypto } from "./subtle";
 
 export class Crypto extends core.Crypto {
 
-    public get nativeCrypto() {
+    public get nativeCrypto(): globalThis.Crypto {
         return nativeCrypto;
     }
 

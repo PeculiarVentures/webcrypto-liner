@@ -1,7 +1,6 @@
 import * as asmCrypto from "asmcrypto.js";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
-import { Crypto } from "../../crypto";
 import { RsaCrypto } from "./crypto";
 import { RsaCryptoKey } from "./key";
 
@@ -21,7 +20,7 @@ export class RsaEsProvider extends core.ProviderCrypto {
     return RsaCrypto.generateKey(algorithm, extractable, keyUsages);
   }
 
-  public checkGenerateKeyParams(algorithm: RsaKeyGenParams) {
+  public checkGenerateKeyParams(algorithm: RsaKeyGenParams): void {
     // public exponent
     this.checkRequiredProperty(algorithm, "publicExponent");
     if (!(algorithm.publicExponent && algorithm.publicExponent instanceof Uint8Array)) {
@@ -109,10 +108,5 @@ export class RsaEsProvider extends core.ProviderCrypto {
   public checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage): asserts key is RsaCryptoKey {
     super.checkCryptoKey(key, keyUsage);
     RsaCrypto.checkCryptoKey(key);
-  }
-
-  private async prepareSignData(algorithm: RsaPkcs1SignParams, data: ArrayBuffer) {
-    const crypto = new Crypto();
-    return crypto.subtle.digest(algorithm.hash, data);
   }
 }

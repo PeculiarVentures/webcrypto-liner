@@ -1,6 +1,6 @@
 import * as core from "webcrypto-core";
 
-const edOIDs: { [key: string]: string } = {
+const edOIDs: { [key: string]: string; } = {
   // Ed448
   [core.asn1.idEd448]: "Ed448",
   "ed448": core.asn1.idEd448,
@@ -15,7 +15,7 @@ const edOIDs: { [key: string]: string } = {
   "x25519": core.asn1.idX25519,
 };
 
-export function getNamedCurveByOid(oid: string) {
+export function getNamedCurveByOid(oid: string): string {
   const namedCurve = edOIDs[oid];
   if (!namedCurve) {
     throw new core.OperationError(`Cannot convert OID(${oid}) to WebCrypto named curve`);
@@ -23,7 +23,7 @@ export function getNamedCurveByOid(oid: string) {
   return namedCurve;
 }
 
-export function getOidByNamedCurve(namedCurve: string) {
+export function getOidByNamedCurve(namedCurve: string): string {
   const oid = edOIDs[namedCurve.toLowerCase()];
   if (!oid) {
     throw new core.OperationError(`Cannot convert WebCrypto named curve '${namedCurve}' to OID`);

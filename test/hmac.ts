@@ -1,9 +1,9 @@
 import { Convert } from "pvtsutils";
-import { ITestGenerateKeyAction, testCrypto } from "./utils";
+import { ITestGenerateKeyAction, liner, testCrypto } from "./utils";
 
 context("HMAC", () => {
 
-  testCrypto(crypto, [
+  testCrypto(liner, [
     {
       name: "HMAC",
       actions: {

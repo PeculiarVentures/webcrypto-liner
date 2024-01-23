@@ -1,20 +1,18 @@
-import { AsnConvert } from "@peculiar/asn1-schema";
 import { IJsonConvertible } from "@peculiar/json-schema";
 import * as elliptic from "elliptic";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
 import { CryptoKey } from "../../key";
-import { getOidByNamedCurve } from "./helper";
 
 export class EdPublicKey extends CryptoKey implements IJsonConvertible {
 
   public algorithm!: EcKeyAlgorithm;
 
   public constructor(algorithm: EcKeyAlgorithm, extractable: boolean, usages: KeyUsage[], public data: EllipticJS.EllipticKeyPair) {
-    super(algorithm, extractable, "public", usages)
+    super(algorithm, extractable, "public", usages);
   }
 
-  public toJSON() {
+  public toJSON(): JsonWebKey {
     const json: JsonWebKey = {
       kty: "OKP",
       crv: this.algorithm.namedCurve,
@@ -27,7 +25,7 @@ export class EdPublicKey extends CryptoKey implements IJsonConvertible {
     });
   }
 
-  public fromJSON(json: JsonWebKey) {
+  public fromJSON(json: JsonWebKey): this {
     if (!json.crv) {
       throw new core.OperationError(`Cannot get named curve from JWK. Property 'crv' is required`);
     }

@@ -17,7 +17,7 @@ try {
   // Safari throws error on crypto.webkitSubtle in Worker
 }
 
-export function setCrypto(crypto: Crypto) {
+export function setCrypto(crypto: Crypto): void {
   nativeCrypto = crypto;
   nativeSubtle = crypto.subtle;
 }

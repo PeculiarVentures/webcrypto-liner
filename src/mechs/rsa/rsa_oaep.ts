@@ -31,7 +31,7 @@ export class RsaOaepProvider extends core.RsaOaepProvider {
     RsaCrypto.checkCryptoKey(key);
   }
 
-  private cipher(algorithm: RsaOaepParams, key: RsaCryptoKey, data: ArrayBuffer) {
+  private cipher(algorithm: RsaOaepParams, key: RsaCryptoKey, data: ArrayBuffer): ArrayBuffer {
     const digest = ShaCrypto.getDigest(key.algorithm.hash.name);
     let label: Uint8Array | undefined;
     if (algorithm.label) {

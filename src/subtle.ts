@@ -106,57 +106,57 @@ export class SubtleCrypto extends core.SubtleCrypto {
     //#endregion
   }
 
-  public async digest(...args: any[]) {
+  public async digest(...args: any[]): Promise<any> {
     return this.wrapNative("digest", ...args);
   }
 
-  public async importKey(...args: any[]) {
+  public async importKey(...args: any[]): Promise<any> {
     this.fixFirefoxEcImportPkcs8(args);
     return this.wrapNative("importKey", ...args);
   }
 
-  public async exportKey(...args: any[]) {
+  public async exportKey(...args: any[]): Promise<any> {
     return await this.fixFirefoxEcExportPkcs8(args) ||
       await this.wrapNative("exportKey", ...args);
   }
 
-  public async generateKey(...args: any[]) {
+  public async generateKey(...args: any[]): Promise<any> {
     return this.wrapNative("generateKey", ...args);
   }
 
-  public async sign(...args: any[]) {
+  public async sign(...args: any[]): Promise<any> {
     return this.wrapNative("sign", ...args);
   }
 
-  public async verify(...args: any[]) {
+  public async verify(...args: any[]): Promise<any> {
     return this.wrapNative("verify", ...args);
   }
 
-  public async encrypt(...args: any[]) {
+  public async encrypt(...args: any[]): Promise<any> {
     return this.wrapNative("encrypt", ...args);
   }
 
-  public async decrypt(...args: any[]) {
+  public async decrypt(...args: any[]): Promise<any> {
     return this.wrapNative("decrypt", ...args);
   }
 
-  public async wrapKey(...args: any[]) {
+  public async wrapKey(...args: any[]): Promise<any> {
     return this.wrapNative("wrapKey", ...args);
   }
 
-  public async unwrapKey(...args: any[]) {
+  public async unwrapKey(...args: any[]): Promise<any> {
     return this.wrapNative("unwrapKey", ...args);
   }
 
-  public async deriveBits(...args: any[]) {
+  public async deriveBits(...args: any[]): Promise<any> {
     return this.wrapNative("deriveBits", ...args);
   }
 
-  public async deriveKey(...args: any[]) {
+  public async deriveKey(...args: any[]): Promise<any> {
     return this.wrapNative("deriveKey", ...args);
   }
 
-  private async wrapNative(method: SubtleMethods, ...args: any[]) {
+  private async wrapNative(method: SubtleMethods, ...args: any[]): Promise<any> {
     if (~["generateKey", "unwrapKey", "deriveKey", "importKey"].indexOf(method)) {
       this.fixAlgorithmName(args);
     }
@@ -166,6 +166,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
         const nativeArgs = this.fixNativeArguments(method, args);
 
         Debug.info(`Call native '${method}' method`, nativeArgs);
+        // eslint-disable-next-line prefer-spread
         const res = await nativeSubtle[method].apply(nativeSubtle, nativeArgs);
 
         return this.fixNativeResult(method, args, res);
@@ -238,7 +239,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
     throw new Error("Incorrect type of 'method'. Must be 'function'.");
   }
 
-  private fixNativeArguments(method: SubtleMethods, args: any[]) {
+  private fixNativeArguments(method: SubtleMethods, args: any[]): any[] {
     const res = [...args];
     if (method === "importKey") {
       if (this.browserInfo.name === Browser.IE && res[0]?.toLowerCase?.() === "jwk" && !BufferSourceConverter.isBufferSource(res[1])) {
@@ -343,7 +344,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
     return key;
   }
 
-  private async castKey(key: core.NativeCryptoKey) {
+  private async castKey(key: core.NativeCryptoKey): Promise<globalThis.CryptoKey> {
     Debug.info("Cast native CryptoKey to linter key.", key);
     if (!key.extractable) {
       throw new Error("Cannot cast unextractable crypto key");
@@ -359,7 +360,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
    * Fixes name of the algorithms. Edge doesn't normilize algorithm names in keys
    * @param args
    */
-  private fixAlgorithmName(args: any[]) {
+  private fixAlgorithmName(args: any[]): void {
     if (this.browserInfo.name === Browser.Edge) {
       for (let i = 0; i < args.length; i++) {
         const arg = args[0];
@@ -390,7 +391,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
   /**
    * Firefox doesn't support import PKCS8 key for ECDSA/ECDH
    */
-  private fixFirefoxEcImportPkcs8(args: any[]) {
+  private fixFirefoxEcImportPkcs8(args: any[]): void {
     const preparedAlgorithm = this.prepareAlgorithm(args[2]) as EcKeyImportParams;
     const algName = preparedAlgorithm.name.toUpperCase();
     if (this.browserInfo.name === Browser.Firefox
@@ -419,7 +420,7 @@ export class SubtleCrypto extends core.SubtleCrypto {
   /**
    * Firefox doesn't support export PKCS8 key for ECDSA/ECDH
    */
-  private async fixFirefoxEcExportPkcs8(args: any[]) {
+  private async fixFirefoxEcExportPkcs8(args: any[]): Promise<ArrayBuffer> {
     try {
       if (this.browserInfo.name === Browser.Firefox
         && args[0] === "pkcs8"

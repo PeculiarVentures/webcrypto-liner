@@ -18,7 +18,7 @@ export class WrappedNativeCryptoKey extends CryptoKey {
   }
 
   // @internal
-  public getNative() {
+  public getNative(): CryptoKey {
     return this.#nativeKey;
   }
 

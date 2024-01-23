@@ -1,11 +1,10 @@
-import * as assert from "assert";
 import { Convert } from "pvtsutils";
 import * as core from "webcrypto-core";
-import { testCrypto } from "./utils";
+import { liner, testCrypto } from "./utils";
 
 context("DES", () => {
 
-  testCrypto(crypto, [
+  testCrypto(liner, [
     {
       name: "DES-CBC",
       actions: {

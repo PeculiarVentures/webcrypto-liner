@@ -1,10 +1,10 @@
 import { Convert } from "pvtsutils";
 import { Browser } from "../src/helper";
-import { browser, testCrypto } from "./utils";
+import { browser, liner, testCrypto } from "./utils";
 
 context("AES", () => {
 
-  testCrypto(crypto, [
+  testCrypto(liner, [
     //#region AES-CBC
     {
       name: "AES-128-CBC",

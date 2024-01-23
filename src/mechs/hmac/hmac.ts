@@ -76,9 +76,10 @@ export class HmacProvider extends core.HmacProvider {
 
   public async onExportKey(format: KeyFormat, key: HmacCryptoKey): Promise<JsonWebKey | ArrayBuffer> {
     switch (format.toLowerCase()) {
-      case "jwk":
+      case "jwk": {
         const jwk = JsonSerializer.toJSON(key) as JsonWebKey;
         return jwk;
+      }
       case "raw":
         return new Uint8Array(key.data).buffer;
       default:
@@ -86,7 +87,7 @@ export class HmacProvider extends core.HmacProvider {
     }
   }
 
-  public checkCryptoKey(key: CryptoKey, keyUsage?: KeyUsage) {
+  public checkCryptoKey(key: CryptoKey, keyUsage?: KeyUsage): void {
     super.checkCryptoKey(key, keyUsage);
     if (!(key instanceof HmacCryptoKey)) {
       throw new TypeError("key: Is not HMAC CryptoKey");

@@ -8,10 +8,10 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
   public algorithm!: EcKeyAlgorithm;
 
   public constructor(algorithm: EcKeyAlgorithm, extractable: boolean, usages: KeyUsage[], public data: EllipticJS.EllipticKeyPair) {
-    super(algorithm, extractable, "private", usages)
+    super(algorithm, extractable, "private", usages);
   }
 
-  public toJSON() {
+  public toJSON(): JsonWebKey {
     const json: JsonWebKey = {
       kty: "OKP",
       crv: this.algorithm.namedCurve,
@@ -24,7 +24,7 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
     });
   }
 
-  public fromJSON(json: JsonWebKey) {
+  public fromJSON(json: JsonWebKey): this {
     if (!json.d) {
       throw new core.OperationError(`Cannot get private data from JWK. Property 'd' is required`);
     }
@@ -33,7 +33,7 @@ export class EdPrivateKey extends CryptoKey implements IJsonConvertible {
     }
 
     const hexPrivateKey = Convert.ToHex(Convert.FromBase64Url(json.d));
-    if (true || /^ed/i.test(json.crv)) {
+    if (/^ed/i.test(json.crv)) {
       // const eddsa = new elliptic.eddsa(json.crv.toLowerCase());
       const eddsa = new elliptic.eddsa("ed25519");
       this.data = eddsa.keyFromSecret(hexPrivateKey);

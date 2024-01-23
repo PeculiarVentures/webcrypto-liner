@@ -1,9 +1,9 @@
 import { Convert } from "pvtsutils";
-import { testCrypto } from "./utils";
+import { liner, testCrypto } from "./utils";
 
 context("PBKDF", () => {
 
-  testCrypto(crypto, [
+  testCrypto(liner, [
     {
       name: "PBKDF2",
       actions: {

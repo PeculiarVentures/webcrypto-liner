@@ -1,4 +1,4 @@
-import { Crypto, nativeCrypto } from ".";
+import { Crypto, nativeCrypto } from "./index";
 import "./init";
 
 if (nativeCrypto) {

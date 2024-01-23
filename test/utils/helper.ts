@@ -98,7 +98,7 @@ export interface ITestParams extends ITestMochaFunction {
   actions: ITestActions;
 }
 
-async function getKeys(crypto: Crypto, key: IImportKeyParams | IImportKeyPairParams) {
+async function getKeys(crypto: Crypto, key: IImportKeyParams | IImportKeyPairParams): Promise<CryptoKeyPair> {
   const keys = {} as CryptoKeyPair;
   if ("privateKey" in key) {
     keys.privateKey = await crypto.subtle.importKey(
@@ -127,7 +127,7 @@ async function getKeys(crypto: Crypto, key: IImportKeyParams | IImportKeyPairPar
 
 function wrapSkipOnly(item: Mocha.TestFunction, params: ITestMochaFunction): Mocha.PendingTestFunction;
 function wrapSkipOnly(item: Mocha.SuiteFunction, params: ITestMochaFunction): Mocha.PendingSuiteFunction;
-function wrapSkipOnly(item: Mocha.TestFunction | Mocha.SuiteFunction, params: ITestMochaFunction) {
+function wrapSkipOnly(item: Mocha.TestFunction | Mocha.SuiteFunction, params: ITestMochaFunction): Mocha.PendingTestFunction | Mocha.PendingSuiteFunction {
   return params.skip
     ? item.skip
     : params.only
@@ -135,10 +135,10 @@ function wrapSkipOnly(item: Mocha.TestFunction | Mocha.SuiteFunction, params: IT
       : item;
 }
 
-async function wrapTest(promise: () => Promise<void>, action: ITestAction, index: number) {
+async function wrapTest(promise: () => Promise<void>, action: ITestAction, index: number): Promise<void> {
   wrapSkipOnly(it, action)(action.name || `#${index + 1}`, async () => {
     if (action.error) {
-      if (typeof(action.error) === "boolean") {
+      if (typeof (action.error) === "boolean") {
         await assert.rejects(promise());
       } else {
         await assert.rejects(promise(), action.error);
@@ -149,7 +149,7 @@ async function wrapTest(promise: () => Promise<void>, action: ITestAction, index
   });
 }
 
-export function testCrypto(crypto: Crypto, params: ITestParams[]) {
+export function testCrypto(crypto: Crypto, params: ITestParams[]): void {
   params.forEach((param) => {
     wrapSkipOnly(context, param)(param.name, () => {
       //#region Generate key

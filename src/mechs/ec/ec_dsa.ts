@@ -7,7 +7,7 @@ import { EcCryptoKey } from "./key";
  * Converts buffer to number array
  * @param buffer ArrayBuffer or ArrayBufferView
  */
-export function b2a(buffer: ArrayBuffer | ArrayBufferView) {
+export function b2a(buffer: ArrayBuffer | ArrayBufferView): number[] {
   const buf = new Uint8Array(buffer as ArrayBuffer);
   const res: number[] = [];
   // tslint:disable-next-line:prefer-for-of
@@ -39,10 +39,9 @@ export class EcdsaProvider extends core.EcdsaProvider {
 
     // get digests
     const crypto = new Crypto();
-    let array;
 
     const hash = await crypto.subtle.digest(algorithm.hash, data);
-    array = b2a(hash);
+    const array = b2a(hash);
     const signature = await key.data.sign(array);
     const asnSignature = new core.asn1.EcDsaSignature();
     asnSignature.r = new Uint8Array(signature.r.toArray()).buffer;

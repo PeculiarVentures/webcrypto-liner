@@ -26,7 +26,7 @@ export class HmacCryptoKey extends CryptoKey {
   protected readonly kty: string = "oct";
 
   @JsonProp({ type: JsonPropTypes.String })
-  protected get alg() {
+  protected get alg(): string {
     const hash = this.algorithm.hash.name.toUpperCase();
     return `HS${hash.replace("SHA-", "")}`;
   }
@@ -35,13 +35,13 @@ export class HmacCryptoKey extends CryptoKey {
     // nothing, cause set is needed for json-schema, but is not used by module
   }
 
-  constructor()
+  constructor();
   constructor(
     algorithm: KeyAlgorithm,
     extractable: boolean,
     usages: KeyUsage[],
     data: Uint8Array,
-  )
+  );
   constructor(
     algorithm = { name: "HMAC" },
     extractable = false,

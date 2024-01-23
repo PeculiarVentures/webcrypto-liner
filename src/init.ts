@@ -1,16 +1,17 @@
 import { nativeSubtle } from "./native";
 
-function WrapFunction(subtle: any, name: string) {
+function WrapFunction(subtle: any, name: string): void {
     const fn = subtle[name];
     // tslint:disable-next-line:only-arrow-functions
-    subtle[name] = function () {
+    subtle[name] = function (): Promise<unknown> {
+        // eslint-disable-next-line prefer-rest-params
         const args = arguments;
         return new Promise((resolve, reject) => {
             const op: any = fn.apply(subtle, args);
-            op.oncomplete = (e: any) => {
+            op.oncomplete = (e: any): any => {
                 resolve(e.target.result);
             };
-            op.onerror = (e: any) => {
+            op.onerror = (_e: any): void => {
                 reject(`Error on running '${name}' function`);
             };
         });
@@ -35,7 +36,7 @@ if (typeof self !== "undefined" && self["msCrypto"]) {
 // fix: Math.imul for IE
 if (!(Math as any).imul) {
     // tslint:disable-next-line:only-arrow-functions
-    (Math as any).imul = function imul(a: number, b: number) {
+    (Math as any).imul = function imul(a: number, b: number): number {
         const ah = (a >>> 16) & 0xffff;
         const al = a & 0xffff;
         const bh = (b >>> 16) & 0xffff;

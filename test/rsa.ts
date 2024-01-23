@@ -1,17 +1,17 @@
 import { Convert } from "pvtsutils";
 import { Browser } from "../src/helper";
-import { browser, ITestGenerateKeyAction, testCrypto } from "./utils";
+import { browser, ITestGenerateKeyAction, liner, testCrypto } from "./utils";
 
 context("RSA", () => {
 
-  testCrypto(crypto, [
+  testCrypto(liner, [
     // RSASSA-PKCS1-v1_5
     {
       name: "RSASSA-PKCS1-v1_5",
       actions: {
-        generateKey: (() => {
+        generateKey: ((): ITestGenerateKeyAction[] => {
           const res: ITestGenerateKeyAction[] = [];
-          ["SHA-1", "SHA-256"].forEach((hash) =>
+          ["SHA-1", "SHA-256"].forEach((_hash) =>
             ["SHA-1", "SHA-256", "SHA-512"].forEach((hash) =>
               [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach((publicExponent) =>
                 [1024, 2048].forEach((modulusLength) => {

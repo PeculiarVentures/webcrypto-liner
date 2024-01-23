@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../../typings/des.d.ts" />
 
 import * as des from "des.js";
@@ -8,13 +9,13 @@ import { DesCryptoKey } from "./key";
 
 export class DesCrypto {
 
-  public static checkLib() {
-    if (typeof(des) === "undefined") {
+  public static checkLib(): void {
+    if (typeof (des) === "undefined") {
       throw new core.OperationError("Cannot implement DES mechanism. Add 'https://peculiarventures.github.io/pv-webcrypto-tests/src/des.js' script to your project");
     }
   }
 
-  public static checkCryptoKey(key: any) {
+  public static checkCryptoKey(key: any): void {
     if (!(key instanceof DesCryptoKey)) {
       throw new TypeError("key: Is not DesCryptoKey");
     }

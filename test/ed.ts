@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import { Convert } from "pvtsutils";
 import { Crypto as NodeCrypto } from "@peculiar/webcrypto";
 import { Crypto } from "../src";
 

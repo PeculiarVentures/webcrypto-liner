@@ -1,2 +1,2 @@
-import "./init";
+export * from "./init";
 export * from "./helper";

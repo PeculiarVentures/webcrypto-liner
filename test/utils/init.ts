@@ -6,7 +6,7 @@ const nativeGenerateKey = crypto.subtle.generateKey;
 const nativeExportKey = crypto.subtle.exportKey;
 
 // asmCrypto doesn't have key generation function and uses native generateKey with RSA-PSS
-crypto.subtle.generateKey = async function (...args: any[]) {
+crypto.subtle.generateKey = async function (...args: any[]): Promise<any> {
   if (args[0]?.name !== "RSA-PSS") {
     throw new Error("Function is broken for test cases");
   }
@@ -14,7 +14,7 @@ crypto.subtle.generateKey = async function (...args: any[]) {
 };
 
 // asmCrypto doesn't have key generation function and uses native exportKey with RSA-PSS
-crypto.subtle.exportKey = async function (...args: any[]) {
+crypto.subtle.exportKey = async function (...args: any[]): Promise<any> {
   if (!(
     (args[0] === "pkcs8"
       || args[0] === "spki")
@@ -34,12 +34,12 @@ crypto.subtle.exportKey = async function (...args: any[]) {
   "importKey",
   "digest",
 ].forEach((o) => {
-  crypto.subtle[o] = async () => {
+  crypto.subtle[o] = async (): Promise<never> => {
     throw new Error("Function is broken for test cases");
   };
 });
 
 // set native crypto
-setCrypto(crypto as globalThis.Crypto);
+setCrypto(crypto);
 
-global["crypto"] = new WebCrypto();
+export const liner = new WebCrypto();
