@@ -1,0 +1,17 @@
+root: true
+parser: "@typescript-eslint/parser"
+plugins:
+  - "@typescript-eslint"
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+ignorePatterns:
+  - "node_modules/**/*.ts"
+  - "build/**/*.ts"
+  - "src/typings/elliptic.d.ts"
+rules:
+  "@typescript-eslint/explicit-function-return-type": 1
+  "@typescript-eslint/no-unused-vars":
+    - warn
+    - argsIgnorePattern: "^_"
+  "@typescript-eslint/no-explicit-any": 0
