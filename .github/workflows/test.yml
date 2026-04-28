@@ -11,19 +11,16 @@ jobs:
         node-version: [18.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-          cache: yarn
-
-      - name: Install global dependencies
-        run: yarn add nyc coveralls -g
+          cache: "npm"
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci
 
       - name: Run linter
         run: npm run lint
@@ -32,6 +29,6 @@ jobs:
         run: npm run coverage
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
